@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Emlove — Pokochaj swoje emocje · Poznaj, nazwij, wyraź</title>
+<meta name="theme-color" content="#0F8C86">
+<meta name="description" content="Emlove — delikatne narzędzie edukacyjne do rozpoznawania, nazywania i wyrażania emocji. Tylko dla dorosłych.">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icon-192.png">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="logo">
+      <div class="logo-icon" style="overflow:hidden;padding:0"><img src="icon-192.png" alt="Emlove" style="width:100%;height:100%;object-fit:cover;border-radius:10px"></div>
+      <div><strong>Emlove</strong><span>pokochaj swoje emocje · v2 🔊🤖</span></div>
+    </div>
+    <nav class="nav">
+      <button class="nav-btn active" data-view="home"><span>🏠</span> Start</button>
+      <button class="nav-btn" data-view="checkin"><span>💭</span> Check-in</button>
+      <button class="nav-btn" data-view="wheel"><span>🎡</span> Koło emocji</button>
+      <button class="nav-btn" data-view="exercises"><span>🧩</span> Ćwiczenia</button>
+      <button class="nav-btn" data-view="simulations"><span>🎭</span> Symulacje</button>
+      <button class="nav-btn" data-view="chat"><span>💬</span> Rozmowa z Milo</button>
+      <button class="nav-btn" data-view="journal"><span>📓</span> Dziennik</button>
+      <button class="nav-btn" data-view="personality"><span>🐾</span> Twoja osobowość</button>
+      <button class="nav-btn" data-view="library"><span>📚</span> Biblioteka emocji</button>
+    </nav>
+
+    <div class="milo-card">
+      <div class="milo-avatar">M</div>
+      <div>
+        <strong>Milo</strong>
+        <p>Twój towarzysz emocji.<br>Nie ocenia. Nie decyduje za Ciebie. Tylko pyta i tworzy przestrzeń.</p>
+        <button class="btn btn-small" onclick="goTo('chat')">Porozmawiaj →</button>
+        <button class="btn btn-small btn-ghost" onclick="playMiloIntro()">🔊 Posłuchaj Milo</button>
+      </div>
+    </div>
+
+    <div class="ai-status" id="aiStatusBox">
+      <strong id="aiStatusTitle">🤖 Tryb: Lokalny Milo</strong>
+      <p id="aiStatusText">Pracuje bez internetu, na regułach refleksyjnych. Aby włączyć prawdziwe AI, kliknij ⚙️ Ustawienia.</p>
+      <button class="btn btn-small btn-ghost" onclick="openSettings()">⚙️ Ustawienia AI i dźwięku</button>
+    </div>
+
+    <div class="progress-box">
+      <div class="progress-head"><span>Twój postęp</span><strong id="pointsLabel">0 pkt</strong></div>
+      <div class="progress-bar"><div id="progressFill"></div></div>
+      <p id="progressText">Zacznij od dzisiejszego check-inu</p>
+      <div class="stats-row">
+        <div><strong id="statEntries">0</strong><span>check-inów</span></div>
+        <div><strong id="statExercises">0</strong><span>ćwiczeń</span></div>
+        <div><strong id="statStreak">0</strong><span>dni z rzędu</span></div>
+      </div>
+    </div>
+    <p class="disclaimer">Emlove to narzędzie edukacyjne dla dorosłych, nie terapia. Jeśli czujesz się zagrożony, skontaktuj się z zaufaną osobą lub zadzwoń <b>116 111</b> / <b>112</b>.</p>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <button class="hamburger" id="hamburger">☰</button>
+      <div>
+        <h1 id="viewTitle">Cześć, tu Milo ♥</h1>
+        <p id="viewSubtitle">Poznaj, nazwij i wyraź to, co czujesz — w swoim tempie.</p>
+      </div>
+      <div class="top-actions sound-bar">
+        <button class="icon-btn" id="muteBtn" title="Włącz/wyłącz dźwięk" onclick="toggleMute()">🔊</button>
+        <select id="ambientSelect" title="Dźwięk otoczenia" onchange="setAmbient(this.value)">
+          <option value="off">🔇 Bez tła</option>
+          <option value="rain">🌧️ Deszcz</option>
+          <option value="ocean">🌊 Ocean</option>
+          <option value="fire">🔥 Kominek</option>
+          <option value="forest">🌲 Las</option>
+        </select>
+        <input type="range" id="volumeRange" min="0" max="100" value="70" title="Głośność" oninput="setVolume(this.value)">
+        <button class="btn btn-ghost" id="installBtn" onclick="installPWA()" style="display:none">📲 Zainstaluj Emlove</button>
+        <button class="btn btn-ghost" onclick="openSettings()">⚙️ AI</button>
+        <button class="btn btn-ghost" onclick="goTo('checkin')">+ Nowy check-in</button>
+        <div class="date-pill" id="todayPill"></div>
+      </div>
+    </header>
+
+    <section class="view active" id="view-home">
+      <div class="hero">
+        <div class="hero-text">
+          <span class="badge">♥ Delikatne narzędzie edukacyjne · tylko dla dorosłych (18+)</span>
+          <h2>Pokochaj swoje emocje.<br>One są częścią Ciebie.</h2>
+          <p>Emlove pomaga Ci <b>rozpoznawać</b> sygnały w ciele, <b>nazywać</b> je precyzyjnie i <b>wyrażać</b> w sposób, który szanuje Ciebie i innych. Bez oceniania. Bez gotowych odpowiedzi.</p>
+          <div class="hero-btns">
+            <button class="btn btn-primary" onclick="goTo('checkin')">Zacznij check-in →</button>
+            <button class="btn btn-secondary" onclick="goTo('chat')">Poznaj Milo</button>
+            <button class="btn btn-ghost" onclick="openSettings()">🤖 Włącz prawdziwe AI</button>
+          </div>
+          <div class="hero-principles">
+            <span>✓ Nie przejmujemy Twoich słów</span>
+            <span>✓ Nie decydujemy za Ciebie</span>
+            <span>✓ Tylko pytania i sytuacje</span>
+            <span>🔊 Milo mówi na głos</span>
+          </div>
+        </div>
+        <div class="hero-visual">
+          <div class="milo-big">
+            <div class="milo-face">◕‿◕</div>
+            <p>„Cześć! Jestem <b>Milo</b>.<br>Mieszkam w Krainie Odczuwania.<br>Nie jestem terapeutą ani nauczycielem.<br>Jestem towarzyszem — słucham i pytam.”</p>
+            <div class="speech">Jak się dziś czujesz?</div>
+            <div style="margin-top:12px;display:flex;gap:8px;justify-content:center;flex-wrap:wrap">
+              <button class="btn btn-small btn-secondary" onclick="playMiloIntro()">🔊 Powitanie Milo</button>
+              <button class="btn btn-small btn-ghost" onclick="testVoice()">🎙️ Test głosu</button>
+            </div>
+          </div>
+          <div class="mini-emotions">
+            <span>😊 radość</span><span>😢 smutek</span><span>😠 złość</span><span>😟 lęk</span><span>😌 spokój</span><span>🤨 zdziwienie</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="grid-3">
+        <div class="card step-card" onclick="goTo('checkin')"><div class="step-num">1</div><h3>Rozpoznaj</h3><p>Zauważ sygnały: co czujesz w ciele, jakie myśli przychodzą, co się wydarzyło?</p><span>Zrób check-in →</span></div>
+        <div class="card step-card" onclick="goTo('wheel')"><div class="step-num">2</div><h3>Nazwij</h3><p>Wybierz precyzyjne słowo zamiast ogólnego „źle” lub „dobrze”. Nazwanie to już ulga.</p><span>Odkryj koło emocji →</span></div>
+        <div class="card step-card" onclick="goTo('exercises')"><div class="step-num">3</div><h3>Wyraź</h3><p>Ułóż komunikat „Ja”: Czuję… gdy… bo… Potrzebuję… Proszę o…</p><span>Przećwicz wyrażanie →</span></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="card">
+          <h3>🎭 Dzisiejsza symulacja</h3>
+          <p id="dailySimText">Wyobraź sobie: kolega/koleżanka nie odpowiada na Twoją wiadomość od wczoraj. Co czujesz? Co możesz z tym zrobić?</p>
+          <button class="btn btn-primary" onclick="goTo('simulations')">Wejdź w symulację</button>
+        </div>
+        <div class="card">
+          <h3>🌬️ Minuta oddechu <span class="muted small">z dźwiękiem</span></h3>
+          <p>Zatrzymaj się na 60 sekund. Oddychaj z Milo — usłyszysz wdech i wydech.</p>
+          <div class="breath-box"><div class="breath-circle" id="breathCircle">oddychaj</div></div>
+          <button class="btn btn-secondary" id="breathBtn" onclick="toggleBreath()">Rozpocznij oddech</button>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-head"><h3>📈 Ostatnie check-iny</h3><button class="btn btn-ghost" onclick="goTo('journal')">Zobacz dziennik</button></div>
+        <div id="homeRecent" class="recent-list"><p class="muted">Brak check-inów. Twój pierwszy wpis pojawi się tutaj.</p></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-checkin">
+      <div class="card">
+        <h2>💭 Codzienny check-in</h2>
+        <p class="muted">Odpowiedz szczerze. Nie ma dobrych ani złych odpowiedzi. Milo tylko zapyta, nie oceni.</p>
+        <label class="field-label">1. Jak się teraz czujesz? Wybierz emocję główną</label>
+        <div class="emotion-grid" id="checkinEmotions"></div>
+        <label class="field-label">2. Jak silna jest ta emocja? <span id="intensityVal">5</span>/10</label>
+        <input type="range" min="1" max="10" value="5" id="intensity" class="range">
+        <div class="range-labels"><span>1 · ledwo czuję</span><span>10 · bardzo silnie</span></div>
+        <label class="field-label">3. Gdzie czujesz to w ciele? (możesz wybrać kilka)</label>
+        <div class="chips" id="bodyChips"></div>
+        <label class="field-label">4. Co się stało, że pojawiła się ta emocja?</label>
+        <textarea id="checkinWhat" rows="3" placeholder="np. Miałam prezentację i bałam się, że zapomnę tekstu..."></textarea>
+        <label class="field-label">5. Czego potrzebujesz teraz? (opcjonalnie)</label>
+        <div class="chips" id="needChips"></div>
+        <textarea id="checkinNeedText" rows="2" placeholder="np. Potrzebuję chwili ciszy / rozmowy / spaceru..."></textarea>
+        <label class="field-label">6. Jedno zdanie dla siebie (komunikat „Ja”)</label>
+        <div class="i-statement">
+          <span>Czuję</span><input id="iFeel" placeholder="np. napięcie">
+          <span>gdy</span><input id="iWhen" placeholder="np. myślę o jutrzejszym dniu">
+          <span>bo</span><input id="iBecause" placeholder="np. zależy mi, żeby wypadło dobrze">
+          <span>Potrzebuję</span><input id="iNeed" placeholder="np. wsparcia">
+          <span>Proszę o</span><input id="iAsk" placeholder="np. chwilę rozmowy">
+        </div>
+        <div class="preview-box" id="iPreview">Twój komunikat pojawi się tutaj…</div>
+        <div class="form-actions">
+          <button class="btn btn-primary" onclick="saveCheckin()">Zapisz check-in ✓</button>
+          <button class="btn btn-ghost" onclick="resetCheckin()">Wyczyść</button>
+          <button class="btn btn-secondary" onclick="askMiloAboutCheckin()">🤖 Zapytaj Milo o ten check-in</button>
+        </div>
+        <p id="checkinMsg" class="success-msg"></p>
+      </div>
+    </section>
+
+    <section class="view" id="view-wheel">
+      <div class="grid-2">
+        <div class="card center">
+          <h2>🎡 Koło emocji</h2>
+          <p class="muted">Kliknij segment, aby poznać rodzinę emocji i słowa precyzyjne.</p>
+          <div id="wheelSvg" class="wheel-wrap"></div>
+        </div>
+        <div class="card" id="wheelDetail">
+          <span class="badge">Wybierz emocję z koła</span>
+          <h3>Co to znaczy „czuć”?</h3>
+          <p>Emocje to sygnały. Każda niesie informację o potrzebie. Kliknij koło, aby odkryć szczegóły: sygnały w ciele, typowe myśli i pytania, które możesz sobie zadać.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-exercises">
+      <div class="tabs">
+        <button class="tab active" data-tab="recognize">1 · Rozpoznaj</button>
+        <button class="tab" data-tab="name">2 · Nazwij</button>
+        <button class="tab" data-tab="express">3 · Wyraź</button>
+      </div>
+      <div class="tab-panel active" id="tab-recognize"><div class="card" id="recognizeCard"></div></div>
+      <div class="tab-panel" id="tab-name"><div class="card" id="nameCard"></div></div>
+      <div class="tab-panel" id="tab-express">
+        <div class="card">
+          <h2>🗣️ Wyraź emocję — komunikat „Ja”</h2>
+          <p class="muted">Zamiast „Ty zawsze…”, „Ty nigdy…” spróbuj mówić o swoim odczuciu i potrzebie. Milo nie napisze tego za Ciebie — pomoże Ci ułożyć zdanie.</p>
+          <div class="scenario-box">
+            <strong>Sytuacja:</strong> <span id="expressScenario"></span>
+            <button class="btn btn-small btn-ghost" onclick="newExpressScenario()">Inna sytuacja ↻</button>
+            <button class="btn btn-small btn-secondary" onclick="generateExpressWithAI()">✨ Nowa z AI</button>
+          </div>
+          <div class="i-statement big">
+            <span>Czuję</span><input id="exFeel" placeholder="...">
+            <span>gdy</span><input id="exWhen" placeholder="...">
+            <span>bo</span><input id="exBecause" placeholder="...">
+            <span>Potrzebuję</span><input id="exNeed" placeholder="...">
+            <span>Proszę o</span><input id="exAsk" placeholder="...">
+          </div>
+          <div class="preview-box" id="exPreview"></div>
+          <div class="tips"><strong>Podpowiedzi Milo:</strong><ul><li>Używaj „czuję”, nie „jestem”.</li><li>Nazwij potrzebę, nie oskarżaj drugą osobę.</li><li>Prośba jest konkretna i możliwa do spełnienia.</li></ul></div>
+          <button class="btn btn-primary" onclick="completeExpress()">Zapisz i zdobądź punkty ✓</button>
+          <p id="expressMsg" class="success-msg"></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-simulations">
+      <div class="card">
+        <h2>🎭 Symulowane sytuacje</h2>
+        <p class="muted">Wybierz scenariusz. Milo będzie zadawał pytania i proponował wybory — ale <b>decyzja zawsze należy do Ciebie</b>.</p>
+        <button class="btn btn-secondary" onclick="generateSimWithAI()">✨ Wygeneruj nową symulację z AI</button>
+        <div class="sim-grid" id="simGrid" style="margin-top:14px"></div>
+      </div>
+      <div class="card" id="simPlayer" style="display:none">
+        <div class="sim-head"><button class="btn btn-ghost" onclick="closeSim()">← Wszystkie sytuacje</button><span class="badge" id="simStepLabel"></span></div>
+        <div class="sim-story" id="simStory"></div>
+        <div class="milo-question" id="simQuestion"></div>
+        <div class="sim-choices" id="simChoices"></div>
+        <div class="sim-reflect" id="simReflect" style="display:none">
+          <h4>Twoja refleksja</h4>
+          <textarea id="simReflectText" rows="3" placeholder="Co czułeś/czułaś? Co było trudne? Co byś chciał/chciała powiedzieć?"></textarea>
+          <button class="btn btn-primary" onclick="finishSim()">Zakończ symulację ✓</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-chat">
+      <div class="chat-layout">
+        <div class="card chat-card">
+          <div class="chat-head">
+            <div class="milo-avatar">M</div>
+            <div><strong>Milo — towarzysz emocji</strong><p id="chatModeLabel">Online · tryb lokalny · pyta, nie ocenia · nie decyduje za Ciebie</p></div>
+            <button class="btn btn-ghost" onclick="clearChat()">Wyczyść czat</button>
+          </div>
+          <div class="chat-voice-bar">
+            <label><input type="checkbox" id="voiceToggle" checked> 🔊 Milo mówi na głos</label>
+            <label>Głos: <select id="voiceSelect"><option value="">Automatyczny (polski)</option></select></label>
+            <label>Tempo: <input type="range" id="voiceRate" min="0.7" max="1.3" step="0.05" value="0.95"></label>
+            <button class="btn btn-small btn-ghost" onclick="stopSpeaking()">⏹ Zatrzymaj głos</button>
+          </div>
+          <div class="chat-messages" id="chatMessages"></div>
+          <div class="quick-prompts">
+            <button onclick="quickPrompt('Czuję się dziś smutno')">😢 Czuję smutek</button>
+            <button onclick="quickPrompt('Jestem zły')">😠 Jestem zły</button>
+            <button onclick="quickPrompt('Boję się jutro')">😟 Boję się</button>
+            <button onclick="quickPrompt('Daj mi ćwiczenie')">🧩 Daj ćwiczenie</button>
+            <button onclick="quickPrompt('Nie wiem, co czuję')">🤷 Nie wiem, co czuję</button>
+          </div>
+          <form class="chat-form" id="chatForm">
+            <input id="chatInput" placeholder="Napisz, co czujesz... Milo odpowie pytaniem 💬" autocomplete="off">
+            <button class="btn btn-primary" type="submit">Wyślij</button>
+          </form>
+          <p class="muted small">Milo nie jest terapeutą. W kryzysie: <b>116 111</b>, <b>116 123</b>, <b>112</b>. Tryb AI: Twoje wiadomości trafiają do wybranego modelu językowego — nie wysyłaj danych wrażliwych.</p>
+        </div>
+        <div class="card">
+          <h3>Kim jest Milo?</h3>
+          <p><b>Tożsamość:</b> stworzenie z Krainy Odczuwania, którego zadaniem jest towarzyszyć ludziom w odkrywaniu emocji.</p>
+          <ul class="check-list">
+            <li>✓ Słucha i odzwierciedla Twoje słowa</li>
+            <li>✓ Zadaje pytania otwarte</li>
+            <li>✓ Tworzy sytuacje i ćwiczenia</li>
+            <li>✗ Nie przejmuje Twoich wypowiedzi</li>
+            <li>✗ Nie mówi „powinieneś/powinnaś”</li>
+            <li>✗ Nie stawia diagnoz</li>
+            <li>✗ Nie decyduje za Ciebie</li>
+          </ul>
+          <h4>Tryb prawdziwego AI</h4>
+          <p class="muted">Po włączeniu w ⚙️ Ustawieniach Milo odpowiada przez model językowy (OpenAI / OpenRouter / Ollama lokalnie) z tym samym systemowym promptem tożsamości. Bez klucza działa lokalnie.</p>
+          <button class="btn btn-primary" onclick="openSettings()">⚙️ Skonfiguruj AI</button>
+        </div>
+      </div>
+    </section>
+
+    <section class="view" id="view-journal">
+      <div class="card">
+        <div class="card-head"><h2>📓 Dziennik emocji</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="summarizeWithAI()">✨ Podsumowanie AI</button><button class="btn btn-ghost" onclick="exportJournal()">Eksportuj (JSON)</button></div></div>
+        <div id="aiSummary" class="preview-box" style="display:none"></div>
+        <div id="journalList"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-library">
+      <div class="card">
+        <h2>📚 Biblioteka emocji</h2>
+        <p class="muted">Karty z definicjami, sygnałami w ciele i pytaniami do refleksji. Kliknij kartę, aby rozwinąć.</p>
+        <div class="search-row"><input id="libSearch" placeholder="Szukaj emocji... np. złość, lęk, wstyd" oninput="renderLibrary()"></div>
+        <div class="lib-grid" id="libGrid"></div>
+      </div>
+    </section>
+
+    <section class="view" id="view-personality">
+      <div id="bfRoot" class="bf-wrap"></div>
+    </section>
+  </main>
+</div>
+
+<!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="settingsModal" style="display:none">
+  <div class="modal">
+    <div class="modal-head"><h2>⚙️ Ustawienia: dźwięk i prawdziwe AI</h2><button class="icon-btn" onclick="closeSettings()">✕</button></div>
+
+    <h3>🔊 Dźwięk</h3>
+    <label class="check-row"><input type="checkbox" id="setSoundEnabled" checked> Efekty dźwiękowe (kliknięcia, sukcesy, oddech)</label>
+    <label class="check-row"><input type="checkbox" id="setVoiceEnabled" checked> Głos Milo (synteza mowy po polsku)</label>
+    <label>Dźwięk otoczenia
+      <select id="setAmbient" onchange="setAmbient(this.value); document.getElementById('ambientSelect').value=this.value">
+        <option value="off">🔇 Bez tła</option><option value="rain">🌧️ Deszcz</option><option value="ocean">🌊 Ocean</option><option value="fire">🔥 Kominek</option><option value="forest">🌲 Las</option>
+      </select>
+    </label>
+    <label>Głośność <input type="range" id="setVolume" min="0" max="100" value="70" oninput="setVolume(this.value); document.getElementById('volumeRange').value=this.value"></label>
+    <button class="btn btn-ghost" onclick="testVoice()">🎙️ Testuj głos Milo</button>
+
+    <hr>
+    <h3>🤖 Prawdziwe AI (model językowy)</h3>
+    <p class="muted small">Wybierz dostawcę kompatybilnego z OpenAI. Klucz zapisuje się tylko w Twojej przeglądarce (localStorage). Do testów polecamy <b>OpenRouter</b> (darmowe modele) lub lokalny <b>Ollama</b> (bez klucza).</p>
+    <label class="check-row"><input type="checkbox" id="aiEnabled"> Włącz prawdziwe AI dla Milo</label>
+    <label>Dostawca
+      <select id="aiProvider" onchange="applyProviderPreset()">
+        <option value="openai">OpenAI</option>
+        <option value="openrouter">OpenRouter (darmowe modele)</option>
+        <option value="ollama">Ollama (lokalnie, bez klucza)</option>
+        <option value="custom">Własny adres (OpenAI-compatible)</option>
+      </select>
+    </label>
+    <label>Adres API (Base URL)<input id="aiBaseUrl" value="https://api.openai.com/v1" placeholder="https://api.openai.com/v1"></label>
+    <label>Model<input id="aiModel" value="gpt-4o-mini" placeholder="np. gpt-4o-mini, meta-llama/llama-3.1-8b-instruct:free, llama3.1"></label>
+    <label>Klucz API <span class="muted">(Ollama zostaw pusty)</span><input id="aiKey" type="password" placeholder="sk-... / sk-or-..."></label>
+    <label>Temperatura (kreatywność) <span id="tempVal">0.7</span><input type="range" id="aiTemp" min="0" max="1.2" step="0.1" value="0.7" oninput="document.getElementById('tempVal').textContent=this.value"></label>
+
+    <div class="settings-actions">
+      <button class="btn btn-primary" onclick="saveSettings()">💾 Zapisz ustawienia</button>
+      <button class="btn btn-secondary" onclick="testAI()">🔌 Testuj połączenie AI</button>
+      <button class="btn btn-ghost" onclick="closeSettings()">Zamknij</button>
+    </div>
+    <p id="settingsMsg" class="success-msg"></p>
+
+    <div class="help-box">
+      <strong>Jak zdobyć klucz?</strong>
+      <ul>
+        <li><b>OpenRouter (zalecane na start):</b> wejdź na openrouter.ai → Keys → utwórz klucz. Darmowe modele mają w nazwie <code>:free</code>, np. <code>meta-llama/llama-3.1-8b-instruct:free</code>. Base URL: <code>https://openrouter.ai/api/v1</code></li>
+        <li><b>OpenAI:</b> platform.openai.com → API keys. Base URL: <code>https://api.openai.com/v1</code>, model: <code>gpt-4o-mini</code></li>
+        <li><b>Ollama (100% lokalnie, bez internetu):</b> zainstaluj z ollama.com, uruchom <code>ollama pull llama3.1</code>, potem <code>ollama serve</code>. Base URL: <code>http://localhost:11434/v1</code>, model: <code>llama3.1</code>, klucz pusty.</li>
+      </ul>
+      <p class="muted small">⚠️ Klucz w przeglądarce jest wygodny, ale nie wysyłaj przez niego danych wrażliwych. W wersji produkcyjnej klucz powinien być na serwerze (proxy).</p>
+    </div>
+  </div>
+</div>
+
+<script src="app.js"></script>
+<script src="personality.js"></script>
+<script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}</script>
+</body>
+</html>
