@@ -352,6 +352,11 @@
     <p class="muted small" id="settingsMiloMode">Milo działa lokalnie. Pełną rozmowność włącza administrator aplikacji.</p>
     <p class="muted small">Tutaj nie ma żadnych kluczy ani ustawień modelu — decyduje o nich administrator w pliku <code>config.js</code>. Dzięki temu nic wrażliwego nie trafia do przeglądarki.</p>
 
+    <hr>
+    <h3>🔒 Prywatność na tym urządzeniu</h3>
+    <p class="muted small">Możesz usunąć zapisane tutaj wpisy, rozmowy, wynik testu i postępy. To nie usuwa danych z serwerów ani z innych urządzeń. Sesja Milo i ustawienia dźwięku pozostaną.</p>
+    <button class="btn btn-secondary" type="button" onclick="deleteLocalUserData()">Usuń wpisy i postępy z tego urządzenia</button>
+
     <div class="settings-actions">
       <button class="btn btn-primary" onclick="saveSettings()">💾 Zapisz ustawienia</button>
       <button class="btn btn-ghost" onclick="closeSettings()">Zamknij</button>

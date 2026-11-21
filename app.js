@@ -634,6 +634,14 @@ function openSettings(){
   SoundEngine.click();
 }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; SoundEngine.click(); }
+function deleteLocalUserData(){
+  const accepted=window.confirm('Usunąć z tego urządzenia wpisy, rozmowy, wynik testu osobowości, serduszka i postępy w ćwiczeniach? Tego nie można cofnąć. Dane na innych urządzeniach i serwerach nie zostaną usunięte. Sesja Milo i ustawienia dźwięku pozostaną. Zamknij inne otwarte karty Emlove przed usunięciem.');
+  if(!accepted)return;
+  try{
+    ['emocje_entries','emocje_points','emocje_exercises','emocje_chat','emlove_personality','emlove_wheel_cycle_v1'].forEach(k=>localStorage.removeItem(k));
+  }catch(e){window.alert('Nie udało się usunąć danych na tym urządzeniu. Spróbuj ponownie.');return;}
+  window.location.reload();
+}
 function saveSettings(){
   const byId = id => document.getElementById(id);
   const g = id => byId(id) ? byId(id).value : undefined;
