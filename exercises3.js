@@ -1,280 +1,89 @@
-// ============================================================
-// Emlove — sesje ćwiczeń: 5 zadań → serduszka → podsumowanie
-// Bez podpowiedzi po każdym zadaniu. Informacja zwrotna dopiero
-// w podsumowaniu, razem z wyborem: „idziemy dalej” / „poprawiamy”.
-// Poziom trudności rośnie z każdą ukończoną rundą.
-// ============================================================
-
-const EX_TABS = ['recognize', 'name', 'distinguish', 'intensity', 'body', 'need'];
-const EX_LEVEL_HINT = {
-  recognize: 'oprócz emocji nazwij też to, co dzieje się w ciele.',
-  name: 'wybierz słowo o najwęższym znaczeniu, nie to „najładniejsze”.',
-  distinguish: 'odrzuć najpierw słowa, które pasują tylko częściowo.',
-  intensity: 'porównaj sąsiednie słowa na drabinie, nie skrajne.',
-  body: 'pamiętaj, że jedna rodzina może dawać podobne sygnały w ciele.',
-  need: 'potrzeba bywa głębiej niż pierwsza reakcja.',
-};
-const EX_PER_ROUND = 5;
-const EX_CARD_ID = {
-  recognize: 'recognizeCard',
-  name: 'nameCard',
-  distinguish: 'distinguishCard',
-  intensity: 'intensityCard',
-  body: 'bodyExCard',
-  need: 'needExCard',
-};
-
-if (typeof state !== 'undefined' && state.hearts === undefined) state.hearts = 0;
-
-const ExSession = {
-  tabs: {},
-  get(tab) {
-    if (!this.tabs[tab]) this.tabs[tab] = { level: 1, idx: 0, tasks: [], answers: [], phase: 'intro' };
-    return this.tabs[tab];
-  },
-  start(tab, level) {
-    const s = this.get(tab);
-    s.level = level || s.level || 1;
-    s.tasks = buildTasks(tab, s.level);
-    s.idx = 0;
-    s.answers = [];
-    s.phase = 'quiz';
-    renderEx(tab);
-  },
-  answer(tab, optionIndex) {
-    const s = this.get(tab);
-    const task = s.tasks[s.idx];
-    if (!task) return;
-    s.answers.push({ task, chosen: optionIndex, correct: optionIndex === task.answer });
-    s.idx++;
-    if (s.idx < s.tasks.length) { renderEx(tab); return; }
-    s.phase = 'summary';
-    const got = s.answers.filter(a => a.correct).length;
-    if (typeof state !== 'undefined') {
-      state.hearts = (state.hearts || 0) + got;
-      state.exercisesDone = (state.exercisesDone || 0) + got;
-      if (typeof addPoints === 'function') addPoints(got * 4);
-      if (typeof saveState === 'function') saveState();
-    }
-    if (got >= 3) { try { SoundEngine.success(); } catch (e) {} }
-    if (typeof updateHeartsSidebar === 'function') updateHeartsSidebar();
-    renderEx(tab);
-  },
-  next(tab) { this.start(tab, this.get(tab).level + 1); },
-  retry(tab) { this.start(tab, this.get(tab).level); },
-};
-
-window.ExSession = ExSession;
-
-/* ---------- narzędzia ---------- */
-function exShuffle(arr) {
-  const a = [...arr];
-  for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; }
-  return a;
-}
-function exPick(arr, n) { return exShuffle(arr).slice(0, n); }
-
-// ogranicz liczbę opcji z zachowaniem poprawnej odpowiedzi
-function trimOptions(text, options, answer, count) {
-  const correct = options[answer];
-  const others = options.filter((_, i) => i !== answer);
-  const picked = exShuffle([correct, ...exPick(others, Math.max(0, count - 1))]);
-  return { options: picked, answer: picked.indexOf(correct) };
-}
-
-/* ---------- generatory zadań ---------- */
-function buildTasks(tab, level) {
-  const L = Math.min(level, 5);
-  let pool = [];
-  if (tab === 'recognize' && typeof RECOGNIZE_Q !== 'undefined') {
-    pool = RECOGNIZE_Q.map(q => {
-      const t = trimOptions(q.text, q.options, q.answer, L === 1 ? 2 : L === 2 ? 3 : 3);
-      return { prompt: 'Przeczytaj sytuację i wybierz emocję, która najlepiej pasuje do sygnałów w ciele.', scenario: q.text, options: t.options, answer: t.answer, explain: q.explain, kind: 'rozpoznanie emocji' };
-    });
-  } else if (tab === 'name' && typeof NAME_Q !== 'undefined') {
-    pool = NAME_Q.map(q => {
-      const t = trimOptions(q.text, q.options, q.answer, L === 1 ? 2 : 3);
-      return { prompt: 'Wybierz słowo, które najlepiej oddaje to, co czujesz.', scenario: q.text, options: t.options, answer: t.answer, explain: q.explain, kind: 'precyzyjne nazwanie' };
-    });
-  } else if (tab === 'distinguish' && typeof DISTINGUISH_Q !== 'undefined') {
-    pool = DISTINGUISH_Q.map(q => {
-      const t = trimOptions(q.text, q.options, q.answer, L === 1 ? 2 : 3);
-      return { prompt: 'Które słowo najlepiej pasuje do tej sytuacji?', scenario: q.text, options: t.options, answer: t.answer, explain: q.explain, kind: 'różnica między słowami' };
-    });
-  } else if (tab === 'intensity' && typeof INTENSITY_LADDERS !== 'undefined') {
-    pool = INTENSITY_LADDERS.map(lad => {
-      const askLowest = L >= 4;
-      const target = askLowest ? lad.words[0] : lad.words[lad.words.length - 1];
-      const count = L === 1 ? 2 : L === 2 ? 3 : 4;
-      let opts = exShuffle(lad.words).slice(0, count);
-      if (!opts.includes(target)) opts[opts.length - 1] = target;
-      opts = exShuffle(opts);
-      return {
-        prompt: `Rodzina: ${lad.family}. Które słowo opisuje ${askLowest ? 'najsłabsze' : 'najsilniejsze'} natężenie?`,
-        scenario: `W tej rodzinie emocje układają się od łagodnych do bardzo silnych.`,
-        options: opts,
-        answer: opts.indexOf(target),
-        explain: `Pełna drabina: ${lad.words.join(' → ')}. ${askLowest ? 'Najlżej jest na początku — łatwiej wtedy o spokojną reakcję.' : 'Im dalej w prawo, tym większa siła i zwykle większa potrzeba zadbania o siebie.'}`,
-        kind: 'natężenie emocji',
-      };
-    });
-  } else if (tab === 'body' && typeof WHEEL_FAMILIES !== 'undefined') {
-    pool = WHEEL_FAMILIES.map(f => {
-      const count = L === 1 ? 2 : L === 2 ? 3 : 4;
-      const others = exPick(WHEEL_FAMILIES.filter(x => x.id !== f.id).map(x => x.name), count - 1);
-      const options = exShuffle([f.name, ...others]);
-      return {
-        prompt: 'Przeczytaj sygnały z ciała i wybierz rodzinę emocji, do której najczęściej należą.',
-        scenario: f.signal,
-        options,
-        answer: options.indexOf(f.name),
-        explain: `To sygnały ${f.gen}. Ta rodzina prosi zwykle o: ${f.need}. To orientacja, nie diagnoza — u każdego ciało mówi trochę inaczej.`,
-        kind: 'ciało → emocja',
-      };
-    });
-  } else if (tab === 'need' && typeof WHEEL_FAMILIES !== 'undefined') {
-    pool = WHEEL_FAMILIES.map(f => {
-      const count = L === 1 ? 2 : L === 2 ? 3 : 4;
-      const others = exPick(WHEEL_FAMILIES.filter(x => x.id !== f.id).map(x => x.need), count - 1);
-      const options = exShuffle([f.need, ...others]);
-      return {
-        prompt: `Czujesz wyraźnie emocję z rodziny „${f.name}”. O co najczęściej prosi?`,
-        scenario: `W ciele: ${f.signal}`,
-        options,
-        answer: options.indexOf(f.need),
-        explain: `${f.name} niesie informację o potrzebie: ${f.need}. Nie musisz jej spełniać od razu — nazwanie jest pierwszym krokiem.`,
-        kind: 'emocja → potrzeba',
-      };
-    });
+// Trzy pierścienie koła użytkownika. Zadania sprawdzają mapę koła,
+// nigdy nie oceniają czyichś osobistych odczuć ani nie diagnozują ciała.
+const TRAIN_WHEEL = [
+ {name:'Słaby',groups:[['Zmęczony',['rozkojarzony','senny']],['Zestresowany',['tracący kontrolę','przytłoczony']],['Zapracowany',['pośpieszany','pod presją']],['Znudzony',['apatyczny','obojętny']]]},
+ {name:'Lękliwy',groups:[['Przestraszony',['bezsilny','zastraszony']],['Niespokojny',['przytłoczony','zmartwiony']],['Niepewny',['niewystarczający','podrzędny']],['Uległy',['bezwartościowy','nieistotny']],['Odrzucony',['wyobcowany','niepasujący']],['Zastraszony',['nerwowy','zdemaskowany']]]},
+ {name:'Rozgniewany',groups:[['Rozczarowany',['zdradzony','urażony']],['Upokorzony',['zlekceważony','ośmieszony']],['Nienawistny',['zgorszony','zbezczeszczony']],['Zagrożony',['niepewny','zazdrosny']],['Agresywny',['wrogo nastawiony','sprowokowany']],['Sfrustrowany',['oburzony','poirytowany']],['Zdystansowany',['zamknięty w sobie','podejrzliwy']],['Krytyczny',['sceptyczny','sarkastyczny']]]},
+ {name:'Zniesmaczony',groups:[['Nieprzychylny',['niechętny','krytykancki']],['Rozczarowany',['zbuntowany','antypatyczny']],['Czujący się podle',['podburzony','obrzydzony']],['Stroniący',['czujący odrazę','niepewny']]]},
+ {name:'Smutny',groups:[['Samotny',['odizolowany','porzucony']],['Zraniony',['prześladowany','słabowity','rozczarowany','zlekceważony']],['Zrozpaczony',['w bólu, w żałobie','bezsilny']],['Winny',['zawstydzony','skruszony']],['Przygnębiony',['wyczerpany','gorszy od innych']]]},
+ {name:'Szczęśliwy',groups:[['Żartobliwy',['zuchwały','pobudzony']],['Zadowolony',['wolny','wesoły']],['Zainteresowany',['zaciekawiony','dociekliwy']],['Dumny',['ważny','pewny siebie']],['Akceptowany',['szanowany','doceniony']],['Pełen siły',['odważny','kreatywny']],['Spokojny',['kochający','wdzięczny']],['Czujący bliskość',['czuły','figlarny']],['Optymistyczny',['pełen nadziei','zainspirowany']]]},
+ {name:'Zaskoczony',groups:[['Podekscytowany',['ochoczy','energiczny']],['Zdumiony',['zadziwiony','zatrwożony']],['Zmieszany',['rozczarowany','zakłopotany']],['Przestraszony',['skonsternowany','wstrząśnięty']]]}
+];
+const CYCLE_KEY='emlove_wheel_cycle_v1', LIMITS=[50,40,30], DURATION=30*24*60*60*1000;
+function shuffleWheel(xs){const a=xs.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function escWheel(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function makeWheelPool(level){
+ const pool=[];
+ for(const f of TRAIN_WHEEL) for(const [g,words] of f.groups){
+  if(level===1){
+   // Powtarzające się nazwy grup nie mają jednej odpowiedzi — nie zadajemy takich pytań.
+   if(TRAIN_WHEEL.filter(x=>x.groups.some(y=>y[0]===g)).length!==1) continue;
+   const options=shuffleWheel([f.name,...shuffleWheel(TRAIN_WHEEL.filter(x=>x!==f).map(x=>x.name)).slice(0,3)]);
+   pool.push({q:`W którym głównym obszarze koła znajduje się podgrupa „${g}”?`,options,answer:options.indexOf(f.name),path:`${f.name} → ${g}`});
+  } else if(level===2){
+   for(const word of words){
+    if(f.groups.filter(x=>x[1].includes(word)).length!==1) continue;
+    const options=shuffleWheel([g,...shuffleWheel(f.groups.filter(x=>x[0]!==g).map(x=>x[0])).slice(0,3)]);
+    pool.push({q:`W obszarze „${f.name}”: do której podgrupy na kole należy słowo „${word}”?`,options,answer:options.indexOf(g),path:`${f.name} → ${g} → ${word}`});
+   }
+  } else {
+   for(const word of words){
+    const other=f.groups.filter(x=>x[0]!==g).flatMap(x=>x[1]).filter(x=>!words.includes(x));
+    if(other.length<3) continue;
+    const options=shuffleWheel([word,...shuffleWheel([...new Set(other)]).slice(0,3)]);
+    pool.push({q:`W obszarze „${f.name}” otwieramy podgrupę „${g}”. Które słowo leży w niej na kole?`,options,answer:options.indexOf(word),path:`${f.name} → ${g} → ${word}`});
+   }
   }
-  if (!pool.length) return [{ prompt: 'Brak zadań — odśwież aplikację.', scenario: '', options: ['OK'], answer: 0, explain: '', kind: '' }];
-
-  // dobór 5 zadań: rosnąca trudność
-  const picked = exShuffle(pool).slice(0, EX_PER_ROUND);
-  while (picked.length < EX_PER_ROUND) picked.push(exShuffle(pool)[0]);
-  return picked;
+ }
+ return pool;
 }
-
-/* ---------- render ---------- */
-function heartsRow(got, total) {
-  let html = '<div class="hearts" aria-label="' + got + ' z ' + total + ' serduszek">';
-  for (let i = 0; i < total; i++) html += `<span class="${i < got ? 'on' : 'off'}">${i < got ? '♥' : '♡'}</span>`;
-  return html + '</div>';
-}
-
-function renderEx(tab) {
-  const card = document.getElementById(EX_CARD_ID[tab]);
-  if (!card) return;
-  const s = ExSession.get(tab);
-
-  if (s.phase === 'intro' || !s.tasks.length) {
-    card.innerHTML = `
-      <div class="ex-head">
-        <div>
-          <h2>${exTitle(tab)}</h2>
-          <p class="muted">${exIntro(tab)}</p>
-        </div>
-        <div class="ex-score"><span class="ex-hearts-total">♥ ${(state.hearts || 0)}</span><span class="muted small">serduszka razem</span></div>
-      </div>
-      <div class="ex-rules">
-        <p><b>Jak to działa:</b> ${EX_PER_ROUND} zadań w rundzie. Po każdym zadaniu nie mówię, czy było dobrze — dowiesz się tego w podsumowaniu. Za każde poprawne zadanie dostajesz <b>1 serduszko</b> (maks. ${EX_PER_ROUND}).</p>
-      </div>
-      <button class="btn btn-primary" onclick="ExSession.start('${tab}', 1)">Zacznij rundę 1 · poziom 1</button>`;
-    return;
+function newCycle(){return {started:null,done:[0,0,0],correct:[0,0,0],round:null};}
+function loadCycle(){let c;try{c=JSON.parse(localStorage.getItem(CYCLE_KEY));}catch(e){} if(!c||(c.started!==null&&!Number.isFinite(c.started))||!Array.isArray(c.done)||!Array.isArray(c.correct)||(c.started!==null&&Date.now()>=c.started+DURATION)){c=newCycle();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));} return c;}
+function saveCycle(c){localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); updateHeartsSidebar();}
+function currentLevel(c){return LIMITS.findIndex((n,i)=>c.done[i]<n)+1 || 4;}
+function updateHeartsSidebar(){const el=document.getElementById('statHearts');if(el){const c=loadCycle();el.textContent=c.correct.reduce((a,b)=>a+b,0);}}
+function cycleInfo(c){const h=c.correct.reduce((a,b)=>a+b,0),n=c.done.reduce((a,b)=>a+b,0),deadline=c.started===null?'30 dni od pierwszej rundy':new Date(c.started+DURATION).toLocaleString('pl-PL',{dateStyle:'medium',timeStyle:'short'});return `<p><strong>Postęp:</strong> ${n}/120 zadań · ♥ ${h}/120</p><p class="muted small">Poziomy: ${c.done.map((d,i)=>`${d}/${LIMITS[i]}`).join(' · ')}<br>Cykl trwa do: ${deadline} (czas na tym urządzeniu).</p>`;}
+const WheelCourse={
+ start(){
+  const c=loadCycle(),level=currentLevel(c);if(level>3)return this.render();
+  if(c.started===null)c.started=Date.now();
+  let pool=shuffleWheel(makeWheelPool(level));const tasks=pool.slice(0,Math.min(5,LIMITS[level-1]-c.done[level-1]));
+  c.round={level,tasks,answers:[],phase:'quiz',practice:false};saveCycle(c);this.render();
+ },
+ answer(i){
+  const c=loadCycle(),r=c.round;if(!r||r.phase!=='quiz')return this.render();
+  const t=r.tasks[r.answers.length];if(!t||!Number.isInteger(i)||i<0||i>=t.options.length)return;
+  r.answers.push(i);
+  if(r.answers.length===r.tasks.length){
+   r.phase='summary';
+   if(!r.practice){const wins=r.answers.filter((a,j)=>a===r.tasks[j].answer).length;c.done[r.level-1]+=r.tasks.length;c.correct[r.level-1]+=wins;state.exercisesDone+=r.tasks.length;state.points+=wins*4;saveState();}
   }
-
-  if (s.phase === 'quiz') {
-    const task = s.tasks[s.idx];
-    const pct = Math.round((s.idx / s.tasks.length) * 100);
-    card.innerHTML = `
-      <div class="ex-head">
-        <div>
-          <h2>${exTitle(tab)}</h2>
-          <p class="muted small">Zadanie ${s.idx + 1} z ${s.tasks.length} · poziom ${s.level} · ${task.kind}</p>
-        </div>
-        <div class="ex-score"><span class="ex-hearts-total">♥ ${(state.hearts || 0)}</span></div>
-      </div>
-      <div class="ex-progress"><div style="width:${pct}%"></div></div>
-      <p class="ex-prompt">${task.prompt}</p>
-      ${task.scenario ? `<div class="scenario-box">${task.scenario}</div>` : ''}
-      ${s.level >= 3 ? `<p class="ex-extra">Poziom ${s.level}: ${EX_LEVEL_HINT[tab] || 'zwróć uwagę na niuanse między podobnymi słowami.'}</p>` : ''}
-      <div class="exercise-options">
-        ${task.options.map((o, i) => `<button class="choice-btn" onclick="ExSession.answer('${tab}', ${i})">${o}</button>`).join('')}
-      </div>
-      <p class="muted small ex-hint">Odpowiedz tak, jak czujesz — informacja zwrotna pojawi się po ${EX_PER_ROUND} zadaniach.</p>`;
-    return;
-  }
-
-  // podsumowanie
-  const got = s.answers.filter(a => a.correct).length;
-  const msg = got === 5 ? 'Pięć serduszek. Cała runda trafiona.'
-    : got >= 3 ? 'Dobra runda. Widać kierunek — warto iść dalej.'
-    : 'Ta runda była trudna. Możemy ją powtórzyć spokojniej, z nowymi zdaniami.';
-  card.innerHTML = `
-    <div class="ex-head">
-      <div>
-        <h2>Podsumowanie rundy · poziom ${s.level}</h2>
-        <p class="muted small">${msg}</p>
-      </div>
-      <div class="ex-score"><span class="ex-hearts-total">♥ ${(state.hearts || 0)}</span><span class="muted small">razem</span></div>
-    </div>
-    ${heartsRow(got, s.tasks.length)}
-    <p class="ex-hearts-label">${got} z ${s.tasks.length} serduszek w tej rundzie</p>
-    <div class="ex-review">
-      ${s.answers.map((a, i) => `
-        <div class="ex-review-item ${a.correct ? 'ok' : 'no'}">
-          <div class="ex-review-top">
-            <span class="ex-mark">${a.correct ? '♥' : '♡'}</span>
-            <span class="ex-review-q">${i + 1}. ${a.task.prompt}</span>
-          </div>
-          ${a.task.scenario ? `<p class="muted small">${a.task.scenario}</p>` : ''}
-          <p class="small">Twoja odpowiedź: <b>${a.task.options[a.chosen]}</b>${a.correct ? '' : ` · właściwa: <b>${a.task.options[a.task.answer]}</b>`}</p>
-          <p class="muted small">${a.task.explain}</p>
-        </div>`).join('')}
-    </div>
-    <div class="ex-actions">
-      <button class="btn btn-primary" onclick="ExSession.next('${tab}')">Idziemy dalej → poziom ${s.level + 1}</button>
-      <button class="btn btn-secondary" onclick="ExSession.retry('${tab}')">Poprawiamy tę rundę</button>
-    </div>`;
+  saveCycle(c);this.render();
+ },
+ retry(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return; c.round={...c.round,answers:[],phase:'quiz',practice:true};saveCycle(c);this.render();},
+ next(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return; c.round=null;saveCycle(c);this.render();},
+ render(){
+  const el=document.getElementById('wheelCourse');if(!el)return;const c=loadCycle(),r=c.round,level=currentLevel(c);updateHeartsSidebar();
+  if(!r&&level===4){const score=c.correct.reduce((a,b)=>a+b,0),gold=score>=114; el.innerHTML=`<h2>Ukończono drogę Emlove</h2>${cycleInfo(c)}<p><b>${score}/120 · ${(score/120*100).toFixed(1).replace('.',',')}%</b></p><img src="${gold?'phoenix-award.jpg':'icon-512.png'}" alt="${gold?'Odznaka złotego feniksa':'Odznaka białego serca'}" class="award-image"><h3>${gold?'Odznaka feniksa':'Odznaka białego serca'}</h3><p>${gold?'Gratulacje! Wynik co najmniej 95%.':'Dziękujemy za przejście całej drogi. Feniks jest za wynik co najmniej 95%.'} Nowy cykl rozpocznie się po upływie 30 dni.</p>`;return;}
+  if(!r){el.innerHTML=`<h2>🧭 Droga przez koło emocji</h2>${cycleInfo(c)}<p>Poziom 1: grupa główna (50 zadań). Poziom 2: podgrupa (40). Poziom 3: dokładne słowo (30).</p><p>Runda ma 5 losowych zadań. Informację zwrotną zobaczysz na końcu. Po ukończeniu całej drogi wynik 95% (114/120) daje odznakę feniksa; poniżej — białe serce. Po 30 dniach postęp się zeruje; nieukończony cykl nie daje odznaki.</p><p><button class="btn btn-ghost" onclick="goTo('wheel')">Zobacz koło emocji</button></p><p class="muted small">Wynik sprawdza rozmieszczenie słów na przesłanym kole, nie Twoje emocje. Ta sama sytuacja może wywoływać różne uczucia.</p><button class="btn btn-primary" onclick="WheelCourse.start()">Rozpocznij rundę · poziom ${level}</button>`;return;}
+  if(r.phase==='quiz'){let t=r.tasks[r.answers.length];el.innerHTML=`<h2>Poziom ${r.level} · ${r.practice?'powtórka':'runda'}</h2>${cycleInfo(c)}<p class="muted">Zadanie ${r.answers.length+1} z ${r.tasks.length}${r.practice?' · ćwiczenie bez zmiany wyniku cyklu':''}</p><div class="ex-progress"><div style="width:${100*r.answers.length/r.tasks.length}%"></div></div><p class="ex-prompt">${escWheel(t.q)}</p><div class="exercise-options">${t.options.map((o,i)=>`<button class="choice-btn" onclick="WheelCourse.answer(${i})">${escWheel(o)}</button>`).join('')}</div><p class="muted small">Nie ma podpowiedzi ani oceny po pojedynczym zadaniu. Odpowiedzi zobaczysz po całej rundzie.</p>`;return;}
+  const got=r.answers.filter((a,i)=>a===r.tasks[i].answer).length;
+  el.innerHTML=`<h2>Podsumowanie rundy · poziom ${r.level}</h2>${cycleInfo(c)}<div class="hearts">${'♥'.repeat(got)}${'♡'.repeat(r.tasks.length-got)}</div><p>${got}/${r.tasks.length} serduszek${r.practice?' w powtórce — wynik cyklu bez zmian':''}</p><div class="ex-review">${r.tasks.map((t,i)=>`<div class="ex-review-item ${r.answers[i]===t.answer?'ok':'no'}"><b>${i+1}. ${escWheel(t.q)}</b><p>Twoja odpowiedź: ${escWheel(t.options[r.answers[i]])}</p><p>Ścieżka na kole: <b>${escWheel(t.path)}</b></p></div>`).join('')}</div><div class="ex-actions"><button class="btn btn-primary" onclick="WheelCourse.next()">${level===4?'Zobacz odznakę':'Idziemy dalej'}</button><button class="btn btn-secondary" onclick="WheelCourse.retry()">Poprawiamy tę rundę</button></div><p class="muted small">Powtórka pomaga ćwiczyć, ale nie zmienia wyniku już zapisanego w cyklu.</p>`;
+ }
+};
+window.WheelCourse=WheelCourse;
+window.showTrainingFamily=function(i){const f=TRAIN_WHEEL[i],el=document.getElementById('wheelDetail');if(!f||!el)return;el.innerHTML=`<h3>${escWheel(f.name)}</h3><p class="muted small">Podgrupa → słowa z zewnętrznego pierścienia</p>${f.groups.map(g=>`<p><b>${escWheel(g[0])}</b><br>${g[1].map(escWheel).join(' · ')}</p>`).join('')}`;};
+function initWheelCourse(){
+ const section=document.getElementById('view-exercises');if(!section||document.getElementById('wheelCourse'))return;
+ const oldExpress=document.getElementById('tab-express'); if(oldExpress)oldExpress.remove();
+ section.innerHTML=`<div class="tabs"><button class="tab active" id="courseTab">Droga przez koło</button><button class="tab" id="expressTab">Wyraź emocję</button></div><div id="coursePanel"><div class="card" id="wheelCourse"></div></div><div id="expressPanel" style="display:none"></div>`;
+ if(oldExpress){while(oldExpress.firstChild)document.getElementById('expressPanel').appendChild(oldExpress.firstChild);}
+ const switchTab=(isCourse)=>{document.getElementById('coursePanel').style.display=isCourse?'':'none';document.getElementById('expressPanel').style.display=isCourse?'none':'';document.getElementById('courseTab').classList.toggle('active',isCourse);document.getElementById('expressTab').classList.toggle('active',!isCourse);};
+ document.getElementById('courseTab').onclick=()=>switchTab(true);document.getElementById('expressTab').onclick=()=>switchTab(false);
+ const wheel=document.getElementById('wheelSvg');
+ if(wheel){wheel.innerHTML=`<div class="wheel-reference">${TRAIN_WHEEL.map((f,i)=>`<button class="choice-btn" onclick="showTrainingFamily(${i})">${escWheel(f.name)} →</button>`).join('')}</div>`;}
+ const detail=document.getElementById('wheelDetail');if(detail)detail.innerHTML='<h3>Twoje koło emocji</h3><p>Wybierz grupę, aby zobaczyć jej podgrupy i słowa. To mapa do poznawania języka emocji, a nie jedyny sposób odczuwania.</p>';
+ if(typeof WHEEL_WORDS!=='undefined'){WHEEL_WORDS.splice(0,WHEEL_WORDS.length,...TRAIN_WHEEL.flatMap(f=>f.groups.flatMap(g=>g[1].map(word=>({word,familyId:f.name,familyName:f.name,cluster:g[0],color:'#0F8C86'})))));if(typeof renderLibraryWheel==='function')renderLibraryWheel('');}
+ WheelCourse.render();
 }
-
-function exTitle(tab) {
-  return {
-    recognize: '🔍 Rozpoznaj emocję',
-    name: '🏷️ Nazwij precyzyjnie',
-    distinguish: '🎯 Rozróżnij bliskie słowa',
-    intensity: '📶 Natężenie emocji',
-    body: '🫀 Ciało → emocja',
-    need: '🎁 Emocja → potrzeba',
-  }[tab] || tab;
-}
-function exIntro(tab) {
-  return {
-    recognize: 'Sytuacja i sygnały w ciele. Wybierz emocję, która najbardziej pasuje.',
-    name: 'Zamiast „źle / dobrze” — słowo, które naprawdę oddaje to, co czujesz.',
-    distinguish: 'Słowa, które brzmią podobnie, ale znaczą co innego: zlekceważony ≠ odrzucony.',
-    intensity: 'Ta sama emocja ma różną siłę. Im wyższy poziom, tym trudniejsze drabiny.',
-    body: 'Ciało mówi pierwsze. Rozpoznaj rodzinę emocji po sygnałach.',
-    need: 'Każda emocja jest informacją o potrzebie. Nazwij ją.',
-  }[tab] || '';
-}
-
-/* ---------- nadpisanie starych renderów ---------- */
-window.renderRecognize = function () { renderEx('recognize'); };
-window.renderName = function () { renderEx('name'); };
-window.renderDistinguish = function () { renderEx('distinguish'); };
-window.renderIntensity = function () { renderEx('intensity'); };
-window.renderBodyEx = function () { renderEx('body'); };
-window.renderNeedEx = function () { renderEx('need'); };
-
-function updateHeartsSidebar() {
-  const el = document.getElementById('statHearts');
-  if (el) el.textContent = (typeof state !== 'undefined' && state.hearts) || 0;
-}
-
-function initEx3() {
-  EX_TABS.forEach(renderEx);
-  updateHeartsSidebar();
-}
-document.addEventListener('DOMContentLoaded', initEx3);
-if (document.readyState !== 'loading') initEx3();
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',initWheelCourse);else initWheelCourse();

@@ -769,7 +769,7 @@ setInterval(()=>{
 
 // Init v2
 updateAIStatus();
-if(aiSettings.ambient!=='off'){ /* start po pierwszej interakcji */ document.addEventListener('click',()=>SoundEngine.startAmbient(aiSettings.ambient),{once:true}); }
+
 document.addEventListener('click',()=>SoundEngine.ensure(),{once:true});
 
 // === Emlove PWA: instalacja ===

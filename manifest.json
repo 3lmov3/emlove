@@ -1,7 +1,7 @@
 {
   "name": "Emlove — Pokochaj swoje emocje",
   "short_name": "Emlove",
-  "description": "Emlove — delikatne narzędzie edukacyjne dla dorosłych: rozpoznawanie, nazywanie i wyrażanie emocji, towarzysz Milo, test osobowości i zwierzę-towarzysz. Dźwięk i AI.",
+  "description": "Emlove — delikatne narzędzie edukacyjne dla dorosłych: rozpoznawanie, nazywanie i wyrażanie emocji, towarzysz Milo, test osobowości i zwierzę-towarzysz. Dźwięki i Milo.",
   "lang": "pl",
   "start_url": "./index.html",
   "scope": "./",
