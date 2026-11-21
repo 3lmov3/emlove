@@ -56,6 +56,7 @@
         <div><strong id="statEntries">0</strong><span>check-inów</span></div>
         <div><strong id="statExercises">0</strong><span>ćwiczeń</span></div>
         <div><strong id="statStreak">0</strong><span>dni z rzędu</span></div>
+        <div><strong id="statHearts">0</strong><span>serduszek</span></div>
       </div>
     </div>
     <p class="disclaimer">Emlove to narzędzie edukacyjne dla dorosłych, nie terapia. Jeśli czujesz się zagrożony, skontaktuj się z zaufaną osobą lub zadzwoń <b>116 111</b> / <b>112</b>.</p>
@@ -70,6 +71,7 @@
         <p id="viewSubtitle">Poznaj, nazwij i wyraź to, co czujesz — w swoim tempie.</p>
       </div>
       <div class="top-actions sound-bar">
+        <span id="ambientStatus" class="ambient-status"></span>
         <button class="icon-btn" id="muteBtn" title="Włącz/wyłącz dźwięk" onclick="toggleMute()">🔊</button>
         <select id="ambientSelect" title="Dźwięk otoczenia" onchange="setAmbient(this.value)">
           <option value="off">🔇 Bez tła</option>
@@ -95,7 +97,7 @@
           <div class="hero-btns">
             <button class="btn btn-primary" onclick="goTo('checkin')">Zacznij check-in →</button>
             <button class="btn btn-secondary" onclick="goTo('chat')">Poznaj Milo</button>
-            <button class="btn btn-ghost" onclick="openSettings()">🌙 Włącz pełnego Milo</button>
+            <button class="btn btn-ghost" onclick="goTo('chat')">🌙 Porozmawiaj z Milo</button>
           </div>
           <div class="hero-principles">
             <span>✓ Nie przejmujemy Twoich słów</span>
@@ -297,7 +299,7 @@
           </ul>
           <h4>Pełny Milo</h4>
           <p class="muted">Domyślnie Milo odpowiada lokalnie, z gotowych zwrotów. Gdy włączysz pełną rozmowność w ⚙️, Milo układa odpowiedzi sam — z tymi samymi zasadami: nie ocenia, nie decyduje za Ciebie, pyta.</p>
-          <button class="btn btn-primary" onclick="openSettings()">⚙️ Ustaw Milo</button>
+          <p class="muted small">Pełną rozmowność Milo ustala administrator aplikacji. Nie musisz nic konfigurować.</p>
         </div>
       </div>
     </section>
@@ -346,44 +348,26 @@
     <button class="btn btn-ghost" onclick="testVoice()">🎙️ Testuj głos Milo</button>
 
     <hr>
-    <h3>🌙 Pełny Milo</h3>
-    <p class="muted small">To ustawienie decyduje, czy Milo odpowiada z gotowych zwrotów, czy własnymi słowami. Klucz zostaje tylko w Twojej przeglądarce. Do testów polecamy <b>OpenRouter</b> (darmowe modele) lub lokalny <b>Ollama</b> (bez klucza).</p>
-    <label class="check-row"><input type="checkbox" id="aiEnabled"> Włącz pełnego Milo (odpowiada własnymi słowami)</label>
-    <label>Dostawca
-      <select id="aiProvider" onchange="applyProviderPreset()">
-        <option value="openai">OpenAI</option>
-        <option value="openrouter">OpenRouter (darmowe modele)</option>
-        <option value="ollama">Ollama (lokalnie, bez klucza)</option>
-        <option value="custom">Własny adres (OpenAI-compatible)</option>
-      </select>
-    </label>
-    <label>Adres API (Base URL)<input id="aiBaseUrl" value="https://api.openai.com/v1" placeholder="https://api.openai.com/v1"></label>
-    <label>Model<input id="aiModel" value="gpt-4o-mini" placeholder="np. gpt-4o-mini, meta-llama/llama-3.1-8b-instruct:free, llama3.1"></label>
-    <label>Klucz API <span class="muted">(Ollama zostaw pusty)</span><input id="aiKey" type="password" placeholder="sk-... / sk-or-..."></label>
-    <label>Temperatura (kreatywność) <span id="tempVal">0.7</span><input type="range" id="aiTemp" min="0" max="1.2" step="0.1" value="0.7" oninput="document.getElementById('tempVal').textContent=this.value"></label>
+    <h3>🌙 Milo</h3>
+    <p class="muted small" id="settingsMiloMode">Milo działa lokalnie. Pełną rozmowność włącza administrator aplikacji.</p>
+    <p class="muted small">Tutaj nie ma żadnych kluczy ani ustawień modelu — decyduje o nich administrator w pliku <code>config.js</code>. Dzięki temu nic wrażliwego nie trafia do przeglądarki.</p>
 
     <div class="settings-actions">
       <button class="btn btn-primary" onclick="saveSettings()">💾 Zapisz ustawienia</button>
-      <button class="btn btn-secondary" onclick="testAI()">🔌 Sprawdź połączenie Milo</button>
       <button class="btn btn-ghost" onclick="closeSettings()">Zamknij</button>
     </div>
     <p id="settingsMsg" class="success-msg"></p>
 
-    <div class="help-box">
-      <strong>Jak zdobyć klucz?</strong>
-      <ul>
-        <li><b>OpenRouter (zalecane na start):</b> wejdź na openrouter.ai → Keys → utwórz klucz. Darmowe modele mają w nazwie <code>:free</code>, np. <code>meta-llama/llama-3.1-8b-instruct:free</code>. Base URL: <code>https://openrouter.ai/api/v1</code></li>
-        <li><b>OpenAI:</b> platform.openai.com → API keys. Base URL: <code>https://api.openai.com/v1</code>, model: <code>gpt-4o-mini</code></li>
-        <li><b>Ollama (100% lokalnie, bez internetu):</b> zainstaluj z ollama.com, uruchom <code>ollama pull llama3.1</code>, potem <code>ollama serve</code>. Base URL: <code>http://localhost:11434/v1</code>, model: <code>llama3.1</code>, klucz pusty.</li>
-      </ul>
-      <p class="muted small">⚠️ Klucz w przeglądarce jest wygodny, ale nie wysyłaj przez niego danych wrażliwych. W wersji produkcyjnej klucz powinien być na serwerze (proxy).</p>
-    </div>
+    <p class="muted small" style="margin-top:10px">Emlove 3.0 · narzędzie edukacyjne dla dorosłych, nie terapia. W kryzysie: <b>116 123</b> · <b>112</b>.</p>
   </div>
 </div>
 
+<script src="config.js"></script>
 <script src="app.js"></script>
+<script src="ambient.js"></script>
 <script src="wheel.js"></script>
 <script src="exercises2.js"></script>
+<script src="exercises3.js"></script>
 <script src="personality.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}</script>
 </body>

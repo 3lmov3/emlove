@@ -339,3 +339,50 @@ h1,h2,h3{letter-spacing:-.3px}
 /* odznaka rozbudowanych symulacji */
 .sim-badge{display:inline-block;font-size:.62rem;letter-spacing:.7px;text-transform:uppercase;font-weight:800;
   color:#0A6B66;background:#E4F3F1;border:1px solid #CBE9E5;border-radius:5px;padding:2px 6px;vertical-align:middle;margin-left:6px}
+
+/* === v3.2: sesje ćwiczeń — serduszka, podsumowanie === */
+.ex-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;margin-bottom:8px}
+.ex-head h2{margin:0 0 4px;font-size:1.25rem}
+.ex-score{text-align:right;flex:0 0 auto}
+.ex-hearts-total{display:block;font-weight:800;color:#D2426B;font-size:1.05rem}
+.ex-score .muted{font-size:.68rem;letter-spacing:.5px;text-transform:uppercase}
+.ex-progress{height:7px;background:#E9F5F3;border-radius:99px;overflow:hidden;margin:10px 0 14px}
+.ex-progress > div{height:100%;background:linear-gradient(90deg,#0F8C86,#F06C97);border-radius:99px;transition:width .3s}
+.ex-prompt{font-size:1.02rem;line-height:1.5;margin:0 0 10px;font-weight:600}
+.ex-hint{margin-top:12px;opacity:.85}
+.ex-rules{background:#F3FBF9;border:1px solid #D8EDEA;border-radius:10px;padding:12px;margin:12px 0}
+.ex-rules p{margin:0;font-size:.9rem;line-height:1.6;color:#1B4B47}
+.hearts{font-size:2.1rem;letter-spacing:6px;margin:14px 0 2px;line-height:1}
+.hearts .on{color:#E24A72}
+.hearts .off{color:#E7D3DA}
+.ex-hearts-label{font-size:.86rem;color:var(--muted);margin:0 0 14px}
+.ex-review{display:grid;gap:10px;margin-bottom:16px}
+.ex-review-item{border:1px solid var(--border);border-radius:10px;padding:11px 12px;background:#FDFFFE}
+.ex-review-item.ok{border-left:4px solid #0F8C86}
+.ex-review-item.no{border-left:4px solid #E2A0B4;background:#FFF8FA}
+.ex-review-top{display:flex;gap:8px;align-items:flex-start;margin-bottom:4px}
+.ex-mark{color:#E24A72;font-size:1.05rem;line-height:1.2}
+.ex-review-q{font-weight:600;font-size:.94rem}
+.ex-review-item p{margin:3px 0;font-size:.86rem;line-height:1.55}
+.ex-actions{display:flex;gap:8px;flex-wrap:wrap}
+
+/* === status dźwięku tła === */
+.ambient-status{display:inline-flex;align-items:center;gap:6px;font-size:.72rem;letter-spacing:.3px;
+  color:#0A6B66;background:#E4F3F1;border:1px solid #CBE9E5;border-radius:8px;padding:5px 8px;white-space:nowrap}
+.ambient-status:empty{display:none}
+.ambient-status.live{background:#0F8C86;color:#fff;border-color:#0A6B66}
+.ambient-status.warn{background:#FDEAF0;color:#B0395F;border-color:#F7CBD9}
+.ambient-status .eq{display:inline-flex;gap:2px;align-items:flex-end;height:10px}
+.ambient-status .eq i{display:block;width:2px;background:currentColor;border-radius:2px;animation:eqBar .9s ease-in-out infinite}
+.ambient-status .eq i:nth-child(1){height:5px;animation-delay:0s}
+.ambient-status .eq i:nth-child(2){height:9px;animation-delay:.18s}
+.ambient-status .eq i:nth-child(3){height:6px;animation-delay:.36s}
+@keyframes eqBar{0%,100%{transform:scaleY(.55)}50%{transform:scaleY(1.15)}}
+
+/* brak poziomego przewijania strony na telefonie */
+html,body{max-width:100%;overflow-x:hidden}
+.app{max-width:100%}
+.main{min-width:0}
+.stats-row{flex-wrap:wrap}
+.stats-row > div{flex:1 1 40%}
+.ex-extra{background:#FFF8F0;border:1px solid #F2E2CE;border-radius:8px;padding:9px 11px;font-size:.84rem;color:#7A5A3A;margin:6px 0 10px;line-height:1.5}

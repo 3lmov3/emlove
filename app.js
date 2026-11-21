@@ -419,9 +419,18 @@ renderCheckin(); renderWheel(); renderRecognize(); renderName(); newExpressScena
 
 // ---------- Ustawienia ----------
 const AI_SETTINGS_KEY = 'emocje_ai_settings';
-let aiSettings = JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || 'null') || {
-  enabled:false, provider:'openai', baseUrl:'https://api.openai.com/v1', model:'gpt-4o-mini', key:'', temp:0.7,
-  soundEnabled:true, voiceEnabled:true, ambient:'off', volume:70
+const _CFG = (typeof window !== 'undefined' && window.EMLOVE_CONFIG) || {};
+const _saved = JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || 'null') || {};
+let aiSettings = {
+  // o „pełnym Milo” decyduje wyłącznie administrator w config.js
+  enabled: !!(_CFG.aiEndpoint && _CFG.aiEndpoint.length > 5),
+  baseUrl: _CFG.aiEndpoint || '',
+  model: _CFG.aiModel || 'emlove',
+  temp: 0.8,
+  soundEnabled: _saved.soundEnabled !== false,
+  voiceEnabled: _saved.voiceEnabled !== false,
+  ambient: _saved.ambient || 'off',
+  volume: _saved.volume !== undefined ? _saved.volume : 70
 };
 function saveAISettings(){
   localStorage.setItem(AI_SETTINGS_KEY, JSON.stringify(aiSettings));
@@ -431,11 +440,11 @@ function updateAIStatus(){
   const t=document.getElementById('aiStatusTitle'), x=document.getElementById('aiStatusText'), c=document.getElementById('chatModeLabel');
   if(aiSettings.enabled){
     t.textContent='🌙 Pełny Milo';
-    x.textContent=`Model: ${aiSettings.model} · ${aiSettings.baseUrl}`;
+    x.textContent='Milo układa odpowiedzi sam, z tymi samymi zasadami: nie ocenia i nie decyduje za Ciebie.';
     if(c) c.textContent=`Pełny Milo (${aiSettings.model}) · pyta, nie ocenia · nie decyduje za Ciebie`;
   } else {
     t.textContent='🌙 Milo — tryb lokalny';
-    x.textContent='Milo działa lokalnie, bez internetu. Możesz dać mu pełną rozmowność w ⚙️ Ustawieniach.';
+    x.textContent='Milo działa lokalnie, bez internetu — z gotowych zwrotów. Pełną rozmowność ustala administrator aplikacji.';
     if(c) c.textContent='Online · tryb lokalny · pyta, nie ocenia · nie decyduje za Ciebie';
   }
   document.getElementById('muteBtn').textContent = aiSettings.soundEnabled ? '🔊' : '🔇';
@@ -494,6 +503,7 @@ const SoundEngine = {
     return buf;
   },
   startAmbient(type){
+    if(typeof Ambient!=='undefined'){ Ambient.set(type); return; }
     this.stopAmbient();
     this.ambientType=type;
     if(type==='off' || !this.ensure()) return;
@@ -526,11 +536,12 @@ const SoundEngine = {
 };
 function toggleMute(){
   aiSettings.soundEnabled=!aiSettings.soundEnabled;
-  document.getElementById('setSoundEnabled').checked=aiSettings.soundEnabled;
+  const chk=document.getElementById('setSoundEnabled'); if(chk) chk.checked=aiSettings.soundEnabled;
   saveAISettings(); updateAIStatus();
+  if(typeof Ambient!=='undefined') Ambient.setMuted(!aiSettings.soundEnabled);
   if(aiSettings.soundEnabled) SoundEngine.pop();
 }
-function setVolume(v){ SoundEngine.setVolume(v); }
+function setVolume(v){ SoundEngine.setVolume(v); if(typeof Ambient!=='undefined') Ambient.setVolume(v); }
 function setAmbient(v){ aiSettings.ambient=v; saveAISettings(); SoundEngine.startAmbient(v); }
 
 // ---------- Głos Milo (TTS) ----------
@@ -603,59 +614,42 @@ async function miloReplyAI(userText){
   const messages=[{role:'system',content:MILO_SYSTEM_PROMPT}, ...history, {role:'user',content:userText}];
   return await callAI(messages);
 }
-async function testAI(){
-  const msg=document.getElementById('settingsMsg');
-  msg.textContent='⏳ Testuję połączenie...';
-  try{
-    const r=await callAI([{role:'system',content:'Odpowiedz jednym krótkim zdaniem po polsku.'},{role:'user',content:'Cześć, czy działasz?'}]);
-    msg.textContent='✓ Połączenie działa! Milo odpowiedział: '+r.slice(0,200);
-    SoundEngine.success();
-  }catch(e){ msg.textContent='✗ Błąd: '+e.message; SoundEngine.soft(); }
-}
 
 // ---------- Ustawienia UI ----------
 function openSettings(){
-  document.getElementById('settingsModal').style.display='grid';
-  document.getElementById('aiEnabled').checked=aiSettings.enabled;
-  document.getElementById('aiProvider').value=aiSettings.provider;
-  document.getElementById('aiBaseUrl').value=aiSettings.baseUrl;
-  document.getElementById('aiModel').value=aiSettings.model;
-  document.getElementById('aiKey').value=aiSettings.key;
-  document.getElementById('aiTemp').value=aiSettings.temp;
-  document.getElementById('tempVal').textContent=aiSettings.temp;
-  document.getElementById('setSoundEnabled').checked=aiSettings.soundEnabled;
-  document.getElementById('setVoiceEnabled').checked=aiSettings.voiceEnabled;
-  document.getElementById('setAmbient').value=aiSettings.ambient;
-  document.getElementById('setVolume').value=aiSettings.volume;
+  document.getElementById('settingsModal').style.display='flex';
+  const byId = id => document.getElementById(id);
+  const sv = (id, val) => { const el = byId(id); if (el) el.value = val; };
+  sv('setAmbient', aiSettings.ambient);
+  sv('setVolume', aiSettings.volume);
+  const c1 = byId('setSoundEnabled'); if (c1) c1.checked = aiSettings.soundEnabled;
+  const c2 = byId('setVoiceEnabled'); if (c2) c2.checked = aiSettings.voiceEnabled;
+  const note = byId('settingsMiloMode');
+  if (note) note.textContent = aiSettings.enabled
+    ? 'Milo jest skonfigurowany przez administratora i układa odpowiedzi sam.'
+    : 'Milo działa lokalnie. Pełną rozmowność włącza administrator aplikacji — nie musisz nic ustawiać.';
   SoundEngine.click();
 }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; SoundEngine.click(); }
-function applyProviderPreset(){
-  const p=document.getElementById('aiProvider').value;
-  const base=document.getElementById('aiBaseUrl'), model=document.getElementById('aiModel');
-  if(p==='openai'){ base.value='https://api.openai.com/v1'; model.value='gpt-4o-mini'; }
-  if(p==='openrouter'){ base.value='https://openrouter.ai/api/v1'; model.value='meta-llama/llama-3.1-8b-instruct:free'; }
-  if(p==='ollama'){ base.value='http://localhost:11434/v1'; model.value='llama3.1'; }
-}
 function saveSettings(){
-  aiSettings.enabled=document.getElementById('aiEnabled').checked;
-  aiSettings.provider=document.getElementById('aiProvider').value;
-  aiSettings.baseUrl=document.getElementById('aiBaseUrl').value.trim();
-  aiSettings.model=document.getElementById('aiModel').value.trim();
-  aiSettings.key=document.getElementById('aiKey').value.trim();
-  aiSettings.temp=parseFloat(document.getElementById('aiTemp').value);
-  aiSettings.soundEnabled=document.getElementById('setSoundEnabled').checked;
-  aiSettings.voiceEnabled=document.getElementById('setVoiceEnabled').checked;
-  aiSettings.ambient=document.getElementById('setAmbient').value;
-  aiSettings.volume=parseInt(document.getElementById('setVolume').value);
-  saveAISettings(); SoundEngine.startAmbient(aiSettings.ambient); updateAIStatus();
-  document.getElementById('settingsMsg').textContent='✓ Zapisano! '+(aiSettings.enabled?'Pełny Milo włączony ('+aiSettings.model+')':'Milo działa lokalnie.');
+  const byId = id => document.getElementById(id);
+  const g = id => byId(id) ? byId(id).value : undefined;
+  const c = id => byId(id) ? byId(id).checked : undefined;
+  aiSettings.soundEnabled = c('setSoundEnabled') !== false;
+  aiSettings.voiceEnabled = c('setVoiceEnabled') !== false;
+  if (g('setAmbient') !== undefined) aiSettings.ambient = g('setAmbient');
+  if (g('setVolume') !== undefined) aiSettings.volume = parseInt(g('setVolume'));
+  saveAISettings();
+  if (typeof Ambient !== 'undefined') { Ambient.setVolume(aiSettings.volume); Ambient.setMuted(!aiSettings.soundEnabled); Ambient.set(aiSettings.ambient); }
+  updateAIStatus();
+  const msg = document.getElementById('settingsMsg');
+  if (msg) msg.textContent = '✓ Zapisano.';
   SoundEngine.success();
 }
 
 // ---------- Generowanie z Milo ----------
 async function generateExpressWithAI(){
-  if(!aiSettings.enabled){ alert('Włącz pełnego Milo w ⚙️ Ustawieniach, żeby tworzył nowe sytuacje.'); openSettings(); return; }
+  if(!aiSettings.enabled){ alert('Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji. Na razie proponuję gotowe sytuacje.'); return; }
   const btn=event.target; btn.textContent='⏳ Milo wymyśla…';
   try{
     const r=await callAI([{role:'system',content:'Jesteś Milo. Wymyśl jedną krótką, codzienną sytuację społeczną, w której trudno wyrazić emocję. Odpowiedz TYLKO treścią sytuacji, bez cudzysłowu, po polsku, max 20 słów.'},{role:'user',content:'Wymyśl sytuację do ćwiczenia komunikatu Ja.'}]);
@@ -665,7 +659,7 @@ async function generateExpressWithAI(){
   btn.textContent='✨ Poproś Milo o nową';
 }
 async function generateSimWithAI(){
-  if(!aiSettings.enabled){ alert('Włącz pełnego Milo w ⚙️ Ustawieniach.'); openSettings(); return; }
+  if(!aiSettings.enabled){ alert('Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji.'); return; }
   const btn=event.target; btn.textContent='⏳ Milo wymyśla sytuację…';
   try{
     const prompt=`Wymyśl nową symulację emocji w formacie JSON: {"icon":"🎭","title":"...","short":"...","story":"...","steps":[{"q":"...","choices":[{"t":"...","next":"..."},{"t":"...","next":"..."},{"t":"...","next":"..."}]},{"q":"...","choices":[...]},{"q":"...","choices":[...]}]}. Temat: codzienna trudna sytuacja społeczna. Odpowiedz TYLKO JSON, bez markdown.`;
@@ -681,7 +675,7 @@ async function generateSimWithAI(){
 async function summarizeWithAI(){
   const box=document.getElementById('aiSummary');
   if(!state.entries.length){ alert('Najpierw zrób check-in, żeby Milo miał co podsumować.'); return; }
-  if(!aiSettings.enabled){ alert('Włącz pełnego Milo w ⚙️ Ustawieniach.'); openSettings(); return; }
+  if(!aiSettings.enabled){ alert('Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji.'); return; }
   box.style.display='block'; box.textContent='⏳ Milo czyta Twój dziennik…';
   try{
     const data=state.entries.slice(0,20).map(e=>`${e.date} ${e.emotion} siła ${e.intensity}: ${e.what||''} | ${e.iStatement||''}`).join('\n');

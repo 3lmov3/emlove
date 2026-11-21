@@ -1,6 +1,6 @@
 // Emlove PWA — Service Worker (offline-first)
-const CACHE = 'emlove-v5';
-const ASSETS = ['./','./index.html','./style.css','./app.js','./personality.js','./wheel.js','./exercises2.js','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
+const CACHE = 'emlove-v6';
+const ASSETS = ['./','./index.html','./style.css','./config.js','./app.js','./ambient.js','./personality.js','./wheel.js','./exercises2.js','./exercises3.js','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png'];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
 });
