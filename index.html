@@ -18,7 +18,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="logo">
       <div class="logo-icon" style="overflow:hidden;padding:0"><img src="icon-192.png" alt="Emlove" style="width:100%;height:100%;object-fit:cover;border-radius:10px"></div>
-      <div><strong>Emlove</strong><span>pokochaj swoje emocje · v2 🔊🤖</span></div>
+      <div><strong>Emlove</strong><span>pokochaj swoje emocje · v3</span></div>
     </div>
     <nav class="nav">
       <button class="nav-btn active" data-view="home"><span>🏠</span> Start</button>
@@ -43,9 +43,9 @@
     </div>
 
     <div class="ai-status" id="aiStatusBox">
-      <strong id="aiStatusTitle">🤖 Tryb: Lokalny Milo</strong>
-      <p id="aiStatusText">Pracuje bez internetu, na regułach refleksyjnych. Aby włączyć prawdziwe AI, kliknij ⚙️ Ustawienia.</p>
-      <button class="btn btn-small btn-ghost" onclick="openSettings()">⚙️ Ustawienia AI i dźwięku</button>
+      <strong id="aiStatusTitle">🌙 Milo — tryb lokalny</strong>
+      <p id="aiStatusText">Milo działa bez internetu. Możesz dać mu pełną rozmowność — wtedy odpowiada własnymi słowami, zamiast gotowych zdań.</p>
+      <button class="btn btn-small btn-ghost" onclick="openSettings()">⚙️ Ustawienia Milo i dźwięku</button>
     </div>
 
     <div class="progress-box">
@@ -60,6 +60,7 @@
     </div>
     <p class="disclaimer">Emlove to narzędzie edukacyjne dla dorosłych, nie terapia. Jeśli czujesz się zagrożony, skontaktuj się z zaufaną osobą lub zadzwoń <b>116 111</b> / <b>112</b>.</p>
   </aside>
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 
   <main class="main">
     <header class="topbar">
@@ -79,7 +80,7 @@
         </select>
         <input type="range" id="volumeRange" min="0" max="100" value="70" title="Głośność" oninput="setVolume(this.value)">
         <button class="btn btn-ghost" id="installBtn" onclick="installPWA()" style="display:none">📲 Zainstaluj Emlove</button>
-        <button class="btn btn-ghost" onclick="openSettings()">⚙️ AI</button>
+        <button class="btn btn-ghost" onclick="openSettings()">⚙️ Milo</button>
         <button class="btn btn-ghost" onclick="goTo('checkin')">+ Nowy check-in</button>
         <div class="date-pill" id="todayPill"></div>
       </div>
@@ -94,7 +95,7 @@
           <div class="hero-btns">
             <button class="btn btn-primary" onclick="goTo('checkin')">Zacznij check-in →</button>
             <button class="btn btn-secondary" onclick="goTo('chat')">Poznaj Milo</button>
-            <button class="btn btn-ghost" onclick="openSettings()">🤖 Włącz prawdziwe AI</button>
+            <button class="btn btn-ghost" onclick="openSettings()">🌙 Włącz pełnego Milo</button>
           </div>
           <div class="hero-principles">
             <span>✓ Nie przejmujemy Twoich słów</span>
@@ -199,9 +200,17 @@
         <button class="tab active" data-tab="recognize">1 · Rozpoznaj</button>
         <button class="tab" data-tab="name">2 · Nazwij</button>
         <button class="tab" data-tab="express">3 · Wyraź</button>
+        <button class="tab" data-tab="distinguish">4 · Rozróżnij</button>
+        <button class="tab" data-tab="intensity">5 · Natężenie</button>
+        <button class="tab" data-tab="body">6 · Ciało</button>
+        <button class="tab" data-tab="need">7 · Potrzeba</button>
       </div>
       <div class="tab-panel active" id="tab-recognize"><div class="card" id="recognizeCard"></div></div>
       <div class="tab-panel" id="tab-name"><div class="card" id="nameCard"></div></div>
+      <div class="tab-panel" id="tab-distinguish"><div class="card" id="distinguishCard"></div></div>
+      <div class="tab-panel" id="tab-intensity"><div class="card" id="intensityCard"></div></div>
+      <div class="tab-panel" id="tab-body"><div class="card" id="bodyExCard"></div></div>
+      <div class="tab-panel" id="tab-need"><div class="card" id="needExCard"></div></div>
       <div class="tab-panel" id="tab-express">
         <div class="card">
           <h2>🗣️ Wyraź emocję — komunikat „Ja”</h2>
@@ -209,7 +218,7 @@
           <div class="scenario-box">
             <strong>Sytuacja:</strong> <span id="expressScenario"></span>
             <button class="btn btn-small btn-ghost" onclick="newExpressScenario()">Inna sytuacja ↻</button>
-            <button class="btn btn-small btn-secondary" onclick="generateExpressWithAI()">✨ Nowa z AI</button>
+            <button class="btn btn-small btn-secondary" onclick="generateExpressWithAI()">✨ Poproś Milo o nową</button>
           </div>
           <div class="i-statement big">
             <span>Czuję</span><input id="exFeel" placeholder="...">
@@ -230,7 +239,7 @@
       <div class="card">
         <h2>🎭 Symulowane sytuacje</h2>
         <p class="muted">Wybierz scenariusz. Milo będzie zadawał pytania i proponował wybory — ale <b>decyzja zawsze należy do Ciebie</b>.</p>
-        <button class="btn btn-secondary" onclick="generateSimWithAI()">✨ Wygeneruj nową symulację z AI</button>
+        <button class="btn btn-secondary" onclick="generateSimWithAI()">✨ Poproś Milo o nową sytuację</button>
         <div class="sim-grid" id="simGrid" style="margin-top:14px"></div>
       </div>
       <div class="card" id="simPlayer" style="display:none">
@@ -272,7 +281,7 @@
             <input id="chatInput" placeholder="Napisz, co czujesz... Milo odpowie pytaniem 💬" autocomplete="off">
             <button class="btn btn-primary" type="submit">Wyślij</button>
           </form>
-          <p class="muted small">Milo nie jest terapeutą. W kryzysie: <b>116 111</b>, <b>116 123</b>, <b>112</b>. Tryb AI: Twoje wiadomości trafiają do wybranego modelu językowego — nie wysyłaj danych wrażliwych.</p>
+          <p class="muted small">Milo nie jest terapeutą. W kryzysie: <b>116 111</b>, <b>116 123</b>, <b>112</b>. Pełny Milo: Twoje wiadomości trafiają do modelu językowego — nie wysyłaj danych wrażliwych.</p>
         </div>
         <div class="card">
           <h3>Kim jest Milo?</h3>
@@ -286,16 +295,16 @@
             <li>✗ Nie stawia diagnoz</li>
             <li>✗ Nie decyduje za Ciebie</li>
           </ul>
-          <h4>Tryb prawdziwego AI</h4>
-          <p class="muted">Po włączeniu w ⚙️ Ustawieniach Milo odpowiada przez model językowy (OpenAI / OpenRouter / Ollama lokalnie) z tym samym systemowym promptem tożsamości. Bez klucza działa lokalnie.</p>
-          <button class="btn btn-primary" onclick="openSettings()">⚙️ Skonfiguruj AI</button>
+          <h4>Pełny Milo</h4>
+          <p class="muted">Domyślnie Milo odpowiada lokalnie, z gotowych zwrotów. Gdy włączysz pełną rozmowność w ⚙️, Milo układa odpowiedzi sam — z tymi samymi zasadami: nie ocenia, nie decyduje za Ciebie, pyta.</p>
+          <button class="btn btn-primary" onclick="openSettings()">⚙️ Ustaw Milo</button>
         </div>
       </div>
     </section>
 
     <section class="view" id="view-journal">
       <div class="card">
-        <div class="card-head"><h2>📓 Dziennik emocji</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="summarizeWithAI()">✨ Podsumowanie AI</button><button class="btn btn-ghost" onclick="exportJournal()">Eksportuj (JSON)</button></div></div>
+        <div class="card-head"><h2>📓 Dziennik emocji</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="summarizeWithAI()">✨ Podsumowanie od Milo</button><button class="btn btn-ghost" onclick="exportJournal()">Eksportuj (JSON)</button></div></div>
         <div id="aiSummary" class="preview-box" style="display:none"></div>
         <div id="journalList"></div>
       </div>
@@ -305,8 +314,12 @@
       <div class="card">
         <h2>📚 Biblioteka emocji</h2>
         <p class="muted">Karty z definicjami, sygnałami w ciele i pytaniami do refleksji. Kliknij kartę, aby rozwinąć.</p>
-        <div class="search-row"><input id="libSearch" placeholder="Szukaj emocji... np. złość, lęk, wstyd" oninput="renderLibrary()"></div>
+        <div class="search-row"><input id="libSearch" placeholder="Szukaj emocji... np. złość, lęk, wstyd, zlekceważony" oninput="renderLibrary()"></div>
+        <div class="lib-section-title">Rodziny emocji</div>
         <div class="lib-grid" id="libGrid"></div>
+        <div class="lib-section-title">Precyzyjne słowa z koła emocji</div>
+        <p class="muted small">Pełne koło: 8 rodzin i 128 słów w trzech poziomach.</p>
+        <div class="wheel-word-grid" id="wheelWordList"></div>
       </div>
     </section>
 
@@ -319,7 +332,7 @@
 <!-- SETTINGS MODAL -->
 <div class="modal-overlay" id="settingsModal" style="display:none">
   <div class="modal">
-    <div class="modal-head"><h2>⚙️ Ustawienia: dźwięk i prawdziwe AI</h2><button class="icon-btn" onclick="closeSettings()">✕</button></div>
+    <div class="modal-head"><h2>⚙️ Ustawienia: Milo i dźwięk</h2><button class="icon-btn" onclick="closeSettings()">✕</button></div>
 
     <h3>🔊 Dźwięk</h3>
     <label class="check-row"><input type="checkbox" id="setSoundEnabled" checked> Efekty dźwiękowe (kliknięcia, sukcesy, oddech)</label>
@@ -333,9 +346,9 @@
     <button class="btn btn-ghost" onclick="testVoice()">🎙️ Testuj głos Milo</button>
 
     <hr>
-    <h3>🤖 Prawdziwe AI (model językowy)</h3>
-    <p class="muted small">Wybierz dostawcę kompatybilnego z OpenAI. Klucz zapisuje się tylko w Twojej przeglądarce (localStorage). Do testów polecamy <b>OpenRouter</b> (darmowe modele) lub lokalny <b>Ollama</b> (bez klucza).</p>
-    <label class="check-row"><input type="checkbox" id="aiEnabled"> Włącz prawdziwe AI dla Milo</label>
+    <h3>🌙 Pełny Milo</h3>
+    <p class="muted small">To ustawienie decyduje, czy Milo odpowiada z gotowych zwrotów, czy własnymi słowami. Klucz zostaje tylko w Twojej przeglądarce. Do testów polecamy <b>OpenRouter</b> (darmowe modele) lub lokalny <b>Ollama</b> (bez klucza).</p>
+    <label class="check-row"><input type="checkbox" id="aiEnabled"> Włącz pełnego Milo (odpowiada własnymi słowami)</label>
     <label>Dostawca
       <select id="aiProvider" onchange="applyProviderPreset()">
         <option value="openai">OpenAI</option>
@@ -351,7 +364,7 @@
 
     <div class="settings-actions">
       <button class="btn btn-primary" onclick="saveSettings()">💾 Zapisz ustawienia</button>
-      <button class="btn btn-secondary" onclick="testAI()">🔌 Testuj połączenie AI</button>
+      <button class="btn btn-secondary" onclick="testAI()">🔌 Sprawdź połączenie Milo</button>
       <button class="btn btn-ghost" onclick="closeSettings()">Zamknij</button>
     </div>
     <p id="settingsMsg" class="success-msg"></p>
@@ -369,6 +382,8 @@
 </div>
 
 <script src="app.js"></script>
+<script src="wheel.js"></script>
+<script src="exercises2.js"></script>
 <script src="personality.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}</script>
 </body>

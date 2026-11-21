@@ -115,11 +115,17 @@ function goTo(view){
   const meta = TITLES[view] || [view, ''];
   document.getElementById('viewTitle').textContent = meta[0];
   document.getElementById('viewSubtitle').textContent = meta[1];
-  document.getElementById('sidebar').classList.remove('open');
+  closeSidebar();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.view)));
-document.getElementById('hamburger').addEventListener('click',()=>document.getElementById('sidebar').classList.toggle('open'));
+function openSidebar(){ document.getElementById('sidebar').classList.add('open'); const b=document.getElementById('sidebarBackdrop'); if(b) b.classList.add('show'); }
+function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); const b=document.getElementById('sidebarBackdrop'); if(b) b.classList.remove('show'); }
+document.getElementById('hamburger').addEventListener('click',()=>{
+  const sb=document.getElementById('sidebar');
+  if(sb.classList.contains('open')) closeSidebar(); else openSidebar();
+});
+document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSidebar(); });
 
 // Check-in
 function renderCheckin(){
@@ -269,7 +275,7 @@ function completeExpress(){
 
 // Simulations
 function renderSims(){
-  document.getElementById('simGrid').innerHTML = SIMULATIONS.map((s,i)=>`<div class="sim-card" onclick="startSim(${i})"><h4>${s.icon} ${s.title}</h4><p>${s.short}</p><span class="muted">Wejdź w symulację →</span></div>`).join('');
+  document.getElementById('simGrid').innerHTML = SIMULATIONS.map((s,i)=>`<div class="sim-card" onclick="startSim(${i})"><h4>${s.icon} ${s.title}${s.advanced?' <span class="sim-badge">rozbudowana</span>':''}</h4><p>${s.short}</p><span class="muted">Wejdź w symulację →</span></div>`).join('');
 }
 function startSim(i){
   state.simIndex=i; state.simStep=0; state.simLog=[];
@@ -313,6 +319,7 @@ function finishSim(){
 // Library
 function renderLibrary(){
   const q=(document.getElementById('libSearch').value||'').toLowerCase();
+  renderLibraryWheel(q);
   const list=EMOTIONS.filter(e=>e.name.toLowerCase().includes(q)||e.words.join(' ').includes(q));
   document.getElementById('libGrid').innerHTML=list.map(e=>`<div class="lib-card" onclick="this.classList.toggle('open')"><h4>${e.emoji} ${e.name}</h4><p class="muted">${e.words.slice(0,4).join(', ')}…</p><div class="body"><p>${e.desc}</p><p><strong>Ciało:</strong> ${e.body}</p><p><strong>Słowa:</strong> ${e.words.join(', ')}</p><ul>${e.questions.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`).join('')||'<p class="muted">Brak wyników.</p>';
 }
@@ -407,7 +414,7 @@ document.getElementById('chatForm').addEventListener('submit', e=>{
 renderCheckin(); renderWheel(); renderRecognize(); renderName(); newExpressScenario(); renderSims(); renderLibrary(); renderChat(); renderProgress(); renderRecent(); renderJournal(); updateIPreview();
 
 /* ============================================================
-   v2: DŹWIĘK + PRAWDZIWE AI
+   v2: DŹWIĘK + PEŁNY MILO (model językowy)
    ============================================================ */
 
 // ---------- Ustawienia ----------
@@ -423,12 +430,12 @@ function saveAISettings(){
 function updateAIStatus(){
   const t=document.getElementById('aiStatusTitle'), x=document.getElementById('aiStatusText'), c=document.getElementById('chatModeLabel');
   if(aiSettings.enabled){
-    t.textContent='🤖 Tryb: Prawdziwe AI';
+    t.textContent='🌙 Pełny Milo';
     x.textContent=`Model: ${aiSettings.model} · ${aiSettings.baseUrl}`;
-    if(c) c.textContent=`Online · prawdziwe AI (${aiSettings.model}) · pyta, nie ocenia · nie decyduje za Ciebie`;
+    if(c) c.textContent=`Pełny Milo (${aiSettings.model}) · pyta, nie ocenia · nie decyduje za Ciebie`;
   } else {
-    t.textContent='🤖 Tryb: Lokalny Milo';
-    x.textContent='Pracuje bez internetu, na regułach refleksyjnych. Aby włączyć prawdziwe AI, kliknij ⚙️ Ustawienia.';
+    t.textContent='🌙 Milo — tryb lokalny';
+    x.textContent='Milo działa lokalnie, bez internetu. Możesz dać mu pełną rozmowność w ⚙️ Ustawieniach.';
     if(c) c.textContent='Online · tryb lokalny · pyta, nie ocenia · nie decyduje za Ciebie';
   }
   document.getElementById('muteBtn').textContent = aiSettings.soundEnabled ? '🔊' : '🔇';
@@ -563,7 +570,7 @@ function testVoice(){ TTS.speak('Cześć! Jestem Milo, Twój towarzysz emocji. N
 function playMiloIntro(){ testVoice(); }
 function speakText(t){ TTS.speak(t); }
 
-// ---------- Prawdziwe AI ----------
+// ---------- Pełny Milo (model językowy) ----------
 const MILO_SYSTEM_PROMPT = `Jesteś Milo — wirtualnym towarzyszem emocji z Krainy Odczuwania. Twoja tożsamość jest stała:
 - Nie jesteś terapeutą, lekarzem ani nauczycielem. Jesteś towarzyszem, który słucha i pyta.
 - Nigdy nie przejmujesz wypowiedzi użytkownika i nie piszesz za niego. Nie kończysz jego zdań.
@@ -577,7 +584,7 @@ const MILO_SYSTEM_PROMPT = `Jesteś Milo — wirtualnym towarzyszem emocji z Kra
 - Nie używasz formatowania markdown poza prostym tekstem.`;
 
 async function callAI(messages, opts={}){
-  if(!aiSettings.enabled) throw new Error('AI nie jest włączone. Włącz je w ⚙️ Ustawieniach.');
+  if(!aiSettings.enabled) throw new Error('Pełny Milo nie jest włączony. Włącz go w ⚙️ Ustawieniach.');
   const base=(aiSettings.baseUrl||'').replace(/\/$/,'');
   const url=base+'/chat/completions';
   const headers={'Content-Type':'application/json'};
@@ -586,7 +593,7 @@ async function callAI(messages, opts={}){
   const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
   if(!res.ok){
     const txt=await res.text().catch(()=> '');
-    throw new Error(`AI zwróciło błąd ${res.status}: ${txt.slice(0,300)}`);
+    throw new Error(`Milo nie mógł odpowiedzieć (błąd ${res.status}): ${txt.slice(0,300)}`);
   }
   const data=await res.json();
   return data.choices?.[0]?.message?.content || '';
@@ -601,7 +608,7 @@ async function testAI(){
   msg.textContent='⏳ Testuję połączenie...';
   try{
     const r=await callAI([{role:'system',content:'Odpowiedz jednym krótkim zdaniem po polsku.'},{role:'user',content:'Cześć, czy działasz?'}]);
-    msg.textContent='✓ Połączenie działa! Odpowiedź AI: '+r.slice(0,200);
+    msg.textContent='✓ Połączenie działa! Milo odpowiedział: '+r.slice(0,200);
     SoundEngine.success();
   }catch(e){ msg.textContent='✗ Błąd: '+e.message; SoundEngine.soft(); }
 }
@@ -642,24 +649,24 @@ function saveSettings(){
   aiSettings.ambient=document.getElementById('setAmbient').value;
   aiSettings.volume=parseInt(document.getElementById('setVolume').value);
   saveAISettings(); SoundEngine.startAmbient(aiSettings.ambient); updateAIStatus();
-  document.getElementById('settingsMsg').textContent='✓ Zapisano! '+(aiSettings.enabled?'Prawdziwe AI włączone: '+aiSettings.model:'Tryb lokalny Milo.');
+  document.getElementById('settingsMsg').textContent='✓ Zapisano! '+(aiSettings.enabled?'Pełny Milo włączony ('+aiSettings.model+')':'Milo działa lokalnie.');
   SoundEngine.success();
 }
 
-// ---------- Generowanie z AI ----------
+// ---------- Generowanie z Milo ----------
 async function generateExpressWithAI(){
-  if(!aiSettings.enabled){ alert('Włącz prawdziwe AI w ⚙️ Ustawieniach, aby generować sytuacje z AI.'); openSettings(); return; }
-  const btn=event.target; btn.textContent='⏳ Generuję...';
+  if(!aiSettings.enabled){ alert('Włącz pełnego Milo w ⚙️ Ustawieniach, żeby tworzył nowe sytuacje.'); openSettings(); return; }
+  const btn=event.target; btn.textContent='⏳ Milo wymyśla…';
   try{
     const r=await callAI([{role:'system',content:'Jesteś Milo. Wymyśl jedną krótką, codzienną sytuację społeczną, w której trudno wyrazić emocję. Odpowiedz TYLKO treścią sytuacji, bez cudzysłowu, po polsku, max 20 słów.'},{role:'user',content:'Wymyśl sytuację do ćwiczenia komunikatu Ja.'}]);
     document.getElementById('expressScenario').textContent=r.trim();
     SoundEngine.success();
-  }catch(e){ alert('Błąd AI: '+e.message); }
-  btn.textContent='✨ Nowa z AI';
+  }catch(e){ alert('Milo nie mógł teraz odpowiedzieć: '+e.message); }
+  btn.textContent='✨ Poproś Milo o nową';
 }
 async function generateSimWithAI(){
-  if(!aiSettings.enabled){ alert('Włącz prawdziwe AI w ⚙️ Ustawieniach.'); openSettings(); return; }
-  const btn=event.target; btn.textContent='⏳ Generuję symulację...';
+  if(!aiSettings.enabled){ alert('Włącz pełnego Milo w ⚙️ Ustawieniach.'); openSettings(); return; }
+  const btn=event.target; btn.textContent='⏳ Milo wymyśla sytuację…';
   try{
     const prompt=`Wymyśl nową symulację emocji w formacie JSON: {"icon":"🎭","title":"...","short":"...","story":"...","steps":[{"q":"...","choices":[{"t":"...","next":"..."},{"t":"...","next":"..."},{"t":"...","next":"..."}]},{"q":"...","choices":[...]},{"q":"...","choices":[...]}]}. Temat: codzienna trudna sytuacja społeczna. Odpowiedz TYLKO JSON, bez markdown.`;
     const r=await callAI([{role:'system',content:'Odpowiadasz wyłącznie poprawnym JSON.'},{role:'user',content:prompt}]);
@@ -669,19 +676,19 @@ async function generateSimWithAI(){
     alert('✓ Nowa symulacja dodana: '+sim.title);
     SoundEngine.success();
   }catch(e){ alert('Nie udało się wygenerować symulacji: '+e.message); }
-  btn.textContent='✨ Wygeneruj nową symulację z AI';
+  btn.textContent='✨ Poproś Milo o nową sytuację';
 }
 async function summarizeWithAI(){
   const box=document.getElementById('aiSummary');
-  if(!state.entries.length){ alert('Najpierw zrób check-in, aby AI miało co podsumować.'); return; }
-  if(!aiSettings.enabled){ alert('Włącz prawdziwe AI w ⚙️ Ustawieniach.'); openSettings(); return; }
-  box.style.display='block'; box.textContent='⏳ Milo (AI) czyta Twój dziennik...';
+  if(!state.entries.length){ alert('Najpierw zrób check-in, żeby Milo miał co podsumować.'); return; }
+  if(!aiSettings.enabled){ alert('Włącz pełnego Milo w ⚙️ Ustawieniach.'); openSettings(); return; }
+  box.style.display='block'; box.textContent='⏳ Milo czyta Twój dziennik…';
   try{
     const data=state.entries.slice(0,20).map(e=>`${e.date} ${e.emotion} siła ${e.intensity}: ${e.what||''} | ${e.iStatement||''}`).join('\n');
     const r=await callAI([{role:'system',content:MILO_SYSTEM_PROMPT+' Na podstawie dziennika napisz krótkie, ciepłe podsumowanie wzorców (nie diagnozuj), nazwij częste emocje i zadaj 2 pytania do refleksji. Max 150 słów.'},{role:'user',content:'Dziennik:\n'+data}]);
-    box.textContent='✨ Podsumowanie AI:\n'+r;
+    box.textContent='✨ Podsumowanie od Milo:\n'+r;
     TTS.speak(r); SoundEngine.success();
-  }catch(e){ box.textContent='Błąd AI: '+e.message; }
+  }catch(e){ box.textContent='Milo nie mógł teraz napisać podsumowania: '+e.message; }
 }
 async function askMiloAboutCheckin(){
   goTo('chat');
@@ -692,7 +699,7 @@ async function askMiloAboutCheckin(){
   document.getElementById('chatForm').requestSubmit();
 }
 
-// ---------- Nadpisanie czatu: AI + głos ----------
+// ---------- Nadpisanie czatu: pełny Milo + głos ----------
 const _origRenderChat = renderChat;
 renderChat = function(){
   _origRenderChat();
@@ -730,7 +737,7 @@ function hideTyping(){ document.getElementById('typingMsg')?.remove(); }
       if(aiSettings.enabled){ reply=await miloReplyAI(text); }
       else { reply=miloReply(text); }
     }catch(err){
-      reply='⚠️ Prawdziwe AI nie odpowiedziało ('+err.message+'). Przełączam na lokalnego Milo: '+miloReply(text);
+      reply='⚠️ Pełny Milo nie odpowiedział ('+err.message+'). Odpowiadam po swojemu: '+miloReply(text);
     }
     hideTyping();
     addMsg('milo', reply);
@@ -777,4 +784,17 @@ window.addEventListener('beforeinstallprompt', e=>{ e.preventDefault(); deferred
 async function installPWA(){
   if(deferredPrompt){ deferredPrompt.prompt(); await deferredPrompt.userChoice; deferredPrompt=null; }
   else { alert('Aby zainstalować Emlove: w Chrome/Android kliknij ⋮ → „Zainstaluj aplikację”. Na iPhonie: Udostępnij → „Dodaj do ekranu początkowego”.'); }
+}
+
+
+// Biblioteka: precyzyjne słowa z koła 3-poziomowego
+function renderLibraryWheel(q){
+  const box = document.getElementById('wheelWordList');
+  if(!box || typeof WHEEL_WORDS === 'undefined') return;
+  const list = q ? WHEEL_WORDS.filter(w =>
+      w.word.includes(q) || w.familyName.toLowerCase().includes(q) || w.cluster.toLowerCase().includes(q)) : WHEEL_WORDS;
+  if(!list.length){ box.innerHTML = '<p class="muted">Brak słów pasujących do „' + q + '”.</p>'; return; }
+  const shown = list.slice(0, 60);
+  box.innerHTML = shown.map(w => `<div class="wheel-word"><b>${w.word}</b><span>${w.cluster}</span><i>${w.familyName}</i></div>`).join('') +
+    (list.length > shown.length ? `<p class="muted small">Pokazano ${shown.length} z ${list.length} słów — doprecyzuj wyszukiwanie.</p>` : '');
 }
