@@ -9,6 +9,10 @@
 // (np. funkcji Supabase / Cloudflare Worker), który trzyma klucz.
 // ============================================================
 window.EMLOVE_CONFIG = {
+  // Adres Supabase i publiczny klucz anon/publishable (NIE klucz OpenRouter ani service_role).
+  // Wymaga wdrożenia funkcji i ustawienia sekretów po stronie serwera.
+  supabaseUrl: '',
+  supabaseAnonKey: '',
   // Adres pośrednika zgodnego z OpenAI (endpoint /chat/completions).
   // Przykłady:
   //   Supabase Edge Function: 'https://twojprojekt.supabase.co/functions/v1/ai'

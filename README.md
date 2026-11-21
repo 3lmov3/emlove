@@ -1,23 +1,33 @@
-# Emlove — aplikacja PWA
+# Emlove — PWA
 
-Emlove to edukacyjna aplikacja dla dorosłych (18+), nie terapia. Milo słucha i zadaje pytania; nie podejmuje decyzji za użytkownika.
+Emlove to edukacyjna aplikacja dla dorosłych (18+), nie terapia. Milo słucha i pyta, nie decyduje i nie pisze za użytkownika.
 
-## Droga przez koło
+## Drabina emocji
 
-Ćwiczenia wykorzystują trzy pierścienie przesłanego koła. Poziom 1 to 50 zadań o grupach głównych, poziom 2 to 40 zadań o podgrupach, a poziom 3 — 30 zadań o konkretnych słowach. Pytania oraz odpowiedzi są losowane. Zadania sprawdzają położenie słów na kole, a nie stwierdzają, jakie emocje dana osoba „powinna” odczuwać. Ze względu na ograniczoną liczbę słów pytania mogą się powtarzać.
+Jedna ścieżka przeplata sześć rodzajów zadań: Rozpoznaj, Nazwij, Rozróżnij, Ciało, Natężenie i Potrzeba. Zadania korzystają z koła oraz przykładowych wypowiedzi. Sygnał ciała nie jest traktowany jako dowód konkretnej emocji, a potrzeby pochodzą z wypowiedzi opisanej osoby. Wypowiedzi nie są oceną uczuć użytkownika.
 
-Po pięciu zadaniach pokazuje się podsumowanie; za poprawną odpowiedź jest serduszko. Powtórka jest treningiem i nie zmienia pierwszego wyniku. Po ukończeniu 120 zadań wynik od 114/120 (95%) daje odznakę feniksa, a niższy — odznakę białego serca. Jeśli w 30 dni od rozpoczęcia pierwszej rundy nie ukończono wszystkich zadań, cykl resetuje się bez odznaki. Ukończony cykl też resetuje się po 30 dniach. Data i postępy przechowywane są w pamięci przeglądarki na urządzeniu; wyczyszczenie pamięci lub zmiana urządzenia je usuwa. Zegar urządzenia może wpływać na termin.
+Trzy poziomy mają odpowiednio 50, 40 i 30 zadań i tyle samo możliwych serduszek. Świeży cykl rozkłada zadania możliwie równo: poziom 1 to 8 lub 9 zadań na każdy szczebel, poziom 2 — 6 lub 7, a poziom 3 — po 5. Kolejność i pytania są losowane. Runda ma pięć zadań; podsumowanie jest na końcu. Już rozpoczęty cykl zachowuje wcześniejszy postęp, więc podział sześciu szczebli będzie w pełni równy od następnego nowego cyklu.
 
-## Dźwięki i ikona
+Widoczny licznik „jeszcze do zdobycia” to liczba zadań, które pozostały w bieżącym poziomie, a nie różnica między maksymalną pulą a dotąd zdobytymi serduszkami. Błędne odpowiedzi zużywają szansę na dane serduszko; powtórka to trening, bez zmiany wyniku.
 
-Cztery syntetycznie wygenerowane, zapętlone pliki MP3 znajdują się w katalogu `audio/`. Przeglądarka może wymagać dotknięcia ekranu i włączenia dźwięku. Obsługa offline wymaga pierwszego poprawnego pobrania aplikacji i zakończenia instalacji pamięci podręcznej. Ikona aplikacji przedstawia białe serce; zdjęcie feniksa służy jako odznaka.
+Po 120 zadaniach wynik co najmniej 114/120 (95%) daje odznakę feniksa; niższy — odznakę białego serca. Po 30 dniach od pierwszej rundy cykl resetuje się. Niedokończony cykl nie daje odznaki. Wyniki i czas są lokalne dla przeglądarki; czyszczenie danych je usuwa, a zmiana zegara urządzenia wpływa na termin.
 
-## Publikacja na GitHub Pages
+## Wyraź
 
-Wgraj całą zawartość katalogu do katalogu głównego repozytorium `emlove`, **z zachowaniem folderu `audio/`**. W ustawieniach repozytorium wybierz Pages → Deploy from a branch → `main` / `(root)`. Adres: `https://3lmov3.github.io/emlove/`. Szczegóły są w `INSTRUKCJA_GITHUB.html` dołączonej osobno.
+Własna wypowiedź nie jest punktowana. W trybie lokalnym Milo odpowiada gotowym pytaniem. Po skonfigurowaniu funkcji serwerowej wypowiedź jest wysyłana do serwera i dostawcy modelu dopiero po kliknięciu przycisku; użytkownik widzi informację o tym fakcie. Nie wysyłaj danych wrażliwych.
 
-## Milo i bezpieczeństwo
+## Nagrania
 
-Domyślnie Milo działa lokalnie, na gotowych zwrotach; pośrednik do modelu nie jest jeszcze skonfigurowany. Administrator może ustawić adres pośrednika w `config.js`. Klucz OpenRouter należy umieścić wyłącznie w sekretach zabezpieczonego pośrednika (np. Supabase Edge Function), nigdy w kodzie publicznym ani w aplikacji. Użytkownik nie wprowadza klucza.
+Dźwięki w `audio/` wykorzystują nagrania z Wikimedia Commons, poddane delikatnemu filtrowaniu, ograniczeniu głośnych szczytów i wyciszeniu brzegów. Pełne źródła, autorzy, licencje i opis zmian są w `audio/LICENCJE.html`. Po opuszczeniu aplikacji tło jest wstrzymywane; wznawia je ikona głośnika po powrocie. Nie ma gwarancji identycznej obsługi na wszystkich telefonach — przetestuj na docelowych iOS i Androidzie.
 
-Emlove nie zastępuje terapii. W kryzysie: 116 123 (wsparcie emocjonalne dorosłych), 116 111 (dzieci i młodzież), 112 (bezpośrednie zagrożenie).
+## Automatyzacja Milo — etap przygotowawczy
+
+Domyślnie aplikacja używa wyłącznie lokalnych zadań i gotowego pytania. W `supabase/` dołączono niewdrożoną funkcję i migrację limitów. Po ich poprawnym wdrożeniu, konfiguracji projektu i uruchomieniu anonimowych sesji, Milo może generować neutralne konteksty do rund oraz krótkie odpowiedzi w zakładce Wyraź. **Pytania i ich klucze odpowiedzi nadal pochodzą z lokalnej puli** — model nie generuje ich samodzielnie i nie ma gwarancji braku powtórzeń po 30 dniach. Odpowiedzi na punktowane zadania nie są wysyłane na serwer. To nie jest jeszcze pełna automatyzacja całej aplikacji ani wdrożony serwis; konfiguracja wymaga pracy administratora opisanej w `SUPABASE_MILO.md`.
+
+Połączenie jest opcjonalne. Klucz OpenRouter należy przechowywać wyłącznie jako sekret funkcji serwerowej. Nie wpisuj klucza do czatu, publicznego repozytorium ani `config.js`. Potrzebne są też limity kosztów i zabezpieczenia antynadużyciowe przed wdrożeniem publicznym.
+
+## Publikacja PWA
+
+Wgraj zawartość katalogu do głównego katalogu repozytorium `3lmov3/emlove`, zachowując katalogi `audio/` i `supabase/`. W Settings → Pages wybierz branch `main` i folder `/(root)`. https://3lmov3.github.io/emlove/
+
+W kryzysie: **116 123** (wsparcie emocjonalne dorosłych), **116 111** (dzieci i młodzież), **112** (bezpośrednie zagrożenie).

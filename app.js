@@ -535,10 +535,13 @@ const SoundEngine = {
   }
 };
 function toggleMute(){
+  if(typeof Ambient!=='undefined' && Ambient.type!=='off' && Ambient.needsGesture && aiSettings.soundEnabled){
+    Ambient.needsGesture=false; Ambient.muted=false; if(Ambient.audio)Ambient.audio.muted=false; Ambient.play(); return;
+  }
   aiSettings.soundEnabled=!aiSettings.soundEnabled;
   const chk=document.getElementById('setSoundEnabled'); if(chk) chk.checked=aiSettings.soundEnabled;
   saveAISettings(); updateAIStatus();
-  if(typeof Ambient!=='undefined') Ambient.setMuted(!aiSettings.soundEnabled);
+  if(typeof Ambient!=='undefined'){Ambient.needsGesture=false;Ambient.setMuted(!aiSettings.soundEnabled);if(aiSettings.soundEnabled && Ambient.type!=='off' && !Ambient.audio)Ambient.play();}
   if(aiSettings.soundEnabled) SoundEngine.pop();
 }
 function setVolume(v){ SoundEngine.setVolume(v); if(typeof Ambient!=='undefined') Ambient.setVolume(v); }

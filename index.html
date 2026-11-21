@@ -336,7 +336,7 @@
   <div class="modal">
     <div class="modal-head"><h2>⚙️ Ustawienia: Milo i dźwięk</h2><button class="icon-btn" onclick="closeSettings()">✕</button></div>
 
-    <h3>🔊 Dźwięk</h3>
+    <h3>🔊 Dźwięk</h3><p class="muted small">Po powrocie do aplikacji naciśnij głośnik, aby wznowić tło. <a href="audio/LICENCJE.html" target="_blank" rel="noopener">Autorzy i licencje nagrań</a>.</p>
     <label class="check-row"><input type="checkbox" id="setSoundEnabled" checked> Efekty dźwiękowe (kliknięcia, sukcesy, oddech)</label>
     <label class="check-row"><input type="checkbox" id="setVoiceEnabled" checked> Głos Milo (synteza mowy po polsku)</label>
     <label>Dźwięk otoczenia
@@ -367,6 +367,8 @@
 <script src="ambient.js"></script>
 <script src="wheel.js"></script>
 <script src="exercises2.js"></script>
+<script src="ladder.js"></script>
+<script src="milo-client.js"></script>
 <script src="exercises3.js"></script>
 <script src="personality.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}</script>
