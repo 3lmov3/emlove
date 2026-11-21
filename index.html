@@ -356,6 +356,9 @@
     <h3>🔒 Prywatność na tym urządzeniu</h3>
     <p class="muted small">Możesz usunąć zapisane tutaj wpisy, rozmowy, wynik testu i postępy. To nie usuwa danych z serwerów ani z innych urządzeń. Sesja Milo i ustawienia dźwięku pozostaną.</p>
     <button class="btn btn-secondary" type="button" onclick="deleteLocalUserData()">Usuń wpisy i postępy z tego urządzenia</button>
+    <p class="muted small">Osobno możesz poprosić o usunięcie bieżącej anonimowej sesji Milo i jej liczników w Supabase. Nie usuwa to lokalnych wpisów ani danych u innych dostawców.</p>
+    <button class="btn btn-secondary" type="button" id="deleteMiloSessionBtn" onclick="deleteMiloServerSession()">Usuń bieżącą sesję Milo z serwera</button>
+    <p class="muted small" id="deleteMiloSessionStatus" role="status"></p>
 
     <div class="settings-actions">
       <button class="btn btn-primary" onclick="saveSettings()">💾 Zapisz ustawienia</button>

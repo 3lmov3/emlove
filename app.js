@@ -642,6 +642,19 @@ function deleteLocalUserData(){
   }catch(e){window.alert('Nie udało się usunąć danych na tym urządzeniu. Spróbuj ponownie.');return;}
   window.location.reload();
 }
+async function deleteMiloServerSession(){
+  const status=document.getElementById('deleteMiloSessionStatus'),button=document.getElementById('deleteMiloSessionBtn');
+  let session;try{session=JSON.parse(localStorage.getItem('emlove_milo_session')||'null');}catch(e){}
+  if(!session?.access_token){status.textContent='Na tym urządzeniu nie ma dostępnej sesji Milo. To nie potwierdza usunięcia innych ani wcześniejszych sesji z serwera.';return;}
+  if(!window.confirm('Usunąć bieżącą anonimową sesję Milo i jej liczniki w Supabase? Tego nie można cofnąć. Lokalne wpisy i postępy pozostaną. Nie usunie to danych z innych sesji ani usług zewnętrznych.'))return;
+  button.disabled=true;status.textContent='Wysyłanie prośby o usunięcie…';
+  try{
+    const result=await MiloClient.deleteCurrentSession();
+    status.textContent=result.localSessionRemoved?'Potwierdzono usunięcie tej sesji Milo i jej liczników w Supabase. Lokalne wpisy i postępy pozostały.':'Potwierdzono usunięcie sesji w Supabase, ale nie udało się usunąć jej danych z tego urządzenia. Sprawdź dane strony w przeglądarce.';
+  }catch(e){
+    status.textContent=e?.message==='session_unavailable'?'Nie można uzyskać dostępu do tej sesji. Nie potwierdzono usunięcia danych z serwera.':e?.message==='busy'?'Trwa inne działanie Milo. Spróbuj ponownie za chwilę.':'Nie udało się potwierdzić usunięcia sesji. Sprawdź połączenie lub spróbuj później.';
+  }finally{button.disabled=false;}
+}
 function saveSettings(){
   const byId = id => document.getElementById(id);
   const g = id => byId(id) ? byId(id).value : undefined;

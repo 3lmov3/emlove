@@ -39,6 +39,31 @@ const MiloClient={
   const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),18000);
   try{const r=await fetch(c.supabaseUrl.replace(/\/$/,'')+'/functions/v1/milo',{method:'POST',headers:{'Content-Type':'application/json','apikey':c.supabaseAnonKey,'Authorization':'Bearer '+token},body:JSON.stringify({type,...payload}),signal:ac.signal});if(!r.ok)throw Error('Milo chwilowo niedostępny');return await r.json();}finally{clearTimeout(timer);}
  },
+ // Nie tworzymy nowej sesji podczas usuwania: korzystamy wyłącznie z istniejącej.
+ async deleteCurrentSession(){
+  if(this._sessionPromise)throw Error('busy');
+  const c=window.EMLOVE_CONFIG||{};if(!c.supabaseUrl||!c.supabaseAnonKey)throw Error('not_configured');
+  let session;try{session=JSON.parse(localStorage.getItem('emlove_milo_session')||'null');}catch(e){throw Error('session_unavailable');}
+  if(!session?.access_token)throw Error('session_unavailable');
+  const url=c.supabaseUrl.replace(/\/$/,'');
+  if(!session.expires_at||session.expires_at<=Date.now()/1000+60){
+   if(!session.refresh_token)throw Error('session_unavailable');
+   let refresh;try{refresh=await fetch(url+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{'Content-Type':'application/json','apikey':c.supabaseAnonKey},body:JSON.stringify({refresh_token:session.refresh_token})});}catch(e){throw Error('session_unavailable');}
+   if(!refresh.ok)throw Error('session_unavailable');
+   let result;try{result=await refresh.json();}catch(e){throw Error('session_unavailable');}
+   if(!result.access_token||!result.refresh_token)throw Error('session_unavailable');
+   session={access_token:result.access_token,refresh_token:result.refresh_token,expires_at:result.expires_at||Math.floor(Date.now()/1000)+(result.expires_in||3600)};
+   try{localStorage.setItem('emlove_milo_session',JSON.stringify(session));}catch(e){throw Error('session_unavailable');}
+  }
+  const ac=new AbortController(),timer=setTimeout(()=>ac.abort(),18000);let response,body;
+  try{response=await fetch(url+'/functions/v1/milo-delete',{method:'POST',headers:{'Content-Type':'application/json','apikey':c.supabaseAnonKey,'Authorization':'Bearer '+session.access_token},body:'{}',signal:ac.signal});if(response.ok)body=await response.json();}
+  catch(e){throw Error('not_confirmed');}finally{clearTimeout(timer);}
+  if(!response.ok||body?.deleted!==true)throw Error('not_confirmed');
+  // Po potwierdzeniu serwera usuwamy lokalny token tylko, jeśli nadal jest to ta sama sesja.
+  try{const current=JSON.parse(localStorage.getItem('emlove_milo_session')||'null');if(current?.access_token===session.access_token)localStorage.removeItem('emlove_milo_session');else if(current)throw Error('changed');}
+  catch(e){return {deleted:true,localSessionRemoved:false};}
+  return {deleted:true,localSessionRemoved:true};
+ },
  async contexts(){const data=await this.request('contexts');if(!Array.isArray(data.contexts)||data.contexts.length!==5)throw Error('Nieprawidłowa odpowiedź');return data.contexts.map(x=>typeof x==='string'?x.trim().slice(0,160):'');},
  async localFeedback(text){
   if(/samobój|zabi(ję|c|ć) się|odebrać sobie życie|nie chcę żyć|skrzywdzić siebie|samookalecz/i.test(text))return {local:true,text:'Przykro mi, że przeżywasz coś tak trudnego. Czy możesz teraz skontaktować się z kimś zaufanym? Jeśli grozi Ci bezpośrednie niebezpieczeństwo, zadzwoń pod 112. Możesz też zadzwonić pod 116 123.'};
