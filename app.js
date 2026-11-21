@@ -177,12 +177,12 @@ function resetCheckin(clearMsg=true){
 function renderRecent(){
   const el=document.getElementById('homeRecent');
   if(!state.entries.length){ el.innerHTML='<p class="muted">Brak check-inów. Twój pierwszy wpis pojawi się tutaj.</p>'; return; }
-  el.innerHTML = state.entries.slice(0,3).map(e=>`<div class="recent-item"><div><strong>${e.emoji} ${e.emotion}</strong> · siła ${e.intensity}/10<br><span class="muted">${e.what||'—'}</span></div><span class="muted">${e.date} ${e.time}</span></div>`).join('');
+  el.innerHTML = state.entries.slice(0,3).map(e=>`<div class="recent-item"><div><strong>${escapeHtml(e.emoji)} ${escapeHtml(e.emotion)}</strong> · siła ${escapeHtml(e.intensity)}/10<br><span class="muted">${escapeHtml(e.what||'—')}</span></div><span class="muted">${escapeHtml(e.date)} ${escapeHtml(e.time)}</span></div>`).join('');
 }
 function renderJournal(){
   const el=document.getElementById('journalList');
   if(!state.entries.length){ el.innerHTML='<p class="muted">Jeszcze pusto. Zrób pierwszy check-in, a pojawi się tutaj.</p>'; return; }
-  el.innerHTML = state.entries.map((e,i)=>`<div class="journal-item"><div class="meta"><span class="pill">${e.emoji} ${e.emotion}</span><span>siła ${e.intensity}/10</span><span>${e.date} · ${e.time}</span>${e.body.map(b=>`<span>📍 ${b}</span>`).join('')}</div><p><strong>Co się stało:</strong> ${e.what||'—'}</p>${e.needs.length?`<p><strong>Potrzeby:</strong> ${e.needs.join(', ')}</p>`:''}${e.needText?`<p>${e.needText}</p>`:''}<p class="preview-box">${e.iStatement}</p><button class="btn btn-ghost btn-small" onclick="deleteEntry(${i})">Usuń wpis</button></div>`).join('');
+  el.innerHTML = state.entries.map((e,i)=>`<div class="journal-item"><div class="meta"><span class="pill">${escapeHtml(e.emoji)} ${escapeHtml(e.emotion)}</span><span>siła ${escapeHtml(e.intensity)}/10</span><span>${escapeHtml(e.date)} · ${escapeHtml(e.time)}</span>${e.body.map(b=>`<span>📍 ${escapeHtml(b)}</span>`).join('')}</div><p><strong>Co się stało:</strong> ${escapeHtml(e.what||'—')}</p>${e.needs.length?`<p><strong>Potrzeby:</strong> ${e.needs.map(escapeHtml).join(', ')}</p>`:''}${e.needText?`<p>${escapeHtml(e.needText)}</p>`:''}<p class="preview-box">${escapeHtml(e.iStatement)}</p><button class="btn btn-ghost btn-small" onclick="deleteEntry(${i})">Usuń wpis</button></div>`).join('');
 }
 function deleteEntry(i){ state.entries.splice(i,1); saveState(); }
 function exportJournal(){
@@ -275,7 +275,7 @@ function completeExpress(){
 
 // Simulations
 function renderSims(){
-  document.getElementById('simGrid').innerHTML = SIMULATIONS.map((s,i)=>`<div class="sim-card" onclick="startSim(${i})"><h4>${s.icon} ${s.title}${s.advanced?' <span class="sim-badge">rozbudowana</span>':''}</h4><p>${s.short}</p><span class="muted">Wejdź w symulację →</span></div>`).join('');
+  document.getElementById('simGrid').innerHTML = SIMULATIONS.map((s,i)=>`<div class="sim-card" onclick="startSim(${i})"><h4>${escapeHtml(s.icon)} ${escapeHtml(s.title)}${s.advanced?' <span class="sim-badge">rozbudowana</span>':''}</h4><p>${escapeHtml(s.short)}</p><span class="muted">Wejdź w symulację →</span></div>`).join('');
 }
 function startSim(i){
   state.simIndex=i; state.simStep=0; state.simLog=[];
@@ -288,9 +288,9 @@ function renderSimStep(){
   const sim=SIMULATIONS[state.simIndex];
   const step=sim.steps[state.simStep];
   document.getElementById('simStepLabel').textContent=`Krok ${state.simStep+1} z ${sim.steps.length}`;
-  document.getElementById('simStory').innerHTML=`<strong>${sim.icon} ${sim.title}</strong><br>${sim.story}`;
-  document.getElementById('simQuestion').innerHTML=`<strong>Milo pyta:</strong> ${step.q}`;
-  document.getElementById('simChoices').innerHTML=step.choices.map((c,i)=>`<button class="choice-btn" onclick="chooseSim(${i})">${c.t}</button>`).join('');
+  document.getElementById('simStory').innerHTML=`<strong>${escapeHtml(sim.icon)} ${escapeHtml(sim.title)}</strong><br>${escapeHtml(sim.story)}`;
+  document.getElementById('simQuestion').innerHTML=`<strong>Milo pyta:</strong> ${escapeHtml(step.q)}`;
+  document.getElementById('simChoices').innerHTML=step.choices.map((c,i)=>`<button class="choice-btn" onclick="chooseSim(${i})">${escapeHtml(c.t)}</button>`).join('');
   document.getElementById('simReflect').style.display='none';
 }
 function chooseSim(i){
@@ -298,7 +298,7 @@ function chooseSim(i){
   const step=sim.steps[state.simStep];
   const choice=step.choices[i];
   state.simLog.push({step:state.simStep, choice:choice.t, milo:choice.next});
-  document.getElementById('simQuestion').innerHTML=`<strong>Milo:</strong> ${choice.next}`;
+  document.getElementById('simQuestion').innerHTML=`<strong>Milo:</strong> ${escapeHtml(choice.next)}`;
   document.getElementById('simChoices').innerHTML='';
   if(state.simStep < sim.steps.length-1){
     document.getElementById('simChoices').innerHTML=`<button class="btn btn-primary" onclick="state.simStep++; renderSimStep()">Dalej →</button>`;
@@ -345,10 +345,10 @@ function renderChat(){
     el.innerHTML=`<div class="msg milo"><span class="who">Milo</span>Cześć! Jestem Milo, towarzysz z Krainy Odczuwania. Nie jestem terapeutą — jestem tu, aby słuchać i pytać. Nie przejmę Twoich słów i nie zdecyduję za Ciebie. Jak się dziś czujesz? Możesz napisać np. „czuję smutek” albo „nie wiem, co czuję”.</div>`;
     return;
   }
-  el.innerHTML=state.chat.map(m=>`<div class="msg ${m.who}"><span class="who">${m.who==='milo'?'Milo':'Ty'}</span>${escapeHtml(m.text)}</div>`).join('');
+  el.innerHTML=state.chat.map(m=>`<div class="msg ${m.who==='milo'?'milo':'user'}"><span class="who">${m.who==='milo'?'Milo':'Ty'}</span>${escapeHtml(m.text)}</div>`).join('');
   el.scrollTop=el.scrollHeight;
 }
-function escapeHtml(s){ return s.replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function clearChat(){ state.chat=[]; saveState(); renderChat(); }
 function quickPrompt(text){ document.getElementById('chatInput').value=text; document.getElementById('chatForm').requestSubmit(); }
 
@@ -558,7 +558,7 @@ const TTS = {
     if(!sel) return;
     const pl=all.filter(v=>v.lang && v.lang.toLowerCase().startsWith('pl'));
     const list = pl.length?pl:all;
-    sel.innerHTML='<option value="">Automatyczny (polski)</option>'+list.map((v,i)=>`<option value="${v.name}">${v.name} (${v.lang})</option>`).join('');
+    sel.innerHTML='<option value="">Automatyczny (polski)</option>'+list.map((v,i)=>`<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)} (${escapeHtml(v.lang)})</option>`).join('');
   },
   speak(text){
     if(!aiSettings.voiceEnabled) return;
@@ -811,8 +811,8 @@ function renderLibraryWheel(q){
   if(!box || typeof WHEEL_WORDS === 'undefined') return;
   const list = q ? WHEEL_WORDS.filter(w =>
       w.word.includes(q) || w.familyName.toLowerCase().includes(q) || w.cluster.toLowerCase().includes(q)) : WHEEL_WORDS;
-  if(!list.length){ box.innerHTML = '<p class="muted">Brak słów pasujących do „' + q + '”.</p>'; return; }
+  if(!list.length){ box.innerHTML = '<p class="muted">Brak słów pasujących do „' + escapeHtml(q) + '”.</p>'; return; }
   const shown = list.slice(0, 60);
-  box.innerHTML = shown.map(w => `<div class="wheel-word"><b>${w.word}</b><span>${w.cluster}</span><i>${w.familyName}</i></div>`).join('') +
+  box.innerHTML = shown.map(w => `<div class="wheel-word"><b>${escapeHtml(w.word)}</b><span>${escapeHtml(w.cluster)}</span><i>${escapeHtml(w.familyName)}</i></div>`).join('') +
     (list.length > shown.length ? `<p class="muted small">Pokazano ${shown.length} z ${list.length} słów — doprecyzuj wyszukiwanie.</p>` : '');
 }
