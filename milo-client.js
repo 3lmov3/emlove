@@ -40,8 +40,12 @@ const MiloClient={
   try{const r=await fetch(c.supabaseUrl.replace(/\/$/,'')+'/functions/v1/milo',{method:'POST',headers:{'Content-Type':'application/json','apikey':c.supabaseAnonKey,'Authorization':'Bearer '+token},body:JSON.stringify({type,...payload}),signal:ac.signal});if(!r.ok)throw Error('Milo chwilowo niedostępny');return await r.json();}finally{clearTimeout(timer);}
  },
  async contexts(){const data=await this.request('contexts');if(!Array.isArray(data.contexts)||data.contexts.length!==5)throw Error('Nieprawidłowa odpowiedź');return data.contexts.map(x=>typeof x==='string'?x.trim().slice(0,160):'');},
- async feedback(text){
+ async localFeedback(text){
   if(/samobój|zabi(ję|c|ć) się|odebrać sobie życie|nie chcę żyć|skrzywdzić siebie|samookalecz/i.test(text))return {local:true,text:'Przykro mi, że przeżywasz coś tak trudnego. Czy możesz teraz skontaktować się z kimś zaufanym? Jeśli grozi Ci bezpośrednie niebezpieczeństwo, zadzwoń pod 112. Możesz też zadzwonić pod 116 123.'};
+  return {local:true,text:'Dziękuję, że to zapisujesz. Który fragment najlepiej oddaje to, co chcesz wyrazić?'};
+ },
+ async feedback(text){
+  if(/samobój|zabi(ję|c|ć) się|odebrać sobie życie|nie chcę żyć|skrzywdzić siebie|samookalecz/i.test(text))return this.localFeedback(text);
   if(!this.configured())return {local:true,text:'Dziękuję, że to zapisujesz. Który fragment najlepiej oddaje to, co chcesz wyrazić?'};
   try{const data=await this.request('feedback',{text});if(typeof data.text!=='string'||!data.text.trim())throw Error('Pusta odpowiedź');return {local:false,text:data.text.trim().slice(0,1200)};}
   catch(e){return {local:true,text:'Nie udało mi się teraz połączyć. Który fragment Twoich słów jest dla Ciebie najważniejszy?'};}
