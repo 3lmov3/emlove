@@ -1,0 +1,2 @@
+[functions.milo]
+verify_jwt = true
