@@ -11,10 +11,10 @@
 window.EMLOVE_CONFIG = {
   // Adres Supabase i publiczny klucz anon/publishable (NIE klucz OpenRouter ani service_role).
   // Wymaga wdrożenia funkcji i ustawienia sekretów po stronie serwera.
-  supabaseUrl: '',
-  supabaseAnonKey: '',
+  supabaseUrl: 'https://dwvcdpipjgpgcjycjcpt.supabase.co',
+  supabaseAnonKey: 'sb_publishable_I40qrtffaEh-pl0hbGS0NQ_QRWzsMLN',
   // Publiczny site key Turnstile; sekret Turnstile jest wyłącznie w Supabase.
-  turnstileSiteKey: '',
+  turnstileSiteKey: '0x4AAAAAAGLoHxGNlKV3AxUL',
   // Adres pośrednika zgodnego z OpenAI (endpoint /chat/completions).
   // Przykłady:
   //   Supabase Edge Function: 'https://twojprojekt.supabase.co/functions/v1/ai'
