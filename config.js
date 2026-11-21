@@ -13,6 +13,8 @@ window.EMLOVE_CONFIG = {
   // Wymaga wdrożenia funkcji i ustawienia sekretów po stronie serwera.
   supabaseUrl: '',
   supabaseAnonKey: '',
+  // Publiczny site key Turnstile; sekret Turnstile jest wyłącznie w Supabase.
+  turnstileSiteKey: '',
   // Adres pośrednika zgodnego z OpenAI (endpoint /chat/completions).
   // Przykłady:
   //   Supabase Edge Function: 'https://twojprojekt.supabase.co/functions/v1/ai'

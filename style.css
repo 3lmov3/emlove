@@ -388,3 +388,8 @@ html,body{max-width:100%;overflow-x:hidden}
 .ex-extra{background:#FFF8F0;border:1px solid #F2E2CE;border-radius:8px;padding:9px 11px;font-size:.84rem;color:#7A5A3A;margin:6px 0 10px;line-height:1.5}
 .award-image{display:block;width:min(220px,85%);height:auto;border-radius:18px;margin:16px auto}
 .wheel-reference{display:grid;gap:8px;width:100%}.wheel-reference .choice-btn{width:100%}
+
+/* Jednorazowa weryfikacja przy tworzeniu sesji */
+.milo-captcha-overlay{position:fixed;inset:0;z-index:9999;background:rgba(4,22,20,.7);display:flex;align-items:center;justify-content:center;padding:16px}
+.milo-captcha-card{width:min(440px,100%);max-height:90vh;overflow:auto;border-radius:16px;background:#fff;padding:22px;box-shadow:0 14px 45px #0005}
+.milo-captcha-card h2{margin-top:0}.milo-captcha-card p{line-height:1.5;font-size:.92rem}.milo-captcha-card #milo-captcha-widget{min-height:70px;margin:12px 0}
