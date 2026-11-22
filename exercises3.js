@@ -5,7 +5,7 @@ const TRAIN_WHEEL = [
  {name:'Lękliwy',groups:[['Przestraszony',['bezsilny','zastraszony']],['Niespokojny',['przytłoczony','zmartwiony']],['Niepewny',['niewystarczający','podrzędny']],['Uległy',['bezwartościowy','nieistotny']],['Odrzucony',['wyobcowany','niepasujący']],['Zastraszony',['nerwowy','zdemaskowany']]]},
  {name:'Rozgniewany',groups:[['Rozczarowany',['zdradzony','urażony']],['Upokorzony',['zlekceważony','ośmieszony']],['Nienawistny',['zgorszony','zbezczeszczony']],['Zagrożony',['niepewny','zazdrosny']],['Agresywny',['wrogo nastawiony','sprowokowany']],['Sfrustrowany',['oburzony','poirytowany']],['Zdystansowany',['zamknięty w sobie','podejrzliwy']],['Krytyczny',['sceptyczny','sarkastyczny']]]},
  {name:'Zniesmaczony',groups:[['Nieprzychylny',['niechętny','krytykancki']],['Rozczarowany',['zbuntowany','antypatyczny']],['Czujący się podle',['podburzony','obrzydzony']],['Stroniący',['czujący odrazę','niepewny']]]},
- {name:'Smutny',groups:[['Samotny',['odizolowany','porzucony']],['Zraniony',['prześladowany','słabowity','rozczarowany','zlekceważony']],['Zrozpaczony',['w bólu, w żałobie','bezsilny']],['Winny',['zawstydzony','skruszony']],['Przygnębiony',['wyczerpany','gorszy od innych']]]},
+ {name:'Smutny',groups:[['Samotny',['odizolowany','porzucony']],['Zraniony',['prześladowany','słabowity']],['Zrozpaczony',['w bólu, w żałobie','bezsilny']],['Winny',['zawstydzony','skruszony']],['Przygnębiony',['wyczerpany','gorszy od innych']],['Zraniony',['rozczarowany','zlekceważony']]]},
  {name:'Szczęśliwy',groups:[['Żartobliwy',['zuchwały','pobudzony']],['Zadowolony',['wolny','wesoły']],['Zainteresowany',['zaciekawiony','dociekliwy']],['Dumny',['ważny','pewny siebie']],['Akceptowany',['szanowany','doceniony']],['Pełen siły',['odważny','kreatywny']],['Spokojny',['kochający','wdzięczny']],['Czujący bliskość',['czuły','figlarny']],['Optymistyczny',['pełen nadziei','zainspirowany']]]},
  {name:'Zaskoczony',groups:[['Podekscytowany',['ochoczy','energiczny']],['Zdumiony',['zadziwiony','zatrwożony']],['Zmieszany',['rozczarowany','zakłopotany']],['Przestraszony',['skonsternowany','wstrząśnięty']]]}
 ];
@@ -24,7 +24,7 @@ function makeWheelPool(level){
   } else if(level===2){
    for(const word of words){
     if(f.groups.filter(x=>x[1].includes(word)).length!==1) continue;
-    const options=shuffleWheel([g,...shuffleWheel(f.groups.filter(x=>x[0]!==g).map(x=>x[0])).slice(0,3)]);
+    const options=shuffleWheel([g,...shuffleWheel([...new Set(f.groups.filter(x=>x[0]!==g).map(x=>x[0]))]).slice(0,3)]);
     pool.push({q:`W obszarze „${f.name}”: do której podgrupy na kole należy słowo „${word}”?`,options,answer:options.indexOf(g),path:`${f.name} → ${g} → ${word}`});
    }
   } else {
@@ -96,7 +96,7 @@ function initWheelCourse(){
  const switchTab=(isCourse)=>{document.getElementById('coursePanel').style.display=isCourse?'':'none';document.getElementById('expressPanel').style.display=isCourse?'none':'';document.getElementById('courseTab').classList.toggle('active',isCourse);document.getElementById('expressTab').classList.toggle('active',!isCourse);};
  document.getElementById('courseTab').onclick=()=>switchTab(true);document.getElementById('expressTab').onclick=()=>switchTab(false);
  const wheel=document.getElementById('wheelSvg');
- if(wheel){wheel.innerHTML=`<div class="wheel-reference">${TRAIN_WHEEL.map((f,i)=>`<button class="choice-btn" onclick="showTrainingFamily(${i})">${escWheel(f.name)} →</button>`).join('')}</div>`;}
+ if(wheel){wheel.innerHTML=`<div class="wheel-reference"><a href="wheel-reference.jpg" target="_blank" rel="noopener noreferrer" aria-label="Powiększ oryginalne koło emocji"><img src="wheel-reference.jpg" alt="Oryginalne koło emocji; obszary i słowa są też dostępne na liście poniżej" style="display:block;width:100%;height:auto;border-radius:10px"></a><p class="muted small">Oryginalna grafika · w środku: Łaska. Kliknij obraz, by go powiększyć.</p>${TRAIN_WHEEL.map((f,i)=>`<button class="choice-btn" onclick="showTrainingFamily(${i})">${escWheel(f.name)} →</button>`).join('')}</div>`;}
  const detail=document.getElementById('wheelDetail');if(detail)detail.innerHTML='<h3>Twoje koło emocji</h3><p>Wybierz grupę, aby zobaczyć jej podgrupy i słowa. To mapa do poznawania języka emocji, a nie jedyny sposób odczuwania.</p>';
  if(typeof WHEEL_WORDS!=='undefined'){WHEEL_WORDS.splice(0,WHEEL_WORDS.length,...TRAIN_WHEEL.flatMap(f=>f.groups.flatMap(g=>g[1].map(word=>({word,familyId:f.name,familyName:f.name,cluster:g[0],color:'#0F8C86'})))));if(typeof renderLibraryWheel==='function')renderLibraryWheel('');}
  WheelCourse.render();
