@@ -48,6 +48,47 @@ const NEED_EXAMPLES=[
  ['Chcę wcześniej wiedzieć, jakie są ustalenia, żebym mógł się przygotować.','przewidywalności',['bycia wysłuchaną lub wysłuchanym','odpoczynku','bliskości']],
  ['Chcę sama wybrać, czy chcę o tym rozmawiać.','autonomii',['bycia wysłuchaną lub wysłuchanym','odpoczynku','jasności i informacji']],
 ];
+// Porównujemy wyłącznie własne słowa tej samej osoby, nie jej sytuację ani ciało.
+const INTENSITY_EXAMPLES = [
+ ['Czuję lekki smutek.','Czuję bardzo silny smutek.'],
+ ['Jest we mnie trochę radości.','Czuję ogromną radość.'],
+ ['Czuję niewielki niepokój.','Czuję bardzo silny niepokój.'],
+ ['Odczuwam lekką złość.','Odczuwam bardzo silną złość.'],
+ ['Czuję odrobinę napięcia.','Czuję duże napięcie.'],
+ ['Czuję lekki strach.','Czuję bardzo silny strach.'],
+ ['Jestem trochę rozczarowana.','Jestem bardzo mocno rozczarowana.'],
+ ['Czuję niewielką frustrację.','Czuję ogromną frustrację.'],
+ ['Jestem trochę podekscytowany.','Jestem bardzo mocno podekscytowany.'],
+ ['Czuję lekką irytację.','Czuję bardzo silną irytację.'],
+ ['Czuję niewielką zazdrość.','Czuję bardzo silną zazdrość.'],
+ ['Czuję odrobinę nadziei.','Czuję ogromną nadzieję.'],
+ ['Jestem lekko zaskoczona.','Jestem bardzo mocno zaskoczona.'],
+ ['Czuję niewielki wstyd.','Czuję bardzo silny wstyd.'],
+ ['Czuję się trochę samotnie.','Czuję się bardzo samotnie.'],
+ ['Jestem trochę zmartwiony.','Jestem bardzo mocno zmartwiony.'],
+ ['Odczuwam lekką wdzięczność.','Odczuwam ogromną wdzięczność.'],
+ ['Czuję niewielką bezsilność.','Czuję bardzo silną bezsilność.'],
+ ['Jestem trochę zakłopotana.','Jestem bardzo mocno zakłopotana.'],
+ ['Czuję niewielki zachwyt.','Czuję ogromny zachwyt.'],
+];
+function makeIntensityTask(){
+ const [weaker,stronger]=shuffleWheel(INTENSITY_EXAMPLES)[0];
+ const higher=Math.random()<.5, correct=higher?stronger:weaker;
+ return {kind:'natezenie',q:`Ta sama osoba opisuje swoje odczucie na dwa sposoby. W której wypowiedzi wyraża ${higher?'silniejsze':'słabsze'} odczucie?`,
+  meta:{intensityVersion:2,weaker,stronger,higher},...ladderOptions(correct,[higher?weaker:stronger],2),
+  path:`Wypowiedź tej osoby: „${correct}”`,
+  explain:'Odpowiedź wynika ze słów tej osoby. Każdy może inaczej opisywać siłę swoich odczuć.'};
+}
+// Tylko stary liczbowy wariant, nie dowolne zadanie bez metadanych.
+function isOldIntensityTask(t){return !!t && t.kind==='natezenie' && typeof t.q==='string' && /\d+\/10/.test(t.q) && Array.isArray(t.options) && t.options.length===2 && t.options.every(x=>/^\d+$/.test(String(x)));}
+function migrateUnansweredIntensity(round){
+ if(!round||round.phase!=='quiz'||!Array.isArray(round.tasks)||!Array.isArray(round.answers))return false;
+ let changed=false;
+ for(let i=round.answers.length;i<round.tasks.length;i++)if(isOldIntensityTask(round.tasks[i])){round.tasks[i]=makeIntensityTask();changed=true;}
+ return changed;
+}
+function ladderTaskKey(t){return t.q+'\n'+(t.kind==='natezenie'?[...t.options].sort().join('\n'):'');}
+
 function ladderMakeTask(kind,level){
  const count=level===1?3:4;
  if(kind==='rozpoznaj'){let t=shuffleWheel(makeWheelPool(level))[0];return {...t,kind,explain:'To umiejscowienie słów na przesłanym kole. Nie oznacza jednej właściwej reakcji na daną sytuację.'};}
@@ -71,17 +112,14 @@ function ladderMakeTask(kind,level){
  if(kind==='potrzeba'){
   const [s,correct,wrong]=shuffleWheel(NEED_EXAMPLES)[0];return {kind,q:`Osoba mówi: „${s}” Jaką potrzebę wyraża własnymi słowami?`,...ladderOptions(correct,wrong,count),path:`Wyrażona potrzeba: ${correct}`,explain:'Odczytujemy potrzebę z wypowiedzi tej osoby, nie przypisujemy potrzeby automatycznie do emocji.'};
  }
- let a=1+Math.floor(Math.random()*4),b=a+1+Math.floor(Math.random()*(9-a)); let label=shuffleWheel(['napięcie','radość','niepokój','złość','smutek'])[0];let higher=Math.random()<.5;let correct=String(higher?b:a);
- let wrong=[String(higher?a:b),...shuffleWheel(Array.from({length:10},(_,i)=>String(i+1)).filter(v=>v!==String(a)&&v!==String(b)))];
- // Odpowiedzi wyłącznie dwie, by porównanie dotyczyło dokładnie dwóch pomiarów.
- return {kind,q:`Ta sama osoba określa siłę odczucia „${label}”: rano ${a}/10, wieczorem ${b}/10. Jaką wartość sama przypisała ${higher?'silniejszemu':'słabszemu'} odczuciu?`,...ladderOptions(correct,[String(higher?a:b)],2),path:`Według skali tej osoby: ${correct}/10`,explain:'Natężenie opisuje sama osoba. Skala jest indywidualna; te same słowa nie muszą mieć tej samej siły u wszystkich.'};
+ return makeIntensityTask();
 }
 function ladderMakeRound(c,level){
  if(!Array.isArray(c.plans))c.plans=[];
  if(!Array.isArray(c.plans[level-1])||c.plans[level-1].length!==LIMITS[level-1])c.plans[level-1]=ladderPlan(level);
  const n=Math.min(5,LIMITS[level-1]-c.done[level-1]);const kinds=c.plans[level-1].slice(c.done[level-1],c.done[level-1]+n);
  if(!Array.isArray(c.seen))c.seen=[];const chosen=[];
- for(const kind of kinds){let t;for(let attempt=0;attempt<40;attempt++){t=ladderMakeTask(kind,level);if(!c.seen.includes(t.q)&&!chosen.some(x=>x.q===t.q))break;}chosen.push(t);c.seen.push(t.q);}
+ for(const kind of kinds){let t;for(let attempt=0;attempt<40;attempt++){t=ladderMakeTask(kind,level);if(!c.seen.includes(ladderTaskKey(t))&&!chosen.some(x=>ladderTaskKey(x)===ladderTaskKey(t)))break;}chosen.push(t);c.seen.push(ladderTaskKey(t));}
  c.seen=c.seen.slice(-120);return chosen;
 }
 window.LADDER_LABEL=LADDER_LABEL;

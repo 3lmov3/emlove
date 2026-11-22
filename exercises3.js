@@ -39,7 +39,7 @@ function makeWheelPool(level){
  return pool;
 }
 function newCycle(){return {started:null,done:[0,0,0],correct:[0,0,0],round:null};}
-function loadCycle(){let c;try{c=JSON.parse(localStorage.getItem(CYCLE_KEY));}catch(e){} if(!c||(c.started!==null&&!Number.isFinite(c.started))||!Array.isArray(c.done)||!Array.isArray(c.correct)||(c.started!==null&&Date.now()>=c.started+DURATION)){c=newCycle();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));} return c;}
+function loadCycle(){let c;try{c=JSON.parse(localStorage.getItem(CYCLE_KEY));}catch(e){} if(!c||(c.started!==null&&!Number.isFinite(c.started))||!Array.isArray(c.done)||!Array.isArray(c.correct)||(c.started!==null&&Date.now()>=c.started+DURATION)){c=newCycle();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));} if(migrateUnansweredIntensity(c.round))localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); return c;}
 function saveCycle(c){localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); updateHeartsSidebar();}
 function currentLevel(c){return LIMITS.findIndex((n,i)=>c.done[i]<n)+1 || 4;}
 function updateHeartsSidebar(){const el=document.getElementById('statHearts');if(el){const c=loadCycle();el.textContent=c.correct.reduce((a,b)=>a+b,0);}}
@@ -71,7 +71,7 @@ const WheelCourse={
   }
   saveCycle(c);this.render();
  },
- retry(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return; c.round={...c.round,answers:[],phase:'quiz',practice:true};saveCycle(c);this.render();},
+ retry(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return; c.round={...c.round,answers:[],phase:'quiz',practice:true};migrateUnansweredIntensity(c.round);saveCycle(c);this.render();},
  next(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return; c.round=null;saveCycle(c);this.render();},
  render(){
   const el=document.getElementById('wheelCourse');if(!el)return;const c=loadCycle(),r=c.round,level=currentLevel(c);updateHeartsSidebar();
