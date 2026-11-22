@@ -140,6 +140,28 @@ const ANIMALS = [
     hard:'Empatia vs własne standardy' },
 ];
 
+// Pytania otwarte: symbol nie przypisuje cech użytkownikowi.
+const ANIMAL_REFLECTIONS = {
+  "wyspa": "Co przychodzi Ci na myśl, kiedy myślisz o zabawie lub bliskości?",
+  "sowa": "Jakie skojarzenia budzą w Tobie cisza i uważność?",
+  "lis": "Jakie znaczenie ma dla Ciebie ciekawość?",
+  "wilk": "Co przychodzi Ci na myśl, gdy myślisz o zaufaniu i więzi?",
+  "kot": "Jak rozumiesz przestrzeń dla siebie?",
+  "jelen": "Co kojarzy Ci się z delikatnością?",
+  "jez": "Jakie znaczenie mają dla Ciebie granice?",
+  "delfin": "Co przychodzi Ci na myśl, gdy myślisz o kontakcie z innymi?",
+  "zolw": "Jakie skojarzenia budzi w Tobie własne tempo?",
+  "motyl": "Co przychodzi Ci na myśl, gdy myślisz o zmianie?",
+  "pszczola": "Jak rozumiesz współpracę?",
+  "paw": "Co dla Ciebie oznacza pokazywanie siebie innym?",
+  "niedzwiedz": "Jakie skojarzenia budzi w Tobie odpoczynek?",
+  "pingwin": "Co dla Ciebie oznacza bycie częścią grupy?",
+  "krolik": "Jakie skojarzenia masz z uważnością na otoczenie?",
+  "aksolotl": "Co przychodzi Ci na myśl, kiedy słyszysz słowo «regeneracja»?",
+  "orzel": "Jakie znaczenie ma dla Ciebie patrzenie na coś z innej perspektywy?"
+};
+function animalReflection(id) { return ANIMAL_REFLECTIONS[id] || 'Jakie skojarzenia budzi w Tobie ten symbol?'; }
+
 function bfScoreFromAnswers(answers){
   // answers: array of 1..5 (index matches BF_ITEMS)
   const sums = { O:[], C:[], E:[], A:[], N:[] };
@@ -171,10 +193,7 @@ function matchAnimals(profile){
 }
 
 function profileSummary(profile){
-  const order = Object.entries(profile).sort((a,b)=>b[1]-a[1]);
-  const top = BIG_FIVE_DIMS[order[0][0]].name;
-  const low = BIG_FIVE_DIMS[order[4][0]].name;
-  return `Najbardziej wyróżnia Cię ${top.toLowerCase()}, a najmniej — ${low.toLowerCase()}.`;
+  return 'Zestawienie opiera się na odpowiedziach w tym ćwiczeniu. Nie jest diagnozą ani porównaniem z innymi osobami.';
 }
 
 // ================= UI =================
@@ -182,7 +201,7 @@ const BF_STORE_KEY = 'emlove_personality';
 let bfSession = { i: 0, answers: [], active: false };
 
 if (typeof TITLES !== 'undefined') {
-  TITLES.personality = ['Twoja osobowość 🐾', 'Test wielkiej piątki i Twój zwierzę-towarzysz — dla refleksji, nie diagnoza.'];
+  TITLES.personality = ['Twoja osobowość 🐾', 'Ćwiczenie inspirowane pięcioma wymiarami osobowości — dla refleksji, nie diagnoza.'];
 }
 
 function bfLoadProfile() {
@@ -203,13 +222,13 @@ function bfRenderIntro() {
   const root = document.getElementById('bfRoot');
   root.innerHTML = `
     <div class="card">
-      <span class="badge">🐾 30 podskal · 5 wymiarów · ok. 4 minuty</span>
+      <span class="badge">🐾 30 zdań · 5 wymiarów · ok. 4 minuty</span>
       <h2 style="margin:12px 0 8px">Poznaj swój sposób przeżywania świata</h2>
       <p class="muted">Odpowiesz na 30 krótkich zdań. Nie ma odpowiedzi lepszych ani gorszych — chodzi o to, jak jest u Ciebie, nie jak „powinno być”.</p>
       <div class="result-hint" style="background:#F1FBFA;border:1px solid #D8EDEA;border-radius:10px;padding:14px;margin:14px 0;font-size:.92rem;line-height:1.6;color:#0A6B66">
-        <b>Na końcu poznasz zwierzę-towarzysza</b> — symbol Twojego profilu. Zwierzę nie jest etykietą ani diagnozą: to lustro, z którym łatwiej rozmawiać o sobie. Możesz je zmienić w każdej chwili, powtarzając test.
+        <b>Na końcu zobaczysz zwierzę-towarzysza</b> — symbol dobrany na podstawie odpowiedzi. To zaproszenie do refleksji, a nie opis osoby ani diagnoza. Możesz powtórzyć test w dowolnej chwili.
       </div>
-      <p class="muted small">To narzędzie edukacyjne inspirowane strukturą testu wielkiej piątki (30 podskal). Nie zastępuje diagnozy psychologicznej. Wynik zapisuje się tylko w Twojej przeglądarce.</p>
+      <p class="muted small">To ćwiczenie edukacyjne inspirowane pięcioma wymiarami osobowości. Nie zastępuje diagnozy psychologicznej. Wynik zapisuje się tylko w tej przeglądarce.</p>
       <button class="btn btn-primary" onclick="bfStart()">Zacznij test 🐾</button>
     </div>`;
 }
@@ -301,22 +320,20 @@ function bfRenderResult(record, justFinished = false) {
             <div class="muted small" style="margin-top:4px">${dim.desc}</div>
           </div>`;
         }).join('')}
-        <p class="muted small" style="margin-top:10px">Wynik to opis tendencji, nie diagnoza. Zmienia się z czasem i sytuacją.</p>
+        <p class="muted small" style="margin-top:10px">Wartości wynikają z odpowiedzi w tym ćwiczeniu. Nie stanowią diagnozy ani porównania z innymi osobami.</p>
       </div>
 
       <div>
         <div class="animal-card">
           <div class="animal-emoji">${animal.emoji}</div>
-          <div class="animal-key">Twój zwierzę-towarzysz</div>
+          <div class="animal-key">Zwierzę-towarzysz</div>
           <div class="animal-name">${animal.name}</div>
-          <p class="animal-line">${animal.line}</p>
-          <div class="animal-row"><b>Siła:</b><span>${animal.strengths}</span></div>
-          <div class="animal-row"><b>Troska:</b><span>${animal.care}</span></div>
-          <div class="animal-row"><b>Wyzwanie:</b><span>${animal.hard}</span></div>
+          <p class="animal-line">Symbol dobrany z odpowiedzi — zaproszenie do refleksji, nie opis osoby.</p>
+          <div class="animal-row"><b>Milo pyta:</b><span>${animalReflection(animal.id)}</span></div>
         </div>
         <div class="card" style="margin-top:12px">
-          <h3 style="margin-top:0">Inne bliskie zwierzęta</h3>
-          <p class="muted small">Twój profil jest pomiędzy tymi zwierzętami — możesz się w nich odnaleźć.</p>
+          <h3 style="margin-top:0">Inne symbole dobrane z odpowiedzi</h3>
+          <p class="muted small">To kolejne symbole wybrane przez ten sam algorytm; nie musisz się z nimi utożsamiać.</p>
           <div class="animal-alt">
             ${matches.slice(1).map(a => `<div class="animal-chip"><span>${a.emoji}</span>${a.name}</div>`).join('')}
           </div>
@@ -325,7 +342,7 @@ function bfRenderResult(record, justFinished = false) {
           <h3 style="margin-top:0">Co dalej?</h3>
           <div style="display:flex;flex-wrap:wrap;gap:8px">
             <button class="btn btn-primary" onclick="bfAskMilo()">💬 Zapytaj Milo o mój profil</button>
-            <button class="btn btn-secondary" onclick="bfGoExercise()">🧩 Dopasowane ćwiczenie</button>
+            <button class="btn btn-secondary" onclick="bfGoExercise()">🧩 Przejdź do ćwiczeń</button>
             <button class="btn btn-ghost" onclick="bfRestart()">↻ Powtórz test</button>
           </div>
           <div id="bfMiloOut" class="preview-box" style="display:none;margin-top:12px"></div>
@@ -334,50 +351,27 @@ function bfRenderResult(record, justFinished = false) {
     </div>
 
     <div class="card" style="margin-top:14px">
-      <h3 style="margin-top:0">🐾 Twoje zwierzę jako codzienne narzędzie</h3>
-      <p class="muted">Zwierzę nie mówi, kim jesteś. Mówi, jak możesz o siebie zadbać — i o co warto zapytać w check-inie.</p>
-      <ul class="muted" style="line-height:1.8;padding-left:18px">
-        <li><b>Rano:</b> „Czego dzisiaj potrzebuje ${animal.my}?”</li>
-        <li><b>Wieczorem:</b> „Co było dziś dla mnie trudne?” — i zapisz w dzienniku.</li>
-        <li><b>W kryzysie:</b> przypomnij sobie: ${animal.care}</li>
-      </ul>
-      <p class="muted small">Test inspirowany strukturą wielkiej piątki (30 podskal). Emlove nie diagnozuje. W kryzysie: 116 123 · 112.</p>
+      <p class="muted small">Emlove jest narzędziem edukacyjnym dla dorosłych (18+), nie terapią. Pomoc w Polsce: 116 123 · 116 111 · 112.</p>
     </div>`;
 }
 
 function bfRestart() {
-  localStorage.removeItem(BF_STORE_KEY);
-  bfSession = { i: 0, answers: [], active: false };
-  bfRenderIntro();
+  // Zachowaj poprzedni wynik, dopóki nowy test nie zostanie ukończony.
+  bfStart();
 }
 
 function bfGoExercise() {
   goTo('exercises');
 }
 
-async function bfAskMilo() {
+function bfAskMilo() {
   const out = document.getElementById('bfMiloOut');
   const record = bfLoadProfile();
   if (!record || !out) return;
-  const animal = ANIMALS.find(a => a.id === record.animal);
+  // Odpowiedź lokalna: bez wysyłania odpowiedzi i profilu do internetu.
   out.style.display = 'block';
-  out.textContent = 'Milo myśli…';
-
-  const hasAI = (typeof aiSettings !== 'undefined') && aiSettings.enabled;
-  if (!hasAI) {
-    out.innerHTML = `<b>Milo:</b> Widzę, że blisko Ci do ${animal.gen} — ${animal.key.toLowerCase()}. Zamiast mówić Ci, co robić, zapytam: kiedy ostatnio czułeś/czułaś się jak ${animal.name.toLowerCase()} w dobrym tego słowa znaczeniu? I co wtedy było obecne?`;
-    return;
-  }
-  try {
-    const p = record.profile;
-    const res = await callAI([
-      { role: 'system', content: (typeof MILO_SYSTEM_PROMPT !== 'undefined' ? MILO_SYSTEM_PROMPT : '') + '\nKontekst: użytkownik zrobił test osobowości. Wynik (0-100): Otwartość ' + p.O + ', Sumienność ' + p.C + ', Ekstrawersja ' + p.E + ', Ugodowość ' + p.A + ', Wrażliwość emocjonalna ' + p.N + '. Symbol: ' + animal.name + '. Nie interpretuj wyniku jak diagnozy, nie mów "jesteś typem...". Zadaj jedno pytanie łączące profil z emocjami.' },
-      { role: 'user', content: 'Zrobiłem/am test osobowości. Co mogę z tego wyniku zrobić dla siebie?' }
-    ]);
-    out.innerHTML = '<b>Milo:</b> ' + escapeHtml(res);
-  } catch (e) {
-    out.innerHTML = '<b>Milo:</b> Nie mam teraz połączenia z modelem, ale zapytam po swojemu: co w Twoim profilu wydaje Ci się najbardziej prawdziwe — i co najmniej?';
-  }
+  const shown = record.profile ? matchAnimals(record.profile)[0] : null;
+  out.textContent = 'Milo: ' + animalReflection(shown ? shown.id : record.animal);
 }
 
 // init
