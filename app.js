@@ -625,6 +625,32 @@ async function callAI(messages, opts={}){
       history:_history,
     });
   }
+  // 2) Własny endpoint z config.js — jeśli administrator go ustawił.
+  if(aiSettings.enabled && aiSettings.baseUrl){
+    const base=(aiSettings.baseUrl||'').replace(/\/$/,'');
+    const url=base+'/chat/completions';
+    const headers={'Content-Type':'application/json'};
+    if(aiSettings.key) headers['Authorization']='Bearer '+aiSettings.key;
+    const body={model:aiSettings.model, messages, temperature: aiSettings.temp ?? 0.7, ...opts};
+    const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
+    if(!res.ok){
+      const txt=await res.text().catch(()=> '');
+      throw new Error(`Milo nie mógł odpowiedzieć (błąd ${res.status}): ${txt.slice(0,300)}`);
+    }
+    const data=await res.json();
+    return data.choices?.[0]?.message?.content || '';
+  }
+
+  // 3) Klucz administratora przez funkcję Supabase — wystarczy zalogowanie.
+  if(window.EmloveOnline && window.EmloveAuth && window.EmloveAuth.currentUser()){
+    const _last=messages[messages.length-1] || {content:''};
+    const _hist=messages.slice(0,-1)
+      .filter(m=>m.role!=='system')
+      .map(m=>({role:m.role, content:m.content}));
+    return await window.EmloveOnline.ask(_last.content, _hist);
+  }
+
+  if(window.EmloveOnline) throw new Error('login_required');
   if(!aiSettings.enabled) throw new Error('Pełny Milo nie jest włączony. Włącz go w ⚙️ Ustawieniach.');
   const base=(aiSettings.baseUrl||'').replace(/\/$/,'');
   const url=base+'/chat/completions';
@@ -728,7 +754,8 @@ async function summarizeWithAI(){
   const box=document.getElementById('aiSummary');
   if(!state.entries.length){ alert('Najpierw zrób check-in, żeby Milo miał co podsumować.'); return; }
   const _byok = window.EmloveProviders && window.EmloveProviders.activeProvider()!=='admin';
-  if(!aiSettings.enabled && !_byok){ alert('Ta funkcja wymaga Milo online — wybierz własny klucz w „Klucze API” albo poczekaj, aż administrator włączy klucz główny.'); return; }
+  const _onlineReady = !!(window.EmloveOnline && window.EmloveAuth && window.EmloveAuth.currentUser());
+  if(!aiSettings.enabled && !_byok && !_onlineReady){ alert('Ta funkcja wymaga Milo online — zaloguj się albo wybierz własny klucz w „Klucze API”.'); return; }
   box.style.display='block'; box.textContent='⏳ Milo czyta Twój dziennik…';
   try{
     const data=state.entries.slice(0,20).map(e=>`${e.date} ${e.emotion} siła ${e.intensity}: ${e.what||''} | ${e.iStatement||''}`).join('\n');
@@ -1070,34 +1097,32 @@ function updateMiloGate(){
   if(!status || !text) return;
 
   const P = window.EmloveProviders;
-  const byok = P && P.activeProvider() !== 'admin' && !!P.getApiKey(P.activeProvider());
-  const adminOnline = !!(window.EMLOVE_CONFIG && window.EMLOVE_CONFIG.aiEndpoint);
+  const byokProvider = P ? P.activeProvider() : 'admin';
+  const byok = byokProvider !== 'admin' && !!P.getApiKey(byokProvider);
+  const adminAvailable = !!window.EmloveOnline; // funkcja private26 jest dostępna
   const loggedIn = !!(auth && auth.currentUser());
+  const anyOnline = byok || adminAvailable;
 
-  if(byok && loggedIn){
+  if(loggedIn && byok){
     status.textContent = '🌙 Milo — online';
-    text.textContent = 'Milo odpowiada z modelu ' + P.providerById(P.activeProvider()).label +
+    text.textContent = 'Milo odpowiada z modelu ' + P.providerById(byokProvider).label +
       ' na Twoim własnym kluczu. Rozmowy nie są zapisywane u dostawcy.';
     return;
   }
-  if(byok && !loggedIn){
+  if(loggedIn && adminAvailable){
     status.textContent = '🌙 Milo — online';
-    text.textContent = 'Wybrano własny klucz (' + P.providerById(P.activeProvider()).label +
-      '). Zaloguj się, żeby zacząć rozmowę.';
+    text.textContent = 'Milo odpowiada z modelu językowego. Rozmowy nie są zapisywane u dostawcy.';
     return;
   }
-  if(adminOnline){
-    if(loggedIn){
-      status.textContent = '🌙 Milo — online';
-      text.textContent = 'Milo odpowiada z modelu językowego. Rozmowy nie są zapisywane u dostawcy.';
-    } else {
-      status.textContent = '🌙 Milo — online';
-      text.textContent = 'Zaloguj się, aby rozmawiać z Milo online.';
-    }
+  if(!loggedIn && anyOnline){
+    status.textContent = '🌙 Milo — online';
+    text.textContent = byok
+      ? 'Wybrano własny klucz (' + P.providerById(byokProvider).label + '). Zaloguj się, żeby zacząć rozmowę.'
+      : 'Zaloguj się w panelu bocznym, aby rozmawiać z Milo online.';
     return;
   }
   status.textContent = '🌙 Milo — tryb lokalny';
-  text.textContent = 'Milo działa lokalnie, z gotowych zwrotów. Własny klucz API włączysz w „Klucze API”.';
+  text.textContent = 'Milo działa lokalnie, z gotowych zwrotów.';
 }
 
 ensureEntryIds();
