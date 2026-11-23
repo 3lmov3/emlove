@@ -417,3 +417,6 @@ html,body{max-width:100%;overflow-x:hidden}
 @media (max-width:520px){
   .account-actions{flex-direction:column}
 }
+
+.auth-resend{margin:14px 0 0;font-size:13px;line-height:1.5}
+.auth-resend a{color:#0F8C86;font-weight:700;text-decoration:underline}

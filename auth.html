@@ -24,6 +24,7 @@
   button:disabled{opacity:.5}
   .ok{color:#0f766e}
   .err{color:#b91c1c}
+  a{color:var(--teal);font-weight:700}
   @media (prefers-color-scheme:dark){
     :root{--ink:#e6eeec;--muted:#9aaba6;--line:#2b3a36;--bg:#101917}
     main{background:#16211e}
@@ -62,21 +63,51 @@ function say(text, kind) {
   statusEl.className = kind || 'muted';
 }
 
+// Supabase przekierowuje tutaj także w razie BŁĘDU, z parametrami w URL.
+// Bez tego użytkownik widziałby pustą stronę albo 404.
+const ERRORS = {
+  otp_expired: 'Link wygasł lub został już użyty. Wróć do aplikacji i poproś o nowy link.',
+  access_denied: 'Link nie jest już ważny. Wróć do aplikacji i poproś o nowy.',
+  otp_disabled: 'Ten link został już wykorzystany. Wróć do aplikacji i zaloguj się.',
+  validation_failed: 'Link jest uszkodzony. Otwórz go ponownie z maila albo poproś o nowy.',
+  session_not_found: 'Nie znaleziono sesji. Otwórz link ponownie z maila.',
+  user_banned: 'To konto zostało zablokowane.',
+  provider_email_needs_verification: 'Ten adres wymaga potwierdzenia. Sprawdź skrzynkę.',
+};
+
+function showError(code, description) {
+  say(ERRORS[code] || ('Link nie zadziałał. ' + (description || 'Wróć do aplikacji i poproś o nowy.')), 'err');
+}
+
+const query = new URLSearchParams(location.search);
+const hash = new URLSearchParams(location.hash.slice(1));
+
+const qError = query.get('error');
+const qCode = query.get('error_code') || query.get('code');
+const qDesc = query.get('error_description');
+
+const hError = hash.get('error');
+const hCode = hash.get('error_code');
+const hDesc = hash.get('error_description');
+
 if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
   say('Strona nie jest skonfigurowana. Uzupełnij SUPABASE_URL i SUPABASE_ANON_KEY w auth.html.', 'err');
+} else if (qError || hError) {
+  // Błąd od Supabase — nie ma sesji do odczytania.
+  showError(qCode || hCode || qError || hError, qDesc || hDesc);
+} else if (!query.get('code') && !hash.get('access_token')) {
+  say('Ten adres służy do potwierdzania konta. Otwórz go z linku w mailu, który od nas dostałeś.', 'muted');
 } else {
   const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
     auth: {detectSessionInUrl: true, persistSession: true},
   });
 
-  const hash = new URLSearchParams(location.hash.slice(1));
-  const code = new URLSearchParams(location.search).get('code');
   const type = hash.get('type') || '';
 
   try {
     // Obsługa obu przepływów: PKCE (code w query) i implicit (token w hash).
-    if (code) {
-      const {error} = await supabase.auth.exchangeCodeForSession(code);
+    if (query.get('code')) {
+      const {error} = await supabase.auth.exchangeCodeForSession(query.get('code'));
       if (error) throw error;
     }
 
@@ -85,7 +116,7 @@ if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
 
     if (!data.session) {
       say('Link wygasł lub został już użyty. Wróć do aplikacji i poproś o nowy.', 'err');
-    } else if (type === 'recovery') {
+    } else if (type === 'recovery' || data.session.user?.recovery_sent_at) {
       say('Ustaw nowe hasło do swojego konta.');
       formEl.hidden = false;
       pwEl.focus();

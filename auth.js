@@ -146,6 +146,18 @@
     });
   }
 
+  /** Ponownie wysyła link potwierdzający — gdy pierwszy wygasł albo nie doszedł. */
+  async function resendConfirmation(email, captchaToken) {
+    if (!configured()) throw Object.assign(new Error('not_configured'), {code: 'not_configured'});
+    await request('/auth/v1/resend', {
+      body: {
+        type: 'signup',
+        email: email.trim(),
+        gotrue_meta_security: captchaToken ? {captcha_token: captchaToken} : undefined,
+      },
+    });
+  }
+
   /** Usuwa konto przez edge function z service role (klucz anon nie wystarcza). */
   async function deleteAccount() {
     if (!configured()) throw Object.assign(new Error('not_configured'), {code: 'not_configured'});
@@ -240,6 +252,7 @@
     signIn,
     signOut,
     resetPassword,
+    resendConfirmation,
     deleteAccount,
     captcha,
     session: readSession,

@@ -1071,3 +1071,24 @@ if(window.EmloveAuth && window.EmloveAuth.currentUser() && window.EmloveSync){
     .then(()=>window.EmloveSync.flush())
     .catch(()=>{ lastSyncText='Nie udało się zsynchronizować'; renderAccount(); });
 }
+
+// ── Ponowna wysyłka linku potwierdzającego ──────────────────
+// Przydatne, gdy pierwszy link wygasł (Supabase unieważnia go przy kolejnej
+// rejestracji albo po 24 h) albo nie doszedł.
+async function resendLink(event){
+  if(event) event.preventDefault();
+  const msg=document.getElementById('authMsg');
+  const email=document.getElementById('authEmail').value.trim();
+  if(!email){ if(msg){ msg.textContent='Podaj adres e-mail, na który wysłać link.'; msg.className='auth-msg error'; } return; }
+
+  const auth=window.EmloveAuth;
+  if(!auth) return;
+  if(msg){ msg.textContent='Wysyłam…'; msg.className='auth-msg'; }
+  try{
+    const token=await auth.captcha('Potwierdzenie ponownej wysyłki');
+    await auth.resendConfirmation(email, token);
+    if(msg){ msg.textContent='Jeśli konto z tym adresem istnieje, wysłaliśmy nowy link. Sprawdź też folder spam.'; msg.className='auth-msg'; }
+  }catch(e){
+    if(msg){ msg.textContent=authMessage(e,'Nie udało się wysłać linku. Spróbuj ponownie.'); msg.className='auth-msg error'; }
+  }
+}
