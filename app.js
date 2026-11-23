@@ -79,6 +79,7 @@ function saveState(){
   localStorage.setItem('emocje_exercises', state.exercisesDone);
   localStorage.setItem('emocje_chat', JSON.stringify(state.chat.slice(-100)));
   renderProgress(); renderRecent(); renderJournal();
+  if(window.EmloveSync) EmloveSync.scheduleFlush();
 }
 function addPoints(n){ state.points+=n; saveState(); }
 
@@ -155,6 +156,7 @@ function saveCheckin(){
   if(!state.selectedEmotion){ alert('Wybierz najpierw emocję główną 🙂'); return; }
   const emo = EMOTIONS.find(e=>e.id===state.selectedEmotion);
   const entry = {
+    id: newEntryId(), updatedAt: new Date().toISOString(),
     date: todayStr(), time: new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}),
     emotion: emo.name, emoji: emo.emoji, intensity: document.getElementById('intensity').value,
     body: [...state.selectedBody], what: document.getElementById('checkinWhat').value,
@@ -162,6 +164,7 @@ function saveCheckin(){
     iStatement: document.getElementById('iPreview').textContent
   };
   state.entries.unshift(entry);
+  if(window.EmloveSync) EmloveSync.markDirty(entry.id);
   addPoints(10);
   document.getElementById('checkinMsg').textContent = `✓ Zapisano! ${emo.emoji} ${emo.name} · siła ${entry.intensity}/10 · +10 pkt. Milo: „Dziękuję, że to nazwałeś/nazwałaś. Co chcesz z tym zrobić?”`;
   resetCheckin(false);
@@ -184,7 +187,11 @@ function renderJournal(){
   if(!state.entries.length){ el.innerHTML='<p class="muted">Jeszcze pusto. Zrób pierwszy check-in, a pojawi się tutaj.</p>'; return; }
   el.innerHTML = state.entries.map((e,i)=>`<div class="journal-item"><div class="meta"><span class="pill">${escapeHtml(e.emoji)} ${escapeHtml(e.emotion)}</span><span>siła ${escapeHtml(e.intensity)}/10</span><span>${escapeHtml(e.date)} · ${escapeHtml(e.time)}</span>${e.body.map(b=>`<span>📍 ${escapeHtml(b)}</span>`).join('')}</div><p><strong>Co się stało:</strong> ${escapeHtml(e.what||'—')}</p>${e.needs.length?`<p><strong>Potrzeby:</strong> ${e.needs.map(escapeHtml).join(', ')}</p>`:''}${e.needText?`<p>${escapeHtml(e.needText)}</p>`:''}<p class="preview-box">${escapeHtml(e.iStatement)}</p><button class="btn btn-ghost btn-small" onclick="deleteEntry(${i})">Usuń wpis</button></div>`).join('');
 }
-function deleteEntry(i){ state.entries.splice(i,1); saveState(); }
+function deleteEntry(i){
+  const removed=state.entries[i];
+  if(removed&&removed.id&&window.EmloveSync) EmloveSync.markDeleted(removed.id);
+  state.entries.splice(i,1); saveState();
+}
 function exportJournal(){
   const blob=new Blob([JSON.stringify(state.entries,null,2)],{type:'application/json'});
   const a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='dziennik-emocji.json'; a.click();
@@ -310,7 +317,9 @@ function finishSim(){
   state.exercisesDone++; addPoints(15);
   const sim=SIMULATIONS[state.simIndex];
   const reflect=document.getElementById('simReflectText').value;
-  state.entries.unshift({date:todayStr(), time:new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}), emotion:'Symulacja: '+sim.title, emoji:sim.icon, intensity:'—', body:[], what:reflect||state.simLog.map(l=>l.choice).join(' · '), needs:[], needText:'', iStatement:'Symulacja ukończona. Refleksja: '+(reflect||'—')});
+  const _simEntry={id:newEntryId(), updatedAt:new Date().toISOString(), date:todayStr(), time:new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}), emotion:'Symulacja: '+sim.title, emoji:sim.icon, intensity:'—', body:[], what:reflect||state.simLog.map(l=>l.choice).join(' · '), needs:[], needText:'', iStatement:'Symulacja ukończona. Refleksja: '+(reflect||'—')};
+  state.entries.unshift(_simEntry);
+  if(window.EmloveSync) EmloveSync.markDirty(_simEntry.id);
   saveState();
   alert('✓ Symulacja ukończona! +15 pkt. Pamiętaj: w prawdziwej sytuacji decyzja zawsze należy do Ciebie.');
   closeSim(); document.getElementById('simReflectText').value='';
@@ -643,17 +652,10 @@ function deleteLocalUserData(){
   window.location.reload();
 }
 async function deleteMiloServerSession(){
-  const status=document.getElementById('deleteMiloSessionStatus'),button=document.getElementById('deleteMiloSessionBtn');
-  let session;try{session=JSON.parse(localStorage.getItem('emlove_milo_session')||'null');}catch(e){}
-  if(!session?.access_token){status.textContent='Na tym urządzeniu nie ma dostępnej sesji Milo. To nie potwierdza usunięcia innych ani wcześniejszych sesji z serwera.';return;}
-  if(!window.confirm('Usunąć bieżącą anonimową sesję Milo i jej liczniki w Supabase? Tego nie można cofnąć. Lokalne wpisy i postępy pozostaną. Nie usunie to danych z innych sesji ani usług zewnętrznych.'))return;
-  button.disabled=true;status.textContent='Wysyłanie prośby o usunięcie…';
-  try{
-    const result=await MiloClient.deleteCurrentSession();
-    status.textContent=result.localSessionRemoved?'Potwierdzono usunięcie tej sesji Milo i jej liczników w Supabase. Lokalne wpisy i postępy pozostały.':'Potwierdzono usunięcie sesji w Supabase, ale nie udało się usunąć jej danych z tego urządzenia. Sprawdź dane strony w przeglądarce.';
-  }catch(e){
-    status.textContent=e?.message==='session_unavailable'?'Nie można uzyskać dostępu do tej sesji. Nie potwierdzono usunięcia danych z serwera.':e?.message==='busy'?'Trwa inne działanie Milo. Spróbuj ponownie za chwilę.':'Nie udało się potwierdzić usunięcia sesji. Sprawdź połączenie lub spróbuj później.';
-  }finally{button.disabled=false;}
+  // Anonimowe sesje Milo zostały zastąpione kontem użytkownika.
+  // Usunięcie konta odbywa się w Ustawienia -> „Usuń konto z chmury”.
+  const status=document.getElementById('deleteMiloSessionStatus');
+  if(status) status.textContent='Milo korzysta teraz z konta użytkownika. Aby usunąć dane z serwera, użyj „Usuń konto z chmury”.';
 }
 function saveSettings(){
   const byId = id => document.getElementById(id);
@@ -679,7 +681,13 @@ async function generateExpressWithAI(){
     const r=await callAI([{role:'system',content:'Jesteś Milo. Wymyśl jedną krótką, codzienną sytuację społeczną, w której trudno wyrazić emocję. Odpowiedz TYLKO treścią sytuacji, bez cudzysłowu, po polsku, max 20 słów.'},{role:'user',content:'Wymyśl sytuację do ćwiczenia komunikatu Ja.'}]);
     document.getElementById('expressScenario').textContent=r.trim();
     SoundEngine.success();
-  }catch(e){ alert('Milo nie mógł teraz odpowiedzieć: '+e.message); }
+  }catch(e){
+    if(e && e.message==='login_required'){
+      alert('Milo online wymaga zalogowania. Zaloguj się w panelu bocznym — bez konta Milo działa lokalnie.');
+      return;
+    }
+    alert('Milo nie mógł teraz odpowiedzieć: '+e.message);
+  }
   btn.textContent='✨ Poproś Milo o nową';
 }
 async function generateSimWithAI(){
@@ -815,4 +823,251 @@ function renderLibraryWheel(q){
   const shown = list.slice(0, 60);
   box.innerHTML = shown.map(w => `<div class="wheel-word"><b>${escapeHtml(w.word)}</b><span>${escapeHtml(w.cluster)}</span><i>${escapeHtml(w.familyName)}</i></div>`).join('') +
     (list.length > shown.length ? `<p class="muted small">Pokazano ${shown.length} z ${list.length} słów — doprecyzuj wyszukiwanie.</p>` : '');
+}
+
+// ══════════════════════════════════════════════════════════════
+// Konto użytkownika i synchronizacja
+// ══════════════════════════════════════════════════════════════
+
+/** Stabilne id wpisu — potrzebne do synchronizacji między urządzeniami. */
+function newEntryId(){
+  try{
+    if(window.crypto && crypto.randomUUID) return crypto.randomUUID();
+    if(window.crypto && crypto.getRandomValues){
+      const b=new Uint8Array(16); crypto.getRandomValues(b);
+      return [...b].map(x=>x.toString(16).padStart(2,'0')).join('');
+    }
+  }catch(e){}
+  return 'e'+Date.now().toString(36)+Math.random().toString(36).slice(2,10);
+}
+
+/** Wpisy sprzed aktualizacji nie mają id — uzupełniamy je przy starcie. */
+function ensureEntryIds(){
+  let added=0;
+  state.entries.forEach(e=>{
+    if(!e.id){ e.id=newEntryId(); e.updatedAt=new Date().toISOString(); added++; }
+  });
+  if(added && window.EmloveSync){
+    state.entries.forEach(e=>EmloveSync.markDirty(e.id));
+  }
+  return added;
+}
+
+// Stan i zapis udostępnione modułowi synchronizacji.
+window.EmloveState = state;
+window.EmloveSave = saveState;
+
+const AUTH_TEXT = {
+  captcha_failed:'Weryfikacja bezpieczeństwa nie powiodła się. Spróbuj ponownie.',
+  captcha_unavailable:'Nie udało się wczytać weryfikacji Cloudflare. Sprawdź połączenie.',
+  email_taken:'Konto z tym adresem już istnieje. Zaloguj się.',
+  email_not_confirmed:'Potwierdź adres e-mail przed zalogowaniem — sprawdź skrzynkę.',
+  invalid_credentials:'Nieprawidłowy e-mail lub hasło.',
+  weak_password:'Hasło jest za słabe. Użyj co najmniej 8 znaków.',
+  email_address_invalid:'Podaj poprawny adres e-mail.',
+  email_address_not_authorized:'Ten adres nie jest autoryzowany do rejestracji.',
+  user_banned:'To konto zostało zablokowane.',
+  over_request_rate_limit:'Zbyt wiele prób. Odczekaj chwilę i spróbuj ponownie.',
+  not_configured:'Konto nie jest skonfigurowane w config.js.',
+  network:'Brak połączenia. Sprawdź internet i spróbuj ponownie.',
+  login_required:'Sesja wygasła. Zaloguj się ponownie.',
+  delete_failed:'Nie udało się usunąć konta. Spróbuj ponownie.',
+};
+const AUTH_CODE_ALIAS = {
+  user_already_exists:'email_taken',
+  email_exists:'email_taken',
+  validation_failed:'email_address_invalid',
+  over_email_send_rate_limit:'over_request_rate_limit',
+  request_rate_limit_exceeded:'over_request_rate_limit',
+  captcha_failed:'captcha_failed',
+  bad_jwt:'login_required',
+  session_expired:'login_required',
+  refresh_token_not_found:'login_required',
+};
+
+function authMessage(e, fallback){
+  if(!e) return fallback;
+  const code = AUTH_CODE_ALIAS[e.code] || e.code;
+  const byMessage = AUTH_CODE_ALIAS[e.message] || e.message;
+  return (code && AUTH_TEXT[code]) || (byMessage && AUTH_TEXT[byMessage]) || fallback;
+}
+
+let authMode = 'login';
+
+function renderAccount(){
+  const box=document.getElementById('accountBox');
+  if(!box) return;
+  const auth=window.EmloveAuth;
+  if(!auth || !auth.configured()){
+    box.innerHTML='<strong>👤 Konto</strong><p class="muted small">Logowanie nie jest skonfigurowane w config.js.</p>';
+    return;
+  }
+  const user=auth.currentUser();
+  if(user && lastSyncText==='Nie zalogowano'){ lastSyncText='Zalogowano'; }
+  if(!user){
+    box.innerHTML =
+      '<strong>👤 Konto</strong>' +
+      '<p class="muted small">Zaloguj się, aby zapisać wpisy w chmurze i mieć je na każdym urządzeniu.</p>' +
+      '<div class="account-actions">' +
+        '<button class="btn btn-small" type="button" onclick="openAuth(\'login\')">Zaloguj się</button>' +
+        '<button class="btn btn-small btn-ghost" type="button" onclick="openAuth(\'signup\')">Zarejestruj się</button>' +
+      '</div>';
+    return;
+  }
+  box.innerHTML =
+    '<strong>👤 ' + escapeHtml(user.email || 'Użytkownik') + '</strong>' +
+    '<p class="muted small" id="syncStatus">' + escapeHtml(lastSyncText) + '</p>' +
+    '<div class="account-actions">' +
+      '<button class="btn btn-small btn-ghost" type="button" onclick="syncNow()">Synchronizuj</button>' +
+      '<button class="btn btn-small btn-ghost" type="button" onclick="signOutAccount()">Wyloguj</button>' +
+    '</div>';
+}
+
+let lastSyncText = 'Nie zalogowano';
+document.addEventListener('emlove:sync', e => {
+  lastSyncText = e.detail && e.detail.text ? e.detail.text : lastSyncText;
+  const el = document.getElementById('syncStatus');
+  if(el){
+    el.textContent = lastSyncText;
+    el.className = 'muted small sync-' + (e.detail && e.detail.kind ? e.detail.kind : 'idle');
+  }
+});
+document.addEventListener('emlove:auth', () => { renderAccount(); updateMiloGate(); });
+
+function openAuth(mode){
+  authMode = mode || 'login';
+  const modal=document.getElementById('authModal');
+  if(!modal) return;
+  document.querySelectorAll('.auth-tab').forEach(t=>t.classList.toggle('active', t.dataset.mode===authMode));
+  const pw=document.getElementById('authPassword');
+  const pwRow=document.getElementById('authPasswordRow');
+  if(pwRow) pwRow.style.display = authMode==='reset' ? 'none' : '';
+  const btn=document.getElementById('authSubmit');
+  if(btn) btn.textContent = authMode==='login' ? 'Zaloguj się' : authMode==='signup' ? 'Zarejestruj się' : 'Wyślij link resetujący';
+  const title=document.getElementById('authTitle');
+  if(title) title.textContent = authMode==='login' ? '🔐 Logowanie' : authMode==='signup' ? '✨ Nowe konto' : '🔑 Reset hasła';
+  const msg=document.getElementById('authMsg');
+  if(msg){ msg.textContent=''; msg.className='auth-msg'; }
+  if(pw) pw.value='';
+  document.getElementById('authEmail').value = document.getElementById('authEmail').value || '';
+  modal.style.display='flex';
+  setTimeout(()=>{ const e=document.getElementById('authEmail'); if(e) e.focus(); }, 50);
+}
+
+function switchAuthMode(mode){ openAuth(mode); }
+
+function closeAuth(){
+  const m=document.getElementById('authModal');
+  if(m) m.style.display='none';
+}
+
+async function submitAuth(){
+  const email=document.getElementById('authEmail').value.trim();
+  const password=document.getElementById('authPassword').value;
+  const btn=document.getElementById('authSubmit');
+  const msg=document.getElementById('authMsg');
+
+  if(!email){ if(msg){ msg.textContent='Podaj adres e-mail.'; msg.className='auth-msg error'; } return; }
+  if(authMode!=='reset' && !password){ if(msg){ msg.textContent='Podaj hasło.'; msg.className='auth-msg error'; } return; }
+  if(authMode==='signup' && password.length<8){ if(msg){ msg.textContent='Hasło musi mieć co najmniej 8 znaków.'; msg.className='auth-msg error'; } return; }
+
+  const auth=window.EmloveAuth;
+  if(!auth){ return; }
+  btn.disabled=true;
+  if(msg){ msg.textContent='Proszę czekać…'; msg.className='auth-msg'; }
+
+  try{
+    const token = await auth.captcha(authMode==='signup' ? 'Potwierdzenie rejestracji' : authMode==='login' ? 'Potwierdzenie logowania' : 'Potwierdzenie resetu hasła');
+
+    if(authMode==='signup'){
+      const result = await auth.signUp(email, password, token);
+      closeAuth();
+      alert(result.needsConfirmation
+        ? 'Konto utworzone. Wysłaliśmy link potwierdzający na ' + email + '. Otwórz go, a potem wróć tutaj i zaloguj się.'
+        : 'Konto utworzone. Możesz się zalogować.');
+      openAuth('login');
+    } else if(authMode==='reset'){
+      await auth.resetPassword(email, token);
+      closeAuth();
+      alert('Jeśli konto z tym adresem istnieje, wysłaliśmy link do ustawienia nowego hasła. Sprawdź też folder spam.');
+    } else {
+      await auth.signIn(email, password, token);
+      closeAuth();
+      lastSyncText = 'Zalogowano — pobieram wpisy…';
+      renderAccount();
+      await window.EmloveSync.pull();
+      await window.EmloveSync.flush();
+    }
+  }catch(e){
+    if(msg){ msg.textContent = authMessage(e, 'Nie udało się wykonać operacji. Spróbuj ponownie.'); msg.className='auth-msg error'; }
+  }finally{
+    btn.disabled=false;
+  }
+}
+
+async function signOutAccount(){
+  const auth=window.EmloveAuth;
+  if(!auth) return;
+  if(!confirm('Wylogować się? Wpisy pozostaną na tym urządzeniu, ale nie będą zapisywane w chmurze.')) return;
+  try{ await window.EmloveSync.flush(); }catch(e){}
+  await auth.signOut();
+  lastSyncText='Nie zalogowano';
+  renderAccount();
+}
+
+async function syncNow(){
+  const el=document.getElementById('syncStatus');
+  if(el){ el.textContent='Synchronizuję…'; }
+  try{
+    await window.EmloveSync.fullSync();
+  }catch(e){
+    lastSyncText='Nie udało się zsynchronizować';
+    renderAccount();
+  }
+}
+
+async function deleteAccount(){
+  const auth=window.EmloveAuth;
+  if(!auth || !auth.currentUser()) return;
+  if(!confirm('Usunąć konto? To jest trwałe. Zniknie login i zapisane w chmurze wpisy. Wpisy na tym urządzeniu pozostaną.')) return;
+  try{
+    await auth.deleteAccount();
+    lastSyncText='Konto usunięte';
+    renderAccount();
+    updateMiloGate();
+    alert('Konto zostało usunięte.');
+  }catch(e){
+    alert(authMessage(e,'Nie udało się usunąć konta. Spróbuj ponownie.'));
+  }
+}
+
+// ── Milo online wymaga teraz zalogowania ────────────────────
+function updateMiloGate(){
+  const auth=window.EmloveAuth;
+  const status=document.getElementById('aiStatusTitle');
+  const text=document.getElementById('aiStatusText');
+  if(!status||!text) return;
+  const online = window.EMLOVE_CONFIG && window.EMLOVE_CONFIG.supabaseUrl && window.EMLOVE_CONFIG.aiEndpoint;
+  if(!online) return;
+  if(auth && auth.currentUser()){
+    status.textContent='🌙 Milo — online';
+    text.textContent='Milo odpowiada z modelu językowego. Rozmowy nie są zapisywane u dostawcy.';
+  } else {
+    status.textContent='🌙 Milo — tryb lokalny';
+    text.textContent='Zaloguj się, aby rozmawiać z Milo online. Bez konta Milo działa lokalnie, z gotowych zwrotów.';
+  }
+}
+
+ensureEntryIds();
+renderAccount();
+updateMiloGate();
+
+// Przy starcie: jeśli ktoś jest zalogowany, dopasuj chmurę w tle.
+// Scalanie idzie po `updated_at`, więc lokalne zmiany nie zostaną nadpisane.
+if(window.EmloveAuth && window.EmloveAuth.currentUser() && window.EmloveSync){
+  lastSyncText='Synchronizuję…';
+  renderAccount();
+  window.EmloveSync.pull()
+    .then(()=>window.EmloveSync.flush())
+    .catch(()=>{ lastSyncText='Nie udało się zsynchronizować'; renderAccount(); });
 }

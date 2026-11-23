@@ -393,3 +393,27 @@ html,body{max-width:100%;overflow-x:hidden}
 .milo-captcha-overlay{position:fixed;inset:0;z-index:9999;background:rgba(4,22,20,.7);display:flex;align-items:center;justify-content:center;padding:16px}
 .milo-captcha-card{width:min(440px,100%);max-height:90vh;overflow:auto;border-radius:16px;background:#fff;padding:22px;box-shadow:0 14px 45px #0005}
 .milo-captcha-card h2{margin-top:0}.milo-captcha-card p{line-height:1.5;font-size:.92rem}.milo-captcha-card #milo-captcha-widget{min-height:70px;margin:12px 0}
+
+/* ── Konto i synchronizacja ───────────────────────────────── */
+.account-box{background:rgba(15,140,134,.08);border:1px solid rgba(15,140,134,.22);border-radius:14px;padding:12px;margin:14px 0}
+.account-box strong{display:block;font-size:13.5px;word-break:break-all;color:var(--ink)}
+.account-box .muted{margin:6px 0 10px}
+.account-actions{display:flex;gap:8px;flex-wrap:wrap}
+.account-actions .btn{flex:1 1 auto;justify-content:center;min-width:0}
+
+.sync-ok{color:#0F8C86}
+.sync-error{color:#B42318}
+
+.auth-tabs{display:flex;gap:6px;margin:14px 0 4px}
+.auth-tab{flex:1;padding:10px 6px;border:1px solid var(--border);border-radius:10px;background:transparent;color:var(--muted);font:inherit;font-weight:700;font-size:13px;cursor:pointer}
+.auth-tab.active{border-color:#0F8C86;background:rgba(15,140,134,.1);color:#0F8C86}
+.auth-tab:focus-visible{outline:2px solid #0F8C86;outline-offset:2px}
+
+.modal input[type=email]{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px;margin-top:4px;background:#FFFDF9;color:var(--ink)}
+
+.auth-msg{min-height:20px;margin:12px 0 0;font-size:13.5px;line-height:1.45;color:var(--muted)}
+.auth-msg.error{color:#B42318;font-weight:700}
+
+@media (max-width:520px){
+  .account-actions{flex-direction:column}
+}

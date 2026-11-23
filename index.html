@@ -19,7 +19,7 @@
   <aside class="sidebar" id="sidebar">
     <div class="logo">
       <div class="logo-icon" style="overflow:hidden;padding:0"><img src="icon-192.png" alt="Emlove" style="width:100%;height:100%;object-fit:cover;border-radius:10px"></div>
-      <div><strong>Emlove</strong><span>pokochaj swoje emocje · v3</span></div>
+      <div><strong>Emlove</strong><span>pokochaj swoje emocje · v3.1</span></div>
     </div>
     <nav class="nav">
       <button class="nav-btn active" data-view="home"><span>🏠</span> Start</button>
@@ -32,6 +32,11 @@
       <button class="nav-btn" data-view="personality"><span>🐾</span> Twoja osobowość</button>
       <button class="nav-btn" data-view="library"><span>📚</span> Biblioteka emocji</button>
     </nav>
+
+    <div class="account-box" id="accountBox">
+      <strong>👤 Konto</strong>
+      <p class="muted small">Zaloguj się, aby zapisać wpisy w chmurze i mieć je na każdym urządzeniu.</p>
+    </div>
 
     <div class="milo-card">
       <div class="milo-avatar">M</div>
@@ -333,6 +338,29 @@
 </div>
 
 <!-- SETTINGS MODAL -->
+<div class="modal-overlay" id="authModal" style="display:none">
+  <div class="modal">
+    <div class="modal-head"><h2 id="authTitle">🔐 Logowanie</h2><button class="icon-btn" onclick="closeAuth()" aria-label="Zamknij">✕</button></div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" data-mode="login" type="button" onclick="switchAuthMode('login')">Logowanie</button>
+      <button class="auth-tab" data-mode="signup" type="button" onclick="switchAuthMode('signup')">Rejestracja</button>
+      <button class="auth-tab" data-mode="reset" type="button" onclick="switchAuthMode('reset')">Reset hasła</button>
+    </div>
+    <label class="field-label" for="authEmail">Adres e-mail</label>
+    <input id="authEmail" type="email" autocomplete="email" inputmode="email" placeholder="np. anna@example.com">
+    <div id="authPasswordRow">
+      <label class="field-label" for="authPassword">Hasło</label>
+      <input id="authPassword" type="password" autocomplete="current-password" placeholder="min. 8 znaków przy rejestracji">
+    </div>
+    <p id="authMsg" class="auth-msg" role="status"></p>
+    <div class="settings-actions">
+      <button class="btn btn-primary" id="authSubmit" type="button" onclick="submitAuth()">Zaloguj się</button>
+      <button class="btn btn-ghost" type="button" onclick="closeAuth()">Anuluj</button>
+    </div>
+    <p class="muted small">Logowanie chroni Cloudflare Turnstile — Cloudflare otrzymuje dane techniczne połączenia, w tym adres IP. Przed pierwszym logowaniem potwierdź adres e-mail z linku w mailu.</p>
+  </div>
+</div>
+
 <div class="modal-overlay" id="settingsModal" style="display:none">
   <div class="modal">
     <div class="modal-head"><h2>⚙️ Ustawienia: Milo i dźwięk</h2><button class="icon-btn" onclick="closeSettings()">✕</button></div>
@@ -357,9 +385,8 @@
     <h3>🔒 Prywatność na tym urządzeniu</h3>
     <p class="muted small">Możesz usunąć zapisane tutaj wpisy, rozmowy, wynik testu i postępy. To nie usuwa danych z serwerów ani z innych urządzeń. Sesja Milo i ustawienia dźwięku pozostaną.</p>
     <button class="btn btn-secondary" type="button" onclick="deleteLocalUserData()">Usuń wpisy i postępy z tego urządzenia</button>
-    <p class="muted small">Osobno możesz poprosić o usunięcie bieżącej anonimowej sesji Milo i jej liczników w Supabase. Nie usuwa to lokalnych wpisów ani danych u innych dostawców.</p>
-    <button class="btn btn-secondary" type="button" id="deleteMiloSessionBtn" onclick="deleteMiloServerSession()">Usuń bieżącą sesję Milo z serwera</button>
-    <p class="muted small" id="deleteMiloSessionStatus" role="status"></p>
+    <p class="muted small">Konto w chmurze: usuwa login, hasło i wpisy zapisane w Supabase. Wpisy na tym urządzeniu pozostają — możesz je usunąć osobno.</p>
+    <button class="btn btn-secondary" type="button" id="deleteAccountBtn" onclick="deleteAccount()">Usuń konto z chmury</button>
 
     <div class="settings-actions">
       <button class="btn btn-primary" onclick="saveSettings()">💾 Zapisz ustawienia</button>
@@ -367,11 +394,13 @@
     </div>
     <p id="settingsMsg" class="success-msg"></p>
 
-    <p class="muted small" style="margin-top:10px">Emlove 3.0 · narzędzie edukacyjne dla dorosłych, nie terapia. W kryzysie: <b>116 123</b> · <b>112</b>.</p>
+    <p class="muted small" style="margin-top:10px">Emlove 3.1 · narzędzie edukacyjne dla dorosłych, nie terapia. W kryzysie: <b>116 123</b> · <b>112</b>.</p>
   </div>
 </div>
 
 <script src="config.js"></script>
+<script src="auth.js"></script>
+<script src="sync.js"></script>
 <script src="app.js"></script>
 <script src="ambient.js"></script>
 <script src="wheel.js"></script>

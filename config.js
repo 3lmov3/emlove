@@ -29,5 +29,5 @@ window.EMLOVE_CONFIG = {
   showAiBadge: true,
 
   // Wersja aplikacji (wyświetlana w stopce ustawień).
-  version: '3.0',
+  version: '3.1',
 };
