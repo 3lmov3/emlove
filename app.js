@@ -763,7 +763,7 @@ async function summarizeWithAI(){
     box.textContent='✨ Podsumowanie od Milo:\n'+r;
     lastSummary=r; setMailButton(true);
     TTS.speak(r); SoundEngine.success();
-  }catch(e){ box.textContent='Milo nie mógł teraz napisać podsumowania: '+e.message; lastSummary=''; setMailButton(false); }
+  }catch(e){ box.textContent='Milo nie mógł teraz napisać podsumowania: '+aiErrorMessage(e); lastSummary=''; setMailButton(false); }
 }
 async function askMiloAboutCheckin(){
   goTo('chat');
@@ -1319,4 +1319,31 @@ async function sendSummaryMail(){
   }finally{
     if(btn){ btn.disabled=false; btn.textContent=original||'📧 Wyślij mailem'; }
   }
+}
+
+// ══════════════════════════════════════════════════════════════
+// Czytelne komunikaty błędów AI
+// ══════════════════════════════════════════════════════════════
+
+function aiErrorMessage(e){
+  const code = e && e.code ? e.code : (e && e.message) || '';
+  const source = e && e.source ? e.source : '';
+  const label = source === 'byok' ? 'funkcja milo-mobile-byok'
+    : source === 'private26' ? 'funkcja milo-mobile-private26' : '';
+
+  const map = Object.assign({},
+    window.EmloveByok ? window.EmloveByok.MESSAGES : {},
+    window.EmloveOnline ? window.EmloveOnline.MESSAGES : {},
+    {
+      bad_provider: 'Funkcja nie rozpoznaje wybranego dostawcy.',
+      bad_key: 'Klucz API jest nieprawidłowy.',
+      bad_model: 'Nazwa modelu jest nieprawidłowa.',
+      bad_text: 'Wiadomość jest pusta albo za długa.',
+      invalid_request: 'Żądanie jest niepoprawne.',
+      quota_unavailable: 'Nie udało się sprawdzić limitu.',
+      mail_failed: 'Nie udało się wysłać maila.',
+    });
+
+  const text = map[code] || 'Nie udało się uzyskać odpowiedzi.';
+  return text + (label ? ' [' + label + ': ' + code + ']' : ' [' + code + ']');
 }

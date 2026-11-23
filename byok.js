@@ -63,13 +63,18 @@
 
     if (!response.ok) {
       let detail = '';
-      try { detail = await response.text(); } catch (e) {}
-      const code =
-        response.status === 401 || response.status === 403 ? 'login_required' :
-        response.status === 429 ? 'limit' :
-        response.status === 400 || response.status === 502 ? 'provider_error' :
-        'service';
-      throw Object.assign(new Error(code), {code, detail});
+      let serverCode = '';
+      try {
+        detail = await response.text();
+        const parsed = JSON.parse(detail);
+        if (parsed && typeof parsed.error === 'string') serverCode = parsed.error;
+      } catch (e) {}
+      const code = serverCode ||
+        (response.status === 401 || response.status === 403 ? 'login_required' :
+         response.status === 429 ? 'limit' :
+         response.status === 400 || response.status === 502 ? 'provider_error' :
+         'service');
+      throw Object.assign(new Error(code), {code, detail, source: 'byok'});
     }
 
     let obj = null;
