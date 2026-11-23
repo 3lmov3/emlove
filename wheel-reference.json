@@ -1,0 +1,329 @@
+{
+  "status": "draft-transcription-needs-visual-review",
+  "source": "Dokument_2026-11-20_221546.jpg",
+  "center": "Łaska",
+  "areas": [
+    {
+      "name": "Słaby",
+      "groups": [
+        [
+          "Zmęczony",
+          [
+            "rozkojarzony",
+            "senny"
+          ]
+        ],
+        [
+          "Zestresowany",
+          [
+            "tracący kontrolę",
+            "przytłoczony"
+          ]
+        ],
+        [
+          "Zapracowany",
+          [
+            "pośpieszany",
+            "pod presją"
+          ]
+        ],
+        [
+          "Znudzony",
+          [
+            "apatyczny",
+            "obojętny"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "Lękliwy",
+      "groups": [
+        [
+          "Przestraszony",
+          [
+            "bezsilny",
+            "zastraszony"
+          ]
+        ],
+        [
+          "Niespokojny",
+          [
+            "przytłoczony",
+            "zmartwiony"
+          ]
+        ],
+        [
+          "Niepewny",
+          [
+            "niewystarczający",
+            "podrzędny"
+          ]
+        ],
+        [
+          "Uległy",
+          [
+            "bezwartościowy",
+            "nieistotny"
+          ]
+        ],
+        [
+          "Odrzucony",
+          [
+            "wyobcowany",
+            "niepasujący"
+          ]
+        ],
+        [
+          "Zastraszony",
+          [
+            "nerwowy",
+            "zdemaskowany"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "Rozgniewany",
+      "groups": [
+        [
+          "Rozczarowany",
+          [
+            "zdradzony",
+            "urażony"
+          ]
+        ],
+        [
+          "Upokorzony",
+          [
+            "zlekceważony",
+            "ośmieszony"
+          ]
+        ],
+        [
+          "Nienawistny",
+          [
+            "zgorszony",
+            "zbezczeszczony"
+          ]
+        ],
+        [
+          "Zagrożony",
+          [
+            "niepewny",
+            "zazdrosny"
+          ]
+        ],
+        [
+          "Agresywny",
+          [
+            "wrogo nastawiony",
+            "sprowokowany"
+          ]
+        ],
+        [
+          "Sfrustrowany",
+          [
+            "oburzony",
+            "poirytowany"
+          ]
+        ],
+        [
+          "Zdystansowany",
+          [
+            "zamknięty w sobie",
+            "podejrzliwy"
+          ]
+        ],
+        [
+          "Krytyczny",
+          [
+            "sceptyczny",
+            "sarkastyczny"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "Zniesmaczony",
+      "groups": [
+        [
+          "Nieprzychylny",
+          [
+            "niechętny",
+            "krytykancki"
+          ]
+        ],
+        [
+          "Rozczarowany",
+          [
+            "zbuntowany",
+            "antypatyczny"
+          ]
+        ],
+        [
+          "Czujący się podle",
+          [
+            "podburzony",
+            "obrzydzony"
+          ]
+        ],
+        [
+          "Stroniący",
+          [
+            "czujący odrazę",
+            "niepewny"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "Smutny",
+      "groups": [
+        [
+          "Samotny",
+          [
+            "odizolowany",
+            "porzucony"
+          ]
+        ],
+        [
+          "Zraniony",
+          [
+            "prześladowany",
+            "słabowity"
+          ]
+        ],
+        [
+          "Zrozpaczony",
+          [
+            "w bólu, w żałobie",
+            "bezsilny"
+          ]
+        ],
+        [
+          "Winny",
+          [
+            "zawstydzony",
+            "skruszony"
+          ]
+        ],
+        [
+          "Przygnębiony",
+          [
+            "wyczerpany",
+            "gorszy od innych"
+          ]
+        ],
+        [
+          "Zraniony",
+          [
+            "rozczarowany",
+            "zlekceważony"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "Szczęśliwy",
+      "groups": [
+        [
+          "Żartobliwy",
+          [
+            "zuchwały",
+            "pobudzony"
+          ]
+        ],
+        [
+          "Zadowolony",
+          [
+            "wolny",
+            "wesoły"
+          ]
+        ],
+        [
+          "Zainteresowany",
+          [
+            "zaciekawiony",
+            "dociekliwy"
+          ]
+        ],
+        [
+          "Dumny",
+          [
+            "ważny",
+            "pewny siebie"
+          ]
+        ],
+        [
+          "Akceptowany",
+          [
+            "szanowany",
+            "doceniony"
+          ]
+        ],
+        [
+          "Pełen siły",
+          [
+            "odważny",
+            "kreatywny"
+          ]
+        ],
+        [
+          "Spokojny",
+          [
+            "kochający",
+            "wdzięczny"
+          ]
+        ],
+        [
+          "Czujący bliskość",
+          [
+            "czuły",
+            "figlarny"
+          ]
+        ],
+        [
+          "Optymistyczny",
+          [
+            "pełen nadziei",
+            "zainspirowany"
+          ]
+        ]
+      ]
+    },
+    {
+      "name": "Zaskoczony",
+      "groups": [
+        [
+          "Podekscytowany",
+          [
+            "ochoczy",
+            "energiczny"
+          ]
+        ],
+        [
+          "Zdumiony",
+          [
+            "zadziwiony",
+            "zatrwożony"
+          ]
+        ],
+        [
+          "Zmieszany",
+          [
+            "rozczarowany",
+            "zakłopotany"
+          ]
+        ],
+        [
+          "Przestraszony",
+          [
+            "skonsternowany",
+            "wstrząśnięty"
+          ]
+        ]
+      ]
+    }
+  ]
+}

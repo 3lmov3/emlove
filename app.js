@@ -200,8 +200,12 @@ function exportJournal(){
 }
 
 // Wheel
+// Stare koło 8-segmentowe — używane tylko awaryjnie, gdy brak wheel-reference.json.
+window.legacyWheel = renderWheel;
+
 function renderWheel(){
   const wrap=document.getElementById('wheelSvg');
+  if(!wrap) return;
   const cx=160, cy=160, rOuter=150, rInner=55;
   let paths='';
   EMOTIONS.forEach((e,i)=>{
@@ -422,7 +426,7 @@ document.getElementById('chatForm').addEventListener('submit', e=>{
 });
 
 // Init
-renderCheckin(); renderWheel(); renderRecognize(); renderName(); newExpressScenario(); renderSims(); renderLibrary(); renderChat(); renderProgress(); renderRecent(); renderJournal(); updateIPreview();
+renderCheckin(); renderWheel(); if(window.EmloveWheel) window.EmloveWheel.mount(); renderRecognize(); renderName(); newExpressScenario(); renderSims(); renderLibrary(); renderChat(); renderProgress(); renderRecent(); renderJournal(); updateIPreview();
 
 /* ============================================================
    v2: DŹWIĘK + PEŁNY MILO (model językowy)

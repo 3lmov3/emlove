@@ -458,3 +458,36 @@ html,body{max-width:100%;overflow-x:hidden}
 /* ── Podsumowanie mailem ───────────────────────────────────── */
 #sendMailBtn:disabled{opacity:.45;cursor:not-allowed}
 #sendMailBtn{transition:opacity .15s ease}
+
+/* ── Koło emocji 3-poziomowe (jak w aplikacji mobilnej) ─────── */
+#wheelHost{display:block}
+.wheel-card{background:#fff;border:1px solid #E2EEEA;border-radius:24px;padding:18px 12px;box-shadow:0 5px 18px rgba(56,95,89,.08)}
+.wheel-eyebrow{font-size:10px;font-weight:700;letter-spacing:1.5px;color:#688B85;margin:0 0 8px;text-align:center}
+.wheel-title{font-size:26px;font-weight:700;color:#284C4B;letter-spacing:-.5px;margin:0;text-align:center}
+.wheel-intro{font-size:14px;line-height:21px;color:#617B76;margin:8px auto 16px;max-width:440px;text-align:center}
+.wheel-canvas{display:flex;justify-content:center;align-items:center;overflow-x:auto;padding:4px 0}
+.wheel-canvas svg{max-width:100%;height:auto}
+.wheel-canvas.zoomed svg{max-width:none;width:155%}
+.wheel-hint{text-align:center;font-size:12px;color:#718C86;margin:12px 0}
+.wheel-zoom{display:block;margin:0 auto 8px}
+.wheel-areas{display:flex;flex-wrap:wrap;justify-content:center;gap:7px;margin-top:12px}
+.wheel-area{padding:8px 11px;border-radius:20px;border:1px solid transparent;font:inherit;font-size:12px;font-weight:600;color:#284C4B;cursor:pointer}
+.wheel-area.active{border-color:#406A64}
+.wheel-area.home{background:#FFF4F6}
+.wheel-selected{text-align:center;font-size:13px;color:#466762;font-weight:600;margin:12px 0 0}
+
+.wheel-detail{margin-top:16px}
+.wheel-detail h3{font-size:23px;font-weight:700;color:#284C4B;margin:4px 0 6px}
+.wheel-detail-intro{font-size:13.5px;line-height:21px;color:#69817D;margin:0 0 12px}
+.wheel-group{border-top:1px solid #EDF3F0;padding:10px 0}
+.wheel-group-btn{display:inline-block;background:none;border:0;padding:7px 9px;border-radius:9px;font:inherit;font-size:15px;font-weight:700;color:#284C4B;cursor:pointer}
+.wheel-words{display:flex;flex-wrap:wrap;gap:7px;margin-top:3px}
+.wheel-word{background:#F2F8F5;border:1px solid #E2EEEA;border-radius:16px;padding:8px 11px;font:inherit;font-size:13px;color:#466762;cursor:pointer}
+.wheel-group-btn.selected,.wheel-word.selected{background:#D6EDE4;border-color:#77A99A}
+.wheel-reflection{background:#F8F3F3;border-radius:16px;padding:14px;margin-top:12px}
+.wheel-reflection-word{font-size:18px;font-weight:700;color:#284C4B;margin:4px 0 0}
+.wheel-reflection-text{font-size:14px;line-height:21px;color:#556F6A;margin:6px 0 0}
+.wheel-reflection-note{font-size:12px;color:#78908A;margin:8px 0 0}
+.wheel-empty{margin-top:16px;background:#F4FAF7;border-color:#E1EEE8}
+.wheel-empty h3{font-size:16px;font-weight:700;color:#284C4B;margin:0 0 6px}
+.wheel-disclaimer{font-size:12px;line-height:18px;color:#7B8E89;margin:16px 0}
