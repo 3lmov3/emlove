@@ -454,3 +454,7 @@ html,body{max-width:100%;overflow-x:hidden}
   .keys-row{flex-direction:column}
   .keys-row .btn{width:100%}
 }
+
+/* ── Podsumowanie mailem ───────────────────────────────────── */
+#sendMailBtn:disabled{opacity:.45;cursor:not-allowed}
+#sendMailBtn{transition:opacity .15s ease}

@@ -313,7 +313,7 @@
 
     <section class="view" id="view-journal">
       <div class="card">
-        <div class="card-head"><h2>📓 Dziennik emocji</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="summarizeWithAI()">✨ Podsumowanie od Milo</button><button class="btn btn-ghost" onclick="exportJournal()">Eksportuj (JSON)</button></div></div>
+        <div class="card-head"><h2>📓 Dziennik emocji</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="summarizeWithAI()">✨ Podsumowanie od Milo</button><button class="btn btn-ghost" id="sendMailBtn" type="button" onclick="sendSummaryMail()" disabled>📧 Wyślij mailem</button><button class="btn btn-ghost" onclick="exportJournal()">Eksportuj (JSON)</button></div></div>
         <div id="aiSummary" class="preview-box" style="display:none"></div>
         <div id="journalList"></div>
       </div>
@@ -453,6 +453,7 @@
 <script src="providers.js"></script>
 <script src="byok.js"></script>
 <script src="milo-online.js"></script>
+<script src="summary-mail.js"></script>
 <script src="app.js"></script>
 <script src="ambient.js"></script>
 <script src="wheel.js"></script>

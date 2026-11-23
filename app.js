@@ -761,8 +761,9 @@ async function summarizeWithAI(){
     const data=state.entries.slice(0,20).map(e=>`${e.date} ${e.emotion} siła ${e.intensity}: ${e.what||''} | ${e.iStatement||''}`).join('\n');
     const r=await callAI([{role:'system',content:MILO_SYSTEM_PROMPT+' Na podstawie dziennika napisz krótkie, ciepłe podsumowanie wzorców (nie diagnozuj), nazwij częste emocje i zadaj 2 pytania do refleksji. Max 150 słów.'},{role:'user',content:'Dziennik:\n'+data}]);
     box.textContent='✨ Podsumowanie od Milo:\n'+r;
+    lastSummary=r; setMailButton(true);
     TTS.speak(r); SoundEngine.success();
-  }catch(e){ box.textContent='Milo nie mógł teraz napisać podsumowania: '+e.message; }
+  }catch(e){ box.textContent='Milo nie mógł teraz napisać podsumowania: '+e.message; lastSummary=''; setMailButton(false); }
 }
 async function askMiloAboutCheckin(){
   goTo('chat');
@@ -1282,3 +1283,40 @@ document.addEventListener('emlove:clearLocal', () => {
   if(!window.EmloveProviders) return;
   window.EmloveProviders.PROVIDERS.forEach(p => window.EmloveProviders.clearApiKey(p.id));
 });
+
+// ══════════════════════════════════════════════════════════════
+// Podsumowanie mailem
+// ══════════════════════════════════════════════════════════════
+
+let lastSummary = '';
+
+function setMailButton(enabled){
+  const btn=document.getElementById('sendMailBtn');
+  if(btn) btn.disabled = !enabled;
+}
+
+async function sendSummaryMail(){
+  if(!lastSummary.trim()){
+    alert('Najpierw wygeneruj podsumowanie — kliknij „✨ Podsumowanie od Milo”.');
+    return;
+  }
+  if(!window.EmloveSummaryMail) return;
+
+  const btn=document.getElementById('sendMailBtn');
+  const original=btn ? btn.textContent : '';
+  if(btn){ btn.disabled=true; btn.textContent='📧 Wysyłanie…'; }
+
+  try{
+    const to=await window.EmloveSummaryMail.send(lastSummary);
+    const box=document.getElementById('aiSummary');
+    if(box){
+      box.textContent='✅ Wysłano na ' + to + '.\n\n' + lastSummary;
+      box.style.display='block';
+    }
+    SoundEngine.success();
+  }catch(e){
+    alert(window.EmloveSummaryMail.messageOf(e,'Nie udało się wysłać podsumowania.'));
+  }finally{
+    if(btn){ btn.disabled=false; btn.textContent=original||'📧 Wyślij mailem'; }
+  }
+}
