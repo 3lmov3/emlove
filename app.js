@@ -108,6 +108,7 @@ const TITLES = {
   chat:['Rozmowa z Milo 💬','Milo pyta i słucha — nie decyduje za Ciebie.'],
   journal:['Dziennik emocji 📓','Twoje wpisy, Twoja historia.'],
   library:['Biblioteka emocji 📚','Słownik emocji z sygnałami i pytaniami.'],
+  keys:['Klucze API 🔑','Wybierz, którego klucza ma używać Milo.'],
 };
 function goTo(view){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
@@ -117,6 +118,7 @@ function goTo(view){
   document.getElementById('viewTitle').textContent = meta[0];
   document.getElementById('viewSubtitle').textContent = meta[1];
   closeSidebar();
+  if(view==='keys'&&typeof renderKeys==='function') renderKeys();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.view)));
@@ -446,6 +448,8 @@ function saveAISettings(){
   updateAIStatus();
 }
 function updateAIStatus(){
+  // Gdy aktywny jest własny klucz, stan opisuje updateMiloGate().
+  if(window.EmloveProviders && window.EmloveProviders.activeProvider()!=='admin'){ updateMiloGate(); return; }
   const t=document.getElementById('aiStatusTitle'), x=document.getElementById('aiStatusText'), c=document.getElementById('chatModeLabel');
   if(aiSettings.enabled){
     t.textContent='🌙 Pełny Milo';
@@ -607,6 +611,20 @@ const MILO_SYSTEM_PROMPT = `Jesteś Milo — wirtualnym towarzyszem emocji z Kra
 - Nie używasz formatowania markdown poza prostym tekstem.`;
 
 async function callAI(messages, opts={}){
+  // Własny klucz użytkownika (BYOK) ma pierwszeństwo przed kluczem administratora.
+  const _active = window.EmloveProviders ? window.EmloveProviders.activeProvider() : 'admin';
+  if(_active !== 'admin'){
+    const _last = messages[messages.length-1] || {content:''};
+    const _history = messages.slice(0,-1)
+      .filter(m=>m.role!=='system')
+      .map(m=>({role:m.role, content:m.content}));
+    return await window.EmloveByok.ask({
+      provider:_active,
+      model:'',
+      text:_last.content,
+      history:_history,
+    });
+  }
   if(!aiSettings.enabled) throw new Error('Pełny Milo nie jest włączony. Włącz go w ⚙️ Ustawieniach.');
   const base=(aiSettings.baseUrl||'').replace(/\/$/,'');
   const url=base+'/chat/completions';
@@ -648,6 +666,8 @@ function deleteLocalUserData(){
   if(!accepted)return;
   try{
     ['emocje_entries','emocje_points','emocje_exercises','emocje_chat','emlove_personality','emlove_wheel_cycle_v1'].forEach(k=>localStorage.removeItem(k));
+    // Własne klucze API też znikają z urządzenia.
+    Object.keys(localStorage).forEach(k=>{ if(k.indexOf('emlove.provider.')===0) localStorage.removeItem(k); });
   }catch(e){window.alert('Nie udało się usunąć danych na tym urządzeniu. Spróbuj ponownie.');return;}
   window.location.reload();
 }
@@ -707,7 +727,8 @@ async function generateSimWithAI(){
 async function summarizeWithAI(){
   const box=document.getElementById('aiSummary');
   if(!state.entries.length){ alert('Najpierw zrób check-in, żeby Milo miał co podsumować.'); return; }
-  if(!aiSettings.enabled){ alert('Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji.'); return; }
+  const _byok = window.EmloveProviders && window.EmloveProviders.activeProvider()!=='admin';
+  if(!aiSettings.enabled && !_byok){ alert('Ta funkcja wymaga Milo online — wybierz własny klucz w „Klucze API” albo poczekaj, aż administrator włączy klucz główny.'); return; }
   box.style.display='block'; box.textContent='⏳ Milo czyta Twój dziennik…';
   try{
     const data=state.entries.slice(0,20).map(e=>`${e.date} ${e.emotion} siła ${e.intensity}: ${e.what||''} | ${e.iStatement||''}`).join('\n');
@@ -1043,19 +1064,40 @@ async function deleteAccount(){
 
 // ── Milo online wymaga teraz zalogowania ────────────────────
 function updateMiloGate(){
-  const auth=window.EmloveAuth;
-  const status=document.getElementById('aiStatusTitle');
-  const text=document.getElementById('aiStatusText');
-  if(!status||!text) return;
-  const online = window.EMLOVE_CONFIG && window.EMLOVE_CONFIG.supabaseUrl && window.EMLOVE_CONFIG.aiEndpoint;
-  if(!online) return;
-  if(auth && auth.currentUser()){
-    status.textContent='🌙 Milo — online';
-    text.textContent='Milo odpowiada z modelu językowego. Rozmowy nie są zapisywane u dostawcy.';
-  } else {
-    status.textContent='🌙 Milo — tryb lokalny';
-    text.textContent='Zaloguj się, aby rozmawiać z Milo online. Bez konta Milo działa lokalnie, z gotowych zwrotów.';
+  const auth = window.EmloveAuth;
+  const status = document.getElementById('aiStatusTitle');
+  const text = document.getElementById('aiStatusText');
+  if(!status || !text) return;
+
+  const P = window.EmloveProviders;
+  const byok = P && P.activeProvider() !== 'admin' && !!P.getApiKey(P.activeProvider());
+  const adminOnline = !!(window.EMLOVE_CONFIG && window.EMLOVE_CONFIG.aiEndpoint);
+  const loggedIn = !!(auth && auth.currentUser());
+
+  if(byok && loggedIn){
+    status.textContent = '🌙 Milo — online';
+    text.textContent = 'Milo odpowiada z modelu ' + P.providerById(P.activeProvider()).label +
+      ' na Twoim własnym kluczu. Rozmowy nie są zapisywane u dostawcy.';
+    return;
   }
+  if(byok && !loggedIn){
+    status.textContent = '🌙 Milo — online';
+    text.textContent = 'Wybrano własny klucz (' + P.providerById(P.activeProvider()).label +
+      '). Zaloguj się, żeby zacząć rozmowę.';
+    return;
+  }
+  if(adminOnline){
+    if(loggedIn){
+      status.textContent = '🌙 Milo — online';
+      text.textContent = 'Milo odpowiada z modelu językowego. Rozmowy nie są zapisywane u dostawcy.';
+    } else {
+      status.textContent = '🌙 Milo — online';
+      text.textContent = 'Zaloguj się, aby rozmawiać z Milo online.';
+    }
+    return;
+  }
+  status.textContent = '🌙 Milo — tryb lokalny';
+  text.textContent = 'Milo działa lokalnie, z gotowych zwrotów. Własny klucz API włączysz w „Klucze API”.';
 }
 
 ensureEntryIds();
@@ -1092,3 +1134,126 @@ async function resendLink(event){
     if(msg){ msg.textContent=authMessage(e,'Nie udało się wysłać linku. Spróbuj ponownie.'); msg.className='auth-msg error'; }
   }
 }
+
+// ══════════════════════════════════════════════════════════════
+// Klucze API (BYOK)
+// ══════════════════════════════════════════════════════════════
+
+let selectedProvider = 'admin';
+
+function renderKeys(){
+  const P = window.EmloveProviders;
+  if(!P) return;
+
+  selectedProvider = P.activeProvider();
+  const list = document.getElementById('providerList');
+  if(!list) return;
+
+  list.innerHTML = P.PROVIDERS.map(item => {
+    const on = item.id === selectedProvider;
+    return '<button type="button" class="provider-item' + (on ? ' active' : '') + '"' +
+      ' role="radio" aria-checked="' + (on ? 'true' : 'false') + '"' +
+      ' data-provider="' + item.id + '"' +
+      ' onclick="chooseProvider(\'' + item.id + '\')">' +
+      '<span class="provider-radio' + (on ? ' active' : '') + '"></span>' +
+      '<span class="provider-body"><span class="provider-label">' + escapeHtml(item.label) + '</span>' +
+      '<span class="provider-hint">' + escapeHtml(item.hint) + '</span></span>' +
+      '</button>';
+  }).join('');
+
+  const fields = document.getElementById('keyFields');
+  const adminHint = document.getElementById('adminHint');
+  const current = P.providerById(selectedProvider);
+
+  if(selectedProvider === 'admin'){
+    if(fields) fields.hidden = true;
+    if(adminHint) adminHint.hidden = false;
+  } else {
+    if(fields) fields.hidden = false;
+    if(adminHint) adminHint.hidden = true;
+    const keyEl = document.getElementById('providerKey');
+    const modelEl = document.getElementById('providerModel');
+    const hintEl = document.getElementById('providerKeyHint');
+    if(keyEl){
+      keyEl.value = P.getApiKey(selectedProvider);
+      keyEl.placeholder = current.keyPrefix ? ('np. ' + current.keyPrefix + '…') : 'sk-…';
+    }
+    if(modelEl){
+      modelEl.value = P.getModel(selectedProvider);
+      modelEl.placeholder = current.model;
+    }
+    if(hintEl) hintEl.textContent = current.hint;
+  }
+  updateKeysStatus();
+}
+
+function chooseProvider(id){
+  const P = window.EmloveProviders;
+  if(!P) return;
+  selectedProvider = id;
+  renderKeys();
+  const status = document.getElementById('keysStatus');
+  if(status) status.textContent = '';
+}
+
+function updateKeysStatus(){
+  const label = document.getElementById('chatModeLabel');
+  const P = window.EmloveProviders;
+  if(!label || !P) return;
+  const active = P.activeProvider();
+  if(active === 'admin') return; // ustawienia Milo sama nadpisze tekst
+  label.textContent = 'Milo · ' + P.providerById(active).label + ' · pyta, nie ocenia · nie decyduje za Ciebie';
+}
+
+async function saveProviderKey(){
+  const P = window.EmloveProviders;
+  if(!P) return;
+  const status = document.getElementById('keysStatus');
+  const keyEl = document.getElementById('providerKey');
+  const modelEl = document.getElementById('providerModel');
+
+  const cleanKey = (keyEl ? keyEl.value : '').trim();
+  const cleanModel = (modelEl ? modelEl.value : '').trim() || P.providerById(selectedProvider).model;
+
+  if(selectedProvider !== 'admin' && !cleanKey){
+    if(status){ status.textContent = 'Wpisz klucz API dla wybranego dostawcy.'; status.className = 'keys-status error'; }
+    return;
+  }
+
+  P.setActiveProvider(selectedProvider);
+  if(selectedProvider !== 'admin'){
+    P.setApiKey(selectedProvider, cleanKey);
+    P.setModel(selectedProvider, cleanModel);
+  }
+
+  const looksValid = selectedProvider === 'admin' || P.keyLooksValid(selectedProvider, cleanKey);
+  const label = selectedProvider === 'admin' ? 'klucza administratora' : P.providerById(selectedProvider).label;
+
+  if(status){
+    status.textContent = looksValid
+      ? 'Zapisano. Milo będzie używał: ' + label + '.'
+      : 'Zapisano, ale klucz nie wygląda na klucz ' + label + '. Sprawdź, czy wklejasz właściwy klucz.';
+    status.className = 'keys-status' + (looksValid ? '' : ' error');
+  }
+
+  updateKeysStatus();
+  updateMiloGate();
+  SoundEngine.success();
+}
+
+function clearProviderKey(){
+  const P = window.EmloveProviders;
+  if(!P) return;
+  if(selectedProvider === 'admin') return;
+  if(!confirm('Usunąć klucz ' + P.providerById(selectedProvider).label + ' z tego urządzenia?')) return;
+  P.clearApiKey(selectedProvider);
+  const status = document.getElementById('keysStatus');
+  if(status){ status.textContent = 'Usunięto klucz z urządzenia.'; status.className = 'keys-status'; }
+  renderKeys();
+}
+
+// Czyszczenie danych urządzenia ma objąć też klucze.
+document.addEventListener('emlove:clearLocal', () => {
+  if(!window.EmloveProviders) return;
+  window.EmloveProviders.PROVIDERS.forEach(p => window.EmloveProviders.clearApiKey(p.id));
+});

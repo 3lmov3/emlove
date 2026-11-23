@@ -420,3 +420,37 @@ html,body{max-width:100%;overflow-x:hidden}
 
 .auth-resend{margin:14px 0 0;font-size:13px;line-height:1.5}
 .auth-resend a{color:#0F8C86;font-weight:700;text-decoration:underline}
+
+/* ── Klucze API (BYOK) ─────────────────────────────────────── */
+.keys-section-title{font-weight:700;font-size:14px;color:var(--ink);margin:18px 0 8px}
+.provider-list{display:flex;flex-direction:column;gap:8px}
+.provider-item{display:flex;align-items:flex-start;gap:10px;width:100%;text-align:left;
+  padding:11px;border:1px solid var(--border);border-radius:12px;background:#fff;
+  font:inherit;cursor:pointer;color:var(--ink)}
+.provider-item:hover{border-color:#0F8C86}
+.provider-item.active{border-color:#0F8C86;background:rgba(15,140,134,.07)}
+.provider-item:focus-visible{outline:2px solid #0F8C86;outline-offset:2px}
+
+.provider-radio{flex:0 0 auto;width:18px;height:18px;margin-top:2px;border-radius:999px;
+  border:1.5px solid var(--border);display:inline-flex;align-items:center;justify-content:center}
+.provider-radio.active{border-color:#0F8C86}
+.provider-radio.active::after{content:'';width:9px;height:9px;border-radius:999px;background:#0F8C86}
+
+.provider-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+.provider-label{font-weight:700;font-size:14px}
+.provider-hint{font-size:12px;line-height:1.45;color:var(--muted)}
+
+#view-keys input{width:100%;border:1px solid var(--border);border-radius:10px;padding:12px;
+  background:#FFFDF9;color:var(--ink);font-size:14px;margin-bottom:6px}
+#view-keys input:focus{outline:2px solid rgba(15,140,134,.35);border-color:#0F8C86}
+
+.keys-hint{font-size:12.5px;line-height:1.5;color:var(--muted);margin:4px 0 0}
+.keys-text{font-size:13.5px;line-height:1.6;color:var(--ink);margin:8px 0 0}
+.keys-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+.keys-status{min-height:20px;margin:12px 0 0;font-size:13px;color:var(--muted)}
+.keys-status.error{color:#B42318;font-weight:700}
+
+@media (max-width:520px){
+  .keys-row{flex-direction:column}
+  .keys-row .btn{width:100%}
+}

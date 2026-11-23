@@ -30,6 +30,7 @@
       <button class="nav-btn" data-view="chat"><span>💬</span> Rozmowa z Milo</button>
       <button class="nav-btn" data-view="journal"><span>📓</span> Dziennik</button>
       <button class="nav-btn" data-view="personality"><span>🐾</span> Twoja osobowość</button>
+      <button class="nav-btn" data-view="keys"><span>🔑</span> Klucze API</button>
       <button class="nav-btn" data-view="library"><span>📚</span> Biblioteka emocji</button>
     </nav>
 
@@ -331,6 +332,53 @@
       </div>
     </section>
 
+    <section class="view" id="view-keys">
+      <div class="card">
+        <h2>🔑 Klucze API</h2>
+        <p class="muted">Wybierz, którego klucza ma używać Milo. Klucz administratora obsługuje Supabase;
+          własny klucz jest przechowywany tylko na tym urządzeniu.</p>
+
+        <div class="keys-section-title">Dostawca</div>
+        <div id="providerList" class="provider-list" role="radiogroup" aria-label="Dostawca modelu"></div>
+
+        <div id="keyFields" hidden>
+          <div class="keys-section-title">Klucz API</div>
+          <input id="providerKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…">
+          <p class="keys-hint" id="providerKeyHint"></p>
+
+          <div class="keys-section-title">Model</div>
+          <input id="providerModel" type="text" autocomplete="off" spellcheck="false" placeholder="model">
+
+          <div class="keys-row">
+            <button class="btn btn-primary" type="button" id="saveKeyBtn" onclick="saveProviderKey()">Zapisz</button>
+            <button class="btn btn-ghost" type="button" onclick="clearProviderKey()">Usuń klucz</button>
+          </div>
+        </div>
+
+        <p class="keys-hint" id="adminHint" hidden>
+          Ten tryb używa klucza administratora ustawionego w Supabase. Nie musisz nic wpisywać.
+        </p>
+
+        <p class="keys-status" id="keysStatus" role="status"></p>
+      </div>
+
+      <div class="card">
+        <h2>🔒 Prywatność i bezpieczeństwo</h2>
+        <p class="keys-text">Własny klucz jest zapisywany w przeglądarce na tym urządzeniu i przesyłany do funkcji
+          Supabase tylko wtedy, gdy wysyłasz wiadomość. Funkcja nie zapisuje klucza i nie loguje go.
+          Nie wpisuj klucza w rozmowie z Milo.</p>
+        <p class="keys-text">W przeglądarce klucz trafia do localStorage tej domeny — inaczej niż w aplikacji mobilnej,
+          gdzie używany jest SecureStore. Każdy skrypt działający w tej domenie może go odczytać, dlatego Emlove
+          nie ładuje skryptów firm trzecich poza Cloudflare Turnstile.</p>
+        <p class="keys-text">Klucz administratora nie jest dostępny w aplikacji — pozostaje w sekretach Supabase.
+          Własny klucz nie trafia do klucza administratora ani do historii rozmowy.</p>
+        <p class="keys-text">Płatności za własny klucz rozlicza wybrany dostawca (xAI, Anthropic, OpenAI albo OpenRouter).
+          Emlove nie dodaje marży.</p>
+      </div>
+
+      <button class="btn btn-ghost" type="button" onclick="goTo('chat')">← Wróć do rozmowy</button>
+    </section>
+
     <section class="view" id="view-personality">
       <div id="bfRoot" class="bf-wrap"></div>
     </section>
@@ -402,6 +450,8 @@
 <script src="config.js"></script>
 <script src="auth.js"></script>
 <script src="sync.js"></script>
+<script src="providers.js"></script>
+<script src="byok.js"></script>
 <script src="app.js"></script>
 <script src="ambient.js"></script>
 <script src="wheel.js"></script>
