@@ -10,6 +10,7 @@
 
   const DIRTY_KEY = 'emlove_sync_dirty';
   const DELETED_KEY = 'emlove_sync_deleted';
+  const REMOTE_IDS_PREFIX = 'emlove_sync_remote_ids_v1:';
   const FLUSH_DELAY = 2500;
 
   let timer = null;
@@ -81,7 +82,7 @@
   }
 
   function toRow(entry, userId) {
-    return {
+    const row = {
       id: entry.id,
       user_id: userId,
       entry_date: entry.date,
@@ -96,6 +97,18 @@
       i_statement: entry.iStatement || '',
       updated_at: entry.updatedAt || new Date().toISOString(),
     };
+    // Optional mobile columns are omitted for old cached PWA entries so an
+    // older local copy cannot erase fields written by the mobile app.
+    if ('emotionId' in entry) row.emotion_id = entry.emotionId || null;
+    if ('supportive' in entry) row.supportive = entry.supportive || '';
+    if ('difficult' in entry) row.difficult = entry.difficult || '';
+    if ('wishes' in entry) row.wishes = entry.wishes || '';
+    if ('entryType' in entry || String(entry.emotion || '').startsWith('Symulacja:'))
+      row.entry_type = entry.entryType || 'simulation';
+    if ('simulationId' in entry) row.simulation_id = entry.simulationId || null;
+    if ('simulationTitle' in entry) row.simulation_title = entry.simulationTitle || null;
+    if ('simulationChoices' in entry) row.simulation_choices = Array.isArray(entry.simulationChoices) ? entry.simulationChoices : [];
+    return row;
   }
 
   function fromRow(row) {
@@ -111,6 +124,14 @@
       needs: Array.isArray(row.needs) ? row.needs : [],
       needText: row.need_text || '',
       iStatement: row.i_statement || '',
+      emotionId: row.emotion_id || '',
+      supportive: row.supportive || '',
+      difficult: row.difficult || '',
+      wishes: row.wishes || '',
+      entryType: row.entry_type || (String(row.emotion || '').startsWith('Symulacja:') ? 'simulation' : 'checkin'),
+      simulationId: row.simulation_id || '',
+      simulationTitle: row.simulation_title || '',
+      simulationChoices: Array.isArray(row.simulation_choices) ? row.simulation_choices : [],
       updatedAt: row.updated_at,
     };
   }
@@ -126,7 +147,6 @@
     try {
       if (deleted.length) {
         const ids = deleted.filter(id => typeof id === 'string');
-        // Porcjujemy, żeby nie przekroczyć limitu długości URL.
         for (let i = 0; i < ids.length; i += 40) {
           const chunk = ids.slice(i, i + 40);
           await rest('/rest/v1/emlove_entries?id=in.(' + chunk.join(',') + ')', {method: 'DELETE'});
@@ -165,9 +185,9 @@
     } catch (e) {
       const code = e.code === 'login_required' || e.status === 401 ? 'Sesja wygasła — zaloguj się ponownie'
         : e.status === 404 ? 'Brak tabel w bazie — uruchom emlove_account.sql'
+        : /schema cache|column .* does not exist/i.test(e.message || '') ? 'Baza wymaga mobile_sync_migration.sql'
         : 'Nie udało się zapisać — spróbuję ponownie';
       setStatus(code, 'error');
-      // Nie kasujemy kolejki: następna próba nadrobi.
     } finally {
       flushing = false;
     }
@@ -186,12 +206,19 @@
     }
     const rows = await res.json();
     const remote = (rows || []).map(fromRow);
+    const userId = window.EmloveAuth.currentUser().id;
+    const remoteIds = new Set(remote.map(r => r.id).filter(Boolean));
+    const knownIds = new Set(readList(REMOTE_IDS_PREFIX + userId));
 
     const local = (window.EmloveState && window.EmloveState.entries) || [];
     const byId = new Map();
     local.forEach(e => { if (e.id) byId.set(e.id, e); });
 
     let merged = 0;
+    // Missing records that were present on the last sync were deleted on another device.
+    knownIds.forEach(id => { if (!remoteIds.has(id) && byId.delete(id)) merged++; });
+    writeList(DIRTY_KEY, readList(DIRTY_KEY).filter(id => !knownIds.has(id) || remoteIds.has(id)));
+
     remote.forEach(r => {
       const mine = byId.get(r.id);
       if (!mine) { byId.set(r.id, r); merged++; return; }
@@ -200,10 +227,8 @@
       if (remoteTs > mineTs) { byId.set(r.id, r); merged++; }
     });
 
-    // Usunięte lokalnie pozostają usunięte.
     const deleted = new Set(readList(DELETED_KEY));
     const mergedList = [...byId.values()].filter(e => !deleted.has(e.id));
-
     mergedList.sort((a, b) => {
       const ka = String(a.date) + ' ' + String(a.time);
       const kb = String(b.date) + ' ' + String(b.time);
@@ -215,7 +240,6 @@
       if (window.EmloveSave) window.EmloveSave();
     }
 
-    // Postępy: bierzemy większą wartość — punkty tylko rosną.
     try {
       const p = await fetch(baseUrl() + '/rest/v1/emlove_progress?select=*', {
         headers: {apikey: cfg().supabaseAnonKey, Authorization: 'Bearer ' + token},
@@ -231,7 +255,8 @@
       }
     } catch (e) { /* postępy są pomocnicze */ }
 
-    if (merged > 0) setStatus('Pobrano ' + merged + ' wpisów z chmury', 'ok');
+    writeList(REMOTE_IDS_PREFIX + userId, [...remoteIds]);
+    if (merged > 0) setStatus('Zsynchronizowano ' + merged + ' zmian z chmury', 'ok');
     else setStatus('Chmura aktualna', 'ok');
     return {merged};
   }

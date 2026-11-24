@@ -160,7 +160,8 @@ function saveCheckin(){
   const entry = {
     id: newEntryId(), updatedAt: new Date().toISOString(),
     date: todayStr(), time: new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}),
-    emotion: emo.name, emoji: emo.emoji, intensity: document.getElementById('intensity').value,
+    emotion: emo.name, emotionId: emo.id, emoji: emo.emoji, intensity: document.getElementById('intensity').value,
+    entryType: 'checkin', supportive: '', difficult: '', wishes: '',
     body: [...state.selectedBody], what: document.getElementById('checkinWhat').value,
     needs: [...state.selectedNeeds], needText: document.getElementById('checkinNeedText').value,
     iStatement: document.getElementById('iPreview').textContent
@@ -323,7 +324,7 @@ function finishSim(){
   state.exercisesDone++; addPoints(15);
   const sim=SIMULATIONS[state.simIndex];
   const reflect=document.getElementById('simReflectText').value;
-  const _simEntry={id:newEntryId(), updatedAt:new Date().toISOString(), date:todayStr(), time:new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}), emotion:'Symulacja: '+sim.title, emoji:sim.icon, intensity:'—', body:[], what:reflect||state.simLog.map(l=>l.choice).join(' · '), needs:[], needText:'', iStatement:'Symulacja ukończona. Refleksja: '+(reflect||'—')};
+  const _simEntry={id:newEntryId(), updatedAt:new Date().toISOString(), date:todayStr(), time:new Date().toLocaleTimeString('pl-PL',{hour:'2-digit',minute:'2-digit'}), emotion:'Symulacja: '+sim.title, emoji:sim.icon, intensity:'—', body:[], what:reflect||state.simLog.map(l=>l.choice).join(' · '), needs:[], needText:'', iStatement:'Symulacja ukończona. Refleksja: '+(reflect||'—'), entryType:'simulation', simulationId:sim.id, simulationTitle:sim.title, simulationChoices:state.simLog.map(l=>l.choice)};
   state.entries.unshift(_simEntry);
   if(window.EmloveSync) EmloveSync.markDirty(_simEntry.id);
   saveState();
