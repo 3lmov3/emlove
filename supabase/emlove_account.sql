@@ -69,6 +69,23 @@ create policy "emlove_progress_all" on public.emlove_progress
   for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
 
 -- ─────────────────────────────────────────────────────────────
+-- Uprawnienia
+--
+-- Bez tego PostgREST zwraca 42501 „permission denied for table”,
+-- a aplikacja pokazuje „Nie udało się zsynchronizować”.
+-- anon jest bezpieczny: RLS dopuszcza tylko wiersze z auth.uid() = user_id.
+-- ─────────────────────────────────────────────────────────────
+grant usage on schema public to anon, authenticated;
+
+grant select, insert, update, delete
+  on public.emlove_entries  to anon, authenticated;
+
+grant select, insert, update, delete
+  on public.emlove_progress to anon, authenticated;
+
+grant usage, select on all sequences in schema public to anon, authenticated;
+
+-- ─────────────────────────────────────────────────────────────
 -- Zmiana updated_at przy edycji
 -- ─────────────────────────────────────────────────────────────
 drop trigger if exists emlove_entries_touch on public.emlove_entries;
