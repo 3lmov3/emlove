@@ -1,6 +1,20 @@
 // Połączenie do własnej funkcji Supabase. Klucz OpenRouter nigdy nie jest w przeglądarce.
+//
+// ── 2026-11-23 ─────────────────────────────────────────────────────────────
+// Stara funkcja Supabase „milo" została USUNIĘTA (Dashboard → Edge Functions).
+// Milo w ćwiczeniach (Drabina, „Wyraź") działa teraz WYŁĄCZNIE lokalnie:
+// nie ma przycisków wysyłających tekst ani pobierających tła z serwera.
+//
+// Aby kiedyś przywrócić tryb online: odtwórz funkcję „milo" w Supabase,
+// dodaj CORS i ustaw poniższą flagę na false.
+// ───────────────────────────────────────────────────────────────────────────
+const MILO_ONLINE_DISABLED = true;
+
 const MiloClient={
- configured(){const c=window.EMLOVE_CONFIG||{};return !!(c.supabaseUrl&&c.supabaseAnonKey&&c.turnstileSiteKey);},
+ configured(){
+  if(MILO_ONLINE_DISABLED)return false;
+  const c=window.EMLOVE_CONFIG||{};return !!(c.supabaseUrl&&c.supabaseAnonKey&&c.turnstileSiteKey);
+ },
  async captcha(){
   const sitekey=window.EMLOVE_CONFIG.turnstileSiteKey;
   if(!sitekey)throw Error('Brak konfiguracji weryfikacji');

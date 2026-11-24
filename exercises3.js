@@ -95,8 +95,8 @@ function initWheelCourse(){
  button.onclick=()=>respond(false);localButton.onclick=()=>respond(true);
  const switchTab=(isCourse)=>{document.getElementById('coursePanel').style.display=isCourse?'':'none';document.getElementById('expressPanel').style.display=isCourse?'none':'';document.getElementById('courseTab').classList.toggle('active',isCourse);document.getElementById('expressTab').classList.toggle('active',!isCourse);};
  document.getElementById('courseTab').onclick=()=>switchTab(true);document.getElementById('expressTab').onclick=()=>switchTab(false);
- const wheel=document.getElementById('wheelSvg');
- if(wheel){wheel.innerHTML=`<div class="wheel-reference"><a href="wheel-reference.jpg" target="_blank" rel="noopener noreferrer" aria-label="Powiększ oryginalne koło emocji"><img src="wheel-reference.jpg" alt="Oryginalne koło emocji; obszary i słowa są też dostępne na liście poniżej" style="display:block;width:100%;height:auto;border-radius:10px"></a><p class="muted small">Oryginalna grafika · w środku: Łaska. Kliknij obraz, by go powiększyć.</p>${TRAIN_WHEEL.map((f,i)=>`<button class="choice-btn" onclick="showTrainingFamily(${i})">${escWheel(f.name)} →</button>`).join('')}</div>`;}
+ // Skan koła został usunięty z repo — koło rysuje wheel-view.js jako SVG.
+ // Nie nadpisujemy #wheelSvg, żeby nie zasłonić trybu awaryjnego (renderWheel).
  const detail=document.getElementById('wheelDetail');if(detail)detail.innerHTML='<h3>Twoje koło emocji</h3><p>Wybierz grupę, aby zobaczyć jej podgrupy i słowa. To mapa do poznawania języka emocji, a nie jedyny sposób odczuwania.</p>';
  if(typeof WHEEL_WORDS!=='undefined'){WHEEL_WORDS.splice(0,WHEEL_WORDS.length,...TRAIN_WHEEL.flatMap(f=>f.groups.flatMap(g=>g[1].map(word=>({word,familyId:f.name,familyName:f.name,cluster:g[0],color:'#0F8C86'})))));if(typeof renderLibraryWheel==='function')renderLibraryWheel('');}
  WheelCourse.render();
