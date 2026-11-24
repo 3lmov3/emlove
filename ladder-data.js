@@ -1,336 +1,1496 @@
-// ============================================================
-// Drabina emocji — treść zadań
-//
-// Każdy scenariusz ma DOKŁADNIE 4 pytania, ułożone od najłatwiejszego.
-// Poziom 1 bierze pierwsze 2, poziom 2 pierwsze 3, poziom 3 wszystkie 4.
-//
-// Format pytania: [treść, [poprawna, zła, zła, zła]]
-// Poprawna odpowiedź jest ZAWSZE pierwsza — silnik losuje kolejność.
-// ============================================================
-
-const SCENARIOS = [
-
-// ── POZIOM 1 · codzienne sytuacje ───────────────────────────
-{id:'kolejka', title:'Ktoś przeszedł przed Tobą', story:'Stoisz w kolejce do kasy. Człowiek, który stał daleko za Tobą, podchodzi i staje przed Tobą. Nikt nic nie mówi. Ty też milczysz.', qs:[
- ['Co najbardziej czujesz w tej chwili?',['Złość, że ktoś Cię zignorował','Radość z szybkiej obsługi','Wdzięczność','Nudę']],
- ['Dlaczego nic nie powiedziałeś?',['Bo nie chciałeś robić sceny','Bo Ci to nie przeszkadzało','Bo lubisz kolejki','Bo go znasz']],
- ['Co by Ci pomogło?',['Spokojne powiedzenie, że to Twoja kolej','Głośne krzyknięcie','Uderzenie w stół','Odejście bez słowa']],
- ['Czego możesz potrzebować?',['Szacunku i jasności','Nowych znajomych','Pochwały','Presentu']]]},
-
-{id:'odpis', title:'Kolega nie odpisuje', story:'Napisałeś do kolegi rano. Jest wieczór i nadal nie ma odpowiedzi. Widzisz, że był online. Zaczynasz myśleć, że coś go obraziło.', qs:[
- ['Co prawdopodobnie czujesz?',['Niepokój i złość','Radość','Wdzięczność','Spokój']],
- ['Co może oznaczać brak odpowiedzi?',['Wiele rzeczy — nie musi być nic złego','Na pewno jest na Ciebie zły','Chce zakończyć znajomość','Nie czyta wiadomości']],
- ['Dlaczego wymyślasz najgorsze?',['Bo niepokój lubi dopowiadać','Bo zawsze masz rację','Bo znasz jego myśli','Bo tak jest w filmach']],
- ['Co możesz zrobić?',['Zapytać wprost, czy wszystko gra','Napisać złą wiadomość','Usunąć go z kontaktów','Czekać w milczeniu']]]},
-
-{id:'lunch', title:'Zjadł Twój lunch', story:'W lodówce w pracy leżał Twój obiad. Kiedy przyszła przerwa, pudełko było puste. Ktoś je zjadł i nie zostawił karteczki.', qs:[
- ['Co czujesz?',['Złość i zawód','Radość','Wdzięczność','Obojętność']],
- ['Dlaczego to boli?',['Bo ktoś wziął coś, co było Twoje','Bo lubisz gotować','Bo jestem głodny','Bo obiad był smaczny']],
- ['Co możesz zrobić?',['Zapytać, kto to zrobił','Zjeść komuś inny lunch','Nic — to tylko obiad','Napisać złośliwą karteczkę']],
- ['Czego możesz potrzebować?',['Szacunku do swoich rzeczy','Nowego pudełka','Większej lodówki','Pochwały']]]},
-
-{id:'halas', title:'Hałas w nocy', story:'Jest trzecia w nocy. Sąsiad słucha muzyki tak głośno, że słychać ją u Ciebie. Jutro masz wstać wcześnie. Nie możesz zasnąć.', qs:[
- ['Co czujesz?',['Złość i zmęczenie','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to jest trudne?',['Bo nie masz wpływu na sytuację','Bo lubisz muzykę','Bo masz dużo czasu','Bo sąsiad jest miły']],
- ['Co możesz zrobić?',['Poprosić o ciszej albo zadzwonić','Wyłączyć prąd w całym bloku','Krzyknąć przez ścianę','Przeprowadzić się nocą']],
- ['Czego możesz potrzebować?',['Ciszy i snu','Nowej muzyki','Lepszych słuchawek','Więcej kawy']]]},
-
-{id:'pochwala', title:'Pochwała przy wszystkich', story:'Na spotkaniu szef mówi: „To dzięki Tobie ten projekt doszedł do skutku". Wszyscy patrzą. Kiwasz głową i mówisz „nie ma za co".', qs:[
- ['Co możesz czuć?',['Dumę i trochę skrępowanie','Złość','Wstręt','Nudę']],
- ['Dlaczego trudno przyjąć pochwałę?',['Bo uwaga wielu osób bywa niezręczna','Bo pochwała zawsze kłamie','Bo szef się myli','Bo nie lubisz ludzi']],
- ['Co zrobić, gdy dostajesz pochwałę?',['Podziękować i przyjąć ją',' Zaprzeczyć i pomniejsić','Wyjść z sali','Zmienić temat']],
- ['Co ta pochwała mówi o Twojej pracy?',['Że była ważna i zauważona','Że była bezwartościowa','Że to przypadek','Że szef coś kombinuje']]]},
-
-{id:'prezent', title:'Prezent, który Ci się nie podoba', story:'Dostajesz prezent. Starannie zapakowany. W środku coś, czego nie lubisz i nie użyjesz. Osoba, która go dała, patrzy z nadzieją.', qs:[
- ['Co możesz czuć?',['Wdzięczność i zakłopotanie','Złość','Nienawiść','Obojętność']],
- ['Dlaczego to niezręczne?',['Bo wdzięczność i rozczarowanie mogą iść razem','Bo prezenty zawsze są złe','Bo nie lubisz dostawać','Bo osoba jest niemiła']],
- ['Co możesz powiedzieć?',['Dziękuję, to miłe że o mnie pomyślałeś','To mi się nie podoba','Po co mi to','Zwrócę do sklepu']],
- ['Co jest ważniejsze niż sam prezent?',['Że ktoś o Tobie pomyślał','Cena','Marka','Opakowanie']]]},
-
-{id:'autobus', title:'Spóźniłeś się na autobus', story:'Biegniesz na przystanek. Drzwi zamykają się tuż przed Tobą. Kierowca widzi Cię i odjeżdża. Następny autobus za 40 minut.', qs:[
- ['Co czujesz?',['Frustrację i złość','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to tak denerwuje?',['Bo się starałeś i nie zdążyłeś','Bo lubisz czekać','Bo masz wolny dzień','Bo kierowca Cię zna']],
- ['Co możesz teraz zrobić?',['Zadzwonić, że spóźnisz się','Krzyknąć na kierowcę','Wrócić do domu na zawsze','Zepsuć przystanek']],
- ['Czego możesz potrzebować?',['Odrobiny spokoju','Nowego autobusu','Wiecznego biletu','Kawy']]]},
-
-{id:'sekret', title:'Koleżanka powiedziała Twoją tajemnicę', story:'Powierzyłeś koleżance coś ważnego i poprosiłeś, żeby nie mówiła. Dziś usłyszałeś to od osoby trzeciej. Koleżanka zachowuje się, jakby nic się nie stało.', qs:[
- ['Co czujesz?',['Zdradzenie i zawód','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to boli?',['Bo zaufanie zostało złamane','Bo tajemnica była głupia','Bo osoba trzecia jest miła','Bo lubisz plotki']],
- ['Co możesz zrobić?',['Powiedzieć jej, że wiesz i jak się czujesz','Rozpowiedzieć jej sekret','Uśmiechać się i milczeć','Zniknąć']],
- ['Czego możesz potrzebować?',['Wyjaśnienia i przeprosin','Nowych znajomych','Większej tajemnicy','Zemsty']]]},
-
-{id:'pomoc', title:'Ktoś pomógł bez proszenia', story:'Niesiesz ciężkie torby. Nieznajomy podchodzi, bierze jedną i niesie do drzwi. Nie chciał podziękowania, tylko poszedł dalej.', qs:[
- ['Co czujesz?',['Wdzięczność i zaskoczenie','Złość','Wstręt','Strach']],
- ['Dlaczego to miłe?',['Bo ktoś pomógł, nie oczekując niczego','Bo byłeś słaby','Bo torby były lekkie','Bo lubisz obcych']],
- ['Co możesz zrobić?',['Podziękować i zapamiętać ten gest','Dać mu pieniądze','Uciec','Nic — to normalne']],
- ['Co ten gest mówi o ludziach?',['Że pomoc bywa bezinteresowna','Że wszyscy czegoś chcą','Że ludzie są źli','Że lepiej nie ufać']]]},
-
-{id:'mama', title:'Mama pyta, czy jadłeś', story:'Mama dzwoni i pyta, czy jadłeś. Odpowiadasz, że tak. Ona pyta jeszcze dwa razy. Zaczyna Cię to irytować.', qs:[
- ['Co możesz czuć?',['Irrytację i ciepło naraz','Czystą złość','Obojętność','Strach']],
- ['Dlaczego ona pyta?',['Bo tak okazuje troskę','Bo chce Cię kontrolować','Bo nie ma co robić','Bo nie wierzy w lekarzy']],
- ['Co możesz powiedzieć?',['Mamo, dziękuję, ale zjadłem i jestem najedzony','Przestań pytać','Nie dzwoń więcej','Nic']],
- ['Co jest pod jej pytaniem?',['Obawa o Ciebie','Chęć złośliwości','Nuda','Chęć kłótni']]]},
-
-{id:'podwyzka', title:'Nie dostałeś podwyżki', story:'Mówiono Ci, że podwyżki będą w tym roku. Dowiedziałeś się, że jej nie ma. Kolega z Twojego zespołu dostał. Szef mówi, że „sytuacja jest trudna".', qs:[
- ['Co czujesz?',['Zawód i poczucie niesprawiedliwości','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to boli bardziej, że kolega dostał?',['Bo porównanie się wzmienia','Bo kolega jest niemiły','Bo lubisz kolegę','Bo szef kłamie']],
- ['Co możesz zrobić?',['Zapytać wprost, co wpłynęło na decyzję','Od razu rzucić pracę','Zrobić koledze na złość','Milczeć i się wściekać']],
- ['Czego możesz potrzebować?',['Wyjaśnienia i planu','Nowej pracy od jutra','Zemsty','Pochwały']]]},
-
-{id:'przerwanie', title:'Przerwały Ci w pół zdania', story:'Mówisz coś na spotkaniu. W połowie zdania ktoś wchodzi Ci w słowo i mówi coś innego. Wszyscy słuchają jego. Twoja myśl znika.', qs:[
- ['Co czujesz?',['Złość i pominięcie','Radość','Wdzięczność','Nudę']],
- ['Dlaczego to niemiłe?',['Bo nie pozwolono Ci dokończyć','Bo mówisz za cicho','Bo twoja myśl była głupia','Bo lubisz przerywać']],
- ['Co możesz zrobić?',['Wrócić do niej: „Chciałbym dokończyć myśl"','Przerwać jemu','Uśmiechnąć się i dać za wygraną','Wyjść']],
- ['Czego możesz potrzebować?',['Przestrzeni do dokończenia','Nowego zespołu','Mikrofonu','Autorytetu']]]},
-
-{id:'odwolane', title:'Spotkanie odwołane w ostatniej chwili', story:'Umówiłeś się ze znajomym na weekend. Godzinę przed spotkaniem pisze, że nie może. Już byłeś gotowy i wyszedłeś z domu.', qs:[
- ['Co czujesz?',['Zawód i złość','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to denerwuje?',['Bo czekałeś i się przygotowałeś','Bo lubisz czekać','Bo masz dużo czasu','Bo znajomy jest niemiły']],
- ['Co możesz zrobić?',['Powiedzieć, że Ci zależało','Napisać złośliwie','Zniknąć','Zrobić mu na złość']],
- ['Czego możesz potrzebować?',['Poważnego traktowania','Nowego znajomego','Więcej planów','Spokoju']]]},
-
-{id:'wiatr', title:'Deszcz bez parasola', story:'Wychodzisz z domu. Niebo jest szare, ale nie pada. Po drodze zaczyna padać. Nie masz parasola. Wracasz mokry.', qs:[
- ['Co możesz czuć?',['Irrytację i zmęczenie','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to denerwuje?',['Bo nie mogłeś się przygotować','Bo lubisz deszcz','Bo masz nową kurtkę','Bo lubisz wracać']],
- ['Co możesz zrobić?',['Przebrać się i wypić coś ciepłego','Złościć się cały dzień','Obwiniać pogodę','Nie wychodzić z domu']],
- ['Czego możesz potrzebować?',['Chwili na wyschnięcie','Nowego parasola','Zmiany pogody','Spokoju']]]},
-
-{id:'balagan', title:'Bałagan w domu', story:'Wracasz zmęczony. Na stole brudne naczynia, na podłodze ubrania. Nikt nie sprzątał, choć było ustalone, że będzie czysto.', qs:[
- ['Co czujesz?',['Złość i zmęczenie','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to dotyka?',['Bo umowa nie została dotrzymana','Bo lubisz bałagan','Bo masz mało ubrań','Bo naczynia są ładne']],
- ['Co możesz zrobić?',['Powiedzieć, jak się czujesz, i ustalić zasady','Krzyknąć','Sprzątać w milczeniu i wściekać się','Wyprowadzić się']],
- ['Czego możesz potrzebować?',['Współpracy','Nowego domu','Sprzątaczki','Ciszy']]]}
-];
-
-// ── POZIOM 2 · trudniejsze relacje ──────────────────────────
-SCENARIOS.push(
-
-{id:'odwoluje', title:'Zawsze umawia się i odwołuje', story:'Przyjaciel regularnie umawia się na spotkania i odwołuje je dzień albo dwa wcześniej. Za każdym razem ma powód. Przestajesz robić sobie plany.', qs:[
- ['Co możesz czuć?',['Zawód i zmęczenie','Radość','Wdzięczność','Nudę']],
- ['Co może oznaczać taki wzorzec?',['Że coś go powstrzymuje — warto zapytać','Że Cię nienawidzi','Że jest leniwy','Że lubi odwoływać']],
- ['Dlaczego przestajesz planować?',['Bo nie chcesz again zawieść się','Bo nie lubisz ludzi','Bo masz mało czasu','Bo lubisz siedzieć']],
- ['Co możesz zrobić?',['Powiedzieć, jak to wpływa na Ciebie','Od razu zakończyć znajomość','Odwoływać swoje spotkania','Milczeć i mieć żal']]]},
-
-{id:'piatek', title:'Zadania w piątek wieczorem', story:'Szef wysyła Ci zadania w piątek po południu, na poniedziałek. Dzieje się tak regularnie. Nie masz czasu na weekend.', qs:[
- ['Co czujesz?',['Frustrację i zmęczenie','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to problem?',['Bo weekend to odpoczynek, nie praca','Bo zadania są trudne','Bo nie lubisz szefa','Bo piątek jest długi']],
- ['Co możesz zrobić?',['Ustalić granicę: pilne tylko naprawdę pilne','Ignorować','Zmienić pracę','Skarżyć się kolegom']],
- ['Czego możesz potrzebować?',['Jasnych zasad','Nowego telefonu','Mniej pieniędzy','Więcej pracy']]]},
-
-{id:'telefon', title:'Telefon podczas rozmowy', story:'Opowiadasz coś ważnego. Druga osoba przez cały czas zerka na telefon i odpisuje na wiadomości. Mówi, że słucha.', qs:[
- ['Co możesz czuć?',['Pominięcie i złość','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to rani?',['Bo uwaga jest formą szacunku','Bo telefon jest drogi','Bo lubisz gadat','Bo osoba jest zajęta']],
- ['Co możesz powiedzieć?',['„Potrzebuję, żebyś posłuchał bez telefonu"','„Jesteś beznadziejny"','Nic i mieć żal','Zabrać telefon']],
- ['Co jest pod Twoją złością?',['Potrzeba bycia ważnym','Chęć kontroli','Nuda','Zazdrość o telefon']]]},
-
-{id:'coltam', title:'Pyta, ale nie słucha', story:'Ktoś pyta „co tam u Ciebie?". Zaczynasz opowiadać. Po chwili przerywa i mówi o sobie. Nie pyta o nic więcej.', qs:[
- ['Co możesz czuć?',['Zawód i samotność','Radość','Wdzięczność','Nudę']],
- ['Dlaczego to nieprzyjemne?',['Bo pytanie było tylko formą','Bo mówisz za długo','Bo osoba jest ciekawa','Bo nie lubisz pytań']],
- ['Co możesz zrobić?',['Zapytać, czy chce posłuchać','Przerwać i pójść','Mówić głośniej','Zrobić to samo']],
- ['Czego możesz potrzebować?',['Zainteresowania i uwagi','Nowego rozmówcy','Mniej słów','Spokoju']]]},
-
-{id:'porownanie', title:'Porównanie do rodzeństwa', story:'Rodzic mówi: „Twój brat w twoim wieku już miał pracę i rodzinę". Ty masz inny plan. Rodzic powtarza to przy okazji.', qs:[
- ['Co możesz czuć?',['Zawód i poczucie bycia gorszym','Radość','Wdzięczność','Spokój']],
- ['Dlaczego porównania bolą?',['Bo mierzą Cię cudzą miarą','Bo brat jest lepszy','Bo rodzic kocha brata','Bo nie lubisz rodziny']],
- ['Co możesz zrobić?',['Powiedzieć, że masz swoją drogę','Przestać rozmawiać z rodzeństwem','Zrobić wszystko jak brat','Krzyknąć']],
- ['Czego możesz potrzebować?',['Uznania własnej drogi','Nowego brata','Większej rodziny','Spokoju']]]},
-
-{id:'kredit', title:'Ktoś bierze kredit za Twoją pracę', story:'Zrobiłeś większość zadania. Na spotkaniu współpracownik przedstawia je jako wspólne, ale mówi głównie o swoim udziale. Szef go chwali.', qs:[
- ['Co czujesz?',['Złość i niesprawiedliwość','Radość','Wdzięczność','Spokój']],
- ['Dlaczego to boli?',['Bo Twoja praca została pominięta','Bo szef jest miły','Bo lubisz współpracę','Bo zadanie było łatwe']],
- ['Co możesz zrobić?',['Spokojnie wskazać swój wkład','Zrobić mu przykrość','Milczeć i mieć żal','Zniszczyć projekt']],
- ['Czego możesz potrzebować?',['Uznania','Nowego zajęcia','Mniej pracy','Zemsty']]]},
-
-{id:'pieniadze', title:'Pożycza pieniądze i nie oddaje', story:'Znajomy pożyczył pieniądze „na tydzień". Minęły trzy miesiące. Kiedy o tym wspominasz, mówi, że zaraz odda. Czujesz się niezręcznie.', qs:[
- ['Co czujesz?',['Złość i niezręczność','Radość','Wdzięczność','Spokój']],
- ['Dlaczego trudno o tym mówić?',['Bo temat pieniędzy jest wrażliwy','Bo lubisz pożyczać','Bo znajomy jest bogaty','Bo nie potrzebujesz pieniędzy']],
- ['Co możesz zrobić?',['Powiedzieć wprost i ustalić termin','Napisać do jego rodziny','Zniknąć','Zrobić mu scenę']],
- ['Czego możesz potrzebować?',['Zwrotu i jasności','Nowych znajomych','Mniej pieniędzy','Ostrzejszych słów']]]}
-);
-
-// ── POZIOM 3 · głębsze mechanizmy ────────────────────────────
-SCENARIOS.push(
-
-{id:'usmiech', title:'Uśmiech na spotkaniu', story:'Kierownik mówi pracownikowi, że jego projekt został odrzucony. Pracownik uśmiecha się, kiwa głową i mówi: „Oczywiście, rozumiem. Nie ma problemu". Po spotkaniu nie rozmawia z nikim, szybko wychodzi z budynku i odmawia udziału we wspólnym obiedzie.', qs:[
- ['Co on prawdopodobnie czuje?',['Złość i zawód, choć tego nie pokazuje','Radość, że projekt odrzucono','Nic — skoro się uśmiecha','Wstyd, że mu się udało']],
- ['Dlaczego uśmiechał się na spotkaniu?',['Bo w pracy trudno pokazać, że coś boli','Bo go to ucieszyło','Bo zawsze się uśmiecha','Bo chciał zranić kierownika']],
- ['Co pomoże mu najbardziej po takim dniu?',['Rozmowa z kimś, komu ufa','Ucieczka od ludzi','Ukrywanie, że coś się stało','Złość na kierownika']],
- ['Czego może potrzebować od innych?',['Uznania, że to trudna sytuacja','Rad, co robić dalej','Pochwały za uśmiech','Pouczenia, że trzeba być twardszym']]]},
-
-{id:'pewnoscsiebie', title:'Nadmierna pewność siebie', story:'Mężczyzna podczas dyskusji nieustannie podkreśla swoje kompetencje. Gdy ktoś przedstawia odmienną opinię, przerywa mu: „Zajmuję się tym od lat, wiem lepiej". W prywatnej rozmowie przyznaje, że obawia się utraty stanowiska.', qs:[
- ['Co może kryć się pod tą pewnością?',['Lęk przed utratą stanowiska','Prawdziwa pewność siebie','Chęć pomocy','Nuda']],
- ['Dlaczego zachowanie różni się od odczuć?',['Bo pewność bywa zbroją','Bo on kłamie dla zabawy','Bo nie wie, co czuje','Bo lubi się skrywać']],
- ['Czy to musi być świadoma manipulacja?',['Nie — często to mechanizm obronny','Tak, zawsze','Tak, ale rzadko','Nie wiem']],
- ['Co może pomóc?',['Uznanie jego kompetencji i spokojna rozmowa','Publiczne zdemaskowanie','Unikanie go','Zmiana stanowiska']]]},
-
-{id:'milczenie', title:'Milczenie jako komunikat', story:'Kobieta na rodzinnym spotkaniu dowiaduje się, że brat podjął ważną decyzję bez konsultacji. Nie okazuje złości, nie komentuje, odpowiada krótkimi zdaniami. Następnego dnia zachowuje się, jakby nic się nie stało.', qs:[
- ['Co może znaczyć jej milczenie?',['Żę jest zraniona i nie chce mówić','Że jej wszystko jedno','Że nie słyszała','Że jest zmęczona']],
- ['Czy unikanie konfliktu oznacza brak emocji?',['Nie — emocje mogą być silne, ale ukryte','Tak, zawsze','Nie, nigdy','Nie wiem']],
- ['Jak odróżnić wycofanie od karania ciszą?',['Po czasie i intencji','Po tonie głosu','Po ubiorze','Po godzinie']],
- ['Co może pomóc?',['Danie jej przestrzeni i otwarte pytanie','Zmuszanie do rozmowy','Komentowanie milczenia','Zrobienie jej na złość']]]},
-
-{id:'kontrola', title:'Potrzeba kontroli', story:'Osoba A organizuje wyjazd. Ustala godziny, miejsca, posiłki i trasę. Gdy ktoś proponuje zmianę, reaguje irytacją. Mówi: „Chcę, żeby wszystkim było dobrze".', qs:[
- ['Co może czuć przy zmianie planu?',['Lęk i irytację','Radość','Wdzięczność','Nudę']],
- ['Dlaczego tak pilnuje planu?',['Bo nieprzewidziane sytuacje ją niepokoją','Bo lubi rozkazywać','Bo nikomu nie ufa','Bo chce się wszystkim należeć']],
- ['Czy troska może iść w parze z kontrolą?',['Tak — jedno nie wyklucza drugiego','Nie, nigdy','Tylko u kobiet','Tylko u mężczyzn']],
- ['Co może pomóc?',['Ustalenie, co jest naprawdę ważne','Odebranie jej organizacji','Zmiana planu bez pytania','Kłótnia']]]},
-
-{id:'wina', title:'Ciągłe przepraszanie', story:'Mężczyzna przypadkowo uraził przyjaciela. Przyjaciel zapewnia, że nie ma pretensji. Mimo to on wraca do sytuacji, przeprasza i próbuje wynagrodzić przykrość.', qs:[
- ['Co on czuje?',['Winę, mimo że wybaczone','Ulgę','Złość na przyjaciela','Nudę']],
- ['Dlaczego trudno mu uwierzyć w wybaczenie?',['Bo wina siedzi głębiej niż słowa','Bo przyjaciel kłamie','Bo lubi przepraszać','Bo chce się przypodobać']],
- ['Kiedy przepraszanie przestaje pomagać?',['Gdy staje się pętlą','Nigdy','Tylko w pracy','Tylko w rodzinie']],
- ['Co może pomóc?',['Przyjęcie wybaczenia i zmiana zachowania','Kolejne przeprosiny','Unikanie przyjaciela','Prezent']]]},
-
-{id:'komplement', title:'Pochwała przed prośbą', story:'Kobieta mówi współpracownikowi: „Tylko ty potrafisz zrobić to naprawdę dobrze". Zaraz potem prosi go o dodatkową pracę, która nie należy do jego obowiązków. To się powtarza.', qs:[
- ['Jaki może być cel tej pochwały?',['Skłonienie go do dodatkowej pracy','Szczera radość z jego umiejętności','Chęć lepszego poznania','Zwykła uprzejmość']],
- ['Po czym poznać, że to nie tylko pochwała?',['Za każdym razem pojawia się prośba','Mówi głośno','Często się uśmiecha','Pochwała jest długa']],
- ['Czy ona musi świadomie manipulować?',['Nie — może robić to nieświadomie','Tak, zawsze','Nie, nigdy','Nie wiem']],
- ['Jak zareagować asertywnie?',['Docenić pochwałę i odmówić prośbie','Wściec się','Zgodzić się zawsze','Uciec']]]},
-
-{id:'zazdrosc', title:'Zazdrość pod krytyką', story:'Mężczyzna dowiaduje się, że znajomy dostał awans. Gratuluje, ale chwilę później mówi: „Pewnie miałeś dobre znajomości". W kolejnych rozmowach regularnie pomniejsza jego osiągnięcia.', qs:[
- ['Co może kryć się za tymi słowami?',['Zazdrość, że to nie on dostał awans','Radość z sukcesu','Chęć pomocy','Nuda']],
- ['Dlaczego pomniejsza jego osiągnięcia?',['Bo cudzy sukces go boli','Bo znajomy go o to prosił','Bo chce być zabawny','Bo nie zna faktów']],
- ['Czy krytyka może chronić samoocenę?',['Tak — to mechanizm obronny','Nie, nigdy','Tylko w pracy','Tylko w rodzinie']],
- ['Co może pomóc?',['Uznanie sukcesu znajomego','Unikanie znajomego','Krytykowanie go dalej','Zmiana pracy']]]},
-
-{id:'sprzeczne', title:'Sprzeczne sygnały', story:'Kobieta twierdzi, że chce zakończyć znajomość. Jednocześnie regularnie inicjuje kontakt, interesuje się życiem drugiej osoby i reaguje niezadowoleniem, gdy ta zaczyna spotykać się z kimś innym.', qs:[
- ['Co może się dziać w niej?',['Konflikt między chęcią bliskości i lękiem','Czysta radość','Nuda','Obojętność']],
- ['Dlaczego zachowanie nie zgadza się ze słowami?',['Bo uczucia są sprzeczne','Bo kłamie dla zabawy','Bo chce zranić','Bo nie wie, co mówi']],
- ['Jaką rolę może odgrywać przywiązanie?',['Dużą — bliskość bywa potrzebna i straszna','Żadną','Tylko u kobiet','Tylko u mężczyzn']],
- ['Co może pomóc drugiej osobie?',['Postawienie granicy i spokojna rozmowa','Znikać bez słowa','Zrobić jej na złość','Zmienić numer']]]},
-
-{id:'pokrzywdzony', title:'Zawsze pokrzywdzony', story:'W grupie znajomych jedna osoba często opowiada o tym, jak inni ją zawiedli. W konfliktach przedstawia siebie jako stronę poszkodowaną. Rzadko wspomina o własnym udziale.', qs:[
- ['Jaką funkcję może pełnić taka narracja?',['Chronić samoocenę','Być zawsze prawdą','Śmieszyć','Uczyć']],
- ['Czy to może być sposób radzenia sobie z winą?',['Tak — bywa','Nie, nigdy','Tylko u kobiet','Tylko u mężczyzn']],
- ['Jak odróżnić krzywdę od jednostronnej relacji?',['Posłuchać drugiej strony','Zapytać grupę','Zgadywać','Nie da się']],
- ['Co może pomóc?',['Łagodne pytanie o własny udział','Zgadzać się zawsze','Unikać tej osoby','Skrytykować ją publicznie']]]},
-
-{id:'granice', title:'Testowanie granic', story:'Osoba A regularnie spóźnia się na spotkania z osobą B. Gdy B zwraca uwagę, A odpowiada: „Przecież wiesz, jaki jestem. Nie przesadzaj". Po pewnym czasie B przestaje zgłaszać zastrzeżenia.', qs:[
- ['Co się dzieje w tej relacji?',['A przekracza granice, a B przestaje je zgłaszać','B jest bardziej punktualny','Oboje są zadowoleni','A zawsze przychodzi na czas']],
- ['Dlaczego B przestał zgłaszać zastrzeżenia?',['Bo nic to nie zmieniało','Bo mu się to podobało','Bo bał się spóźnić','Bo chciał sprawdzić A']],
- ['Czy wzorzec się utrwala?',['Tak — brak reakcji uczy, że można','Nie, nigdy','Tylko w pracy','Tylko w rodzinie']],
- ['Co może pomóc?',['Konsekwentne stawianie granicy','Przestać się spotykać','Zawsze się spóźniać','Zrobić scenę']]]},
-
-{id:'racjonalizacja', title:'Racjonalizacja', story:'Student nie zdaje egzaminu. Zamiast przyznać, że niewystarczająco się przygotował, stwierdza: „Ten egzamin i tak nie sprawdza rzeczywistych umiejętności. Prowadzący nie potrafi uczyć". Wcześniej odkładał naukę.', qs:[
- ['Co może się dziać?',['Racjonalizacja — chroni samoocenę','Prawda o egzaminie','Chęć pomocy','Nuda']],
- ['Jaki koszt ma racjonalizacja?',['Blokuje naukę na przyszłość','Żaden','Tylko czas','Tylko pieniądze']],
- ['Czy krytyka egzaminu może być uzasadniona?',['Tak — ale to nie zmienia jego części','Nie, nigdy','Tylko czasem','Nie wiem']],
- ['Co może pomóc?',['Szukanie przyczyny w sobie i wsparcie','Oskarżanie prowadzącego','Zmiana kierunku','Rezygnacja']]]},
-
-{id:'empatia', title:'Empatia czy własny interes', story:'Mężczyzna pomaga znajomym w trudnych sytuacjach. Jest dyspozycyjny, poświęca czas i rozwiązuje ich problemy. Z czasem zaczyna oczekiwać wdzięczności. Gdy ktoś odmawia mu pomocy, mówi: „Po wszystkim, co dla ciebie zrobiłem?"', qs:[
- ['Czy pomoc może być autentyczna i interesowna naraz?',['Tak — jedno nie wyklucza drugiego','Nie, nigdy','Tylko u kobiet','Tylko u mężczyzn']],
- ['Jaką rolę odgrywa potrzeba uznania?',['Dużą — bywa ukryta pod pomocą','Żadną','Tylko u kobiet','Tylko u mężczyzn']],
- ['Jak odróżnić wdzięczność od poczucia długu?',['Wdzięczność jest dobrowolna, dług — zobowiązaniem','Nie da się','Wdzięczność zawsze jest fałszywa','Dług zawsze jest zły']],
- ['Co może pomóc?',['Rozmowa o oczekiwaniach','Zaprzestanie pomocy','Zrobienie sceny','Unikanie ludzi']]]},
-
-{id:'odrzucenie', title:'Brak odpowiedzi na wiadomość', story:'Kobieta wysyła wiadomość do znajomego. Nie otrzymuje odpowiedzi przez kilka godzin. Zaczyna analizować ostatnią rozmowę, zastanawia się, czy powiedziała coś niewłaściwego. W końcu usuwa wiadomość i postanawia więcej się nie odzywać.', qs:[
- ['Co ona czuje?',['Niepokój, że mogła coś zepsuć','Ulgę','Złość na niego','Nic']],
- ['Dlaczego usunęła wiadomość?',['Bo uznała, że powiedziała coś nie tak','Bo zmieniła temat','Bo chciała mieć porządek','Bo on ją o to prosił']],
- ['Czy tu jest personalizacja?',['Tak — bierze winę na siebie bez dowodów','Nie','Tylko czasem','Nie wiem']],
- ['Co może pomóc?',['Zapytać wprost zamiast zgadywać','Usunąć wszystkie wiadomości','Zniknąć','Napisać złość']]]},
-
-{id:'wartosci', title:'Konflikt wartości', story:'Pracownik odkrywa, że przełożony manipuluje wynikami raportów. Wie, że zgłoszenie może doprowadzić do utraty pracy. Uważa też, że milczenie byłoby nieuczciwe wobec klientów. Staje się coraz bardziej wycofany.', qs:[
- ['Jaki konflikt w nim zachodzi?',['Między uczciwością a bezpieczeństwem','Między pieniędzmi a nudą','Między kolegami','Żaden']],
- ['Jaka rolę odgrywa strach?',['Dużą — blokuje działanie','Żadną','Tylko w pracy','Tylko w rodzinie']],
- ['Co to jest dysonans poznawczy?',['Napięcie między tym, co myślę, a co robię','Rodzaj muzyki','Choroba','Brak pieniędzy']],
- ['Co może pomóc?',['Rozmowa z kimś zaufanym','Milczenie na zawsze','Zmiana pracy bez planu','Zrobienie sceny']]]},
-
-{id:'obraz', title:'Inna wobec obcych i bliskich', story:'Osoba w kontaktach z obcymi jest spokojna, uprzejma i powściągliwa. Wobec bliskich bywa impulsywna, krytyczna i wymagająca. W pracy jest bardzo zdyscyplinowana, ale w życiu prywatnym często unika odpowiedzialności.', qs:[
- ['Dlaczego bywa inna wobec bliskich?',['Bo bliskość pozwala na większą swobodę','Bo nie lubi bliskich','Bo jest chora','Bo tak wychowana']],
- ['Czy to musi być hipokryzja?',['Nie — różne konteksty wywołują różne zachowania','Tak, zawsze','Nie, nigdy','Nie wiem']],
- ['Jaki koszt ma to dla bliskich?',['Mogą czuć się mniej ważni','Żaden','Tylko czas','Tylko pieniądze']],
- ['Co może pomóc?',['Zauważenie wzorca i rozmowa','Unikanie bliskich','Zmiana pracy','Terapia tylko']]]}
-);
-
-// ── ROZRÓŻNIJ · zestawy po 4 pytania ─────────────────────────
-const ROZROZNIJ_SETS = [
-{id:'r1', qs:[
- ['Które słowo pasuje do poczucia, że ktoś dostał coś, czego Ty chciałeś?',['zazdrosny','wdzięczny','zaskoczony','spokojny']],
- ['Które słowo oznacza niepokój przed tym, co się stanie?',['zmartwiony','wdzięczny','zuchwały','senny']],
- ['Które słowo opisuje brak wpływu na sytuację?',['bezsilny','odizolowany','zaciekawiony','zuchwały']],
- ['Które słowo oznacza poczucie, że jesteś gorszy od innych?',[' Gorszy od innych','zuchwały','spokojny','zaciekawiony']]]},
-
-{id:'r2', qs:[
- ['Które słowo pasuje do poczucia, że ktoś Cię zawiódl?',['rozczarowany','wdzięczny','zaciekawiony','obojętny']],
- ['Które słowo oznacza wdzięczność za czyjś gest?',['wdzięczny','zazdrosny','zmartwiony','bezsilny']],
- ['Które słowo opisuje brak kontaktu z ludźmi?',['odizolowany','bezsilny','zuchwały','senny']],
- ['Które słowo oznacza radość z czegoś nieoczekiwanego?',['zaskoczony','zmartwiony','zazdrosny','bezsilny']]]},
-
-{id:'r3', qs:[
- ['Które słowo pasuje do silnej złości na kogoś?',['wrogo nastawiony','wdzięczny','spokojny','senny']],
- ['Które słowo oznacza poczucie bycia pominiętym?',['zlekceważony','doceniony','wdzięczny','zuchwały']],
- ['Które słowo opisuje chęć dowiedzenia się więcej?',['zaciekawiony','zmartwiony','bezsilny','zazdrosny']],
- ['Które słowo oznacza spokój i brak napięcia?',['spokojny','zmartwiony','wrogo nastawiony','zaskoczony']]]},
-
-{id:'r4', qs:[
- ['Które słowo pasuje do poczucia winy po czymś?',['winny','zuchwały','spokojny','zaciekawiony']],
- ['Które słowo oznacza wstyd po wpadce?',['zawstydzony','zuchwały','wdzięczny','spokojny']],
- ['Które słowo opisuje dumę z osiągnięcia?',['dumny','zawstydzony','zmartwiony','bezsilny']],
- ['Które słowo oznacza strach przed utratą kogoś?',['zazdrosny','spokojny','zuchwały','wdzięczny']]]},
-
-{id:'r5', qs:[
- ['Które słowo pasuje do zmęczenia i chęci odpoczynku?',['senny','zuchwały','wrogo nastawiony','zaskoczony']],
- ['Które słowo oznacza przytłoczenie zbyt wieloma rzeczami?',['przytłoczony','spokojny','wdzięczny','zuchwały']],
- ['Które słowo opisuje radość z bliskości?',['czuły','wrogo nastawiony','zmartwiony','bezsilny']],
- ['Które słowo oznacza niezdecydowanie?',['niepewny','zuchwały','spokojny','wdzięczny']]]},
-
-{id:'r6', qs:[
- ['Które słowo pasuje do poczucia bycia ważnym?',['ważny','bezsilny','zmartwiony','zawstydzony']],
- ['Które słowo oznacza chęć działania i odwagi?',['odważny','bezsilny','zmartwiony','zawstydzony']],
- ['Które słowo opisuje trudność w podjęciu decyzji?',['niepewny','odważny','spokojny','wdzięczny']],
- ['Które słowo oznacza zaskoczenie czymś?',['zadziwiony','zmartwiony','zazdrosny','bezsilny']]]},
-
-{id:'r7', qs:[
- ['Które słowo pasuje do poczucia, że inni Cię nie akceptują?',['niepasujący','spokojny','wdzięczny','zuchwały']],
- ['Które słowo oznacza chęć bycia samemu?',['zamknięty w sobie','odważny','wdzięczny','zuchwały']],
- ['Które słowo opisuje sceptycyzm wobec czyichś słów?',['sceptyczny','wdzięczny','spokojny','zuchwały']],
- ['Które słowo oznacza pewność siebie?',['pewny siebie','bezsilny','zmartwiony','zawstydzony']]]},
-
-{id:'r8', qs:[
- ['Które słowo pasuje do irytacji drobnymi rzeczami?',['poirytowany','wdzięczny','spokojny','senny']],
- ['Które słowo oznacza oburzenie na niesprawiedliwość?',['oburzony','spokojny','wdzięczny','senny']],
- ['Które słowo opisuje chęć przebaczenia?',['skruszony','wrogo nastawiony','zazdrosny','zuchwały']],
- ['Które słowo oznacza zmęczenie emocjonalne?',['wyczerpany','odważny','zuchwały','spokojny']]]},
-
-{id:'r9', qs:[
- ['Które słowo pasuje do radości z życia?',['wesoły','zmartwiony','bezsilny','zawstydzony']],
- ['Które słowo oznacza wolność od zmartwień?',['wolny','zmartwiony','bezsilny','zawstydzony']],
- ['Które słowo opisuje pełen siły i energii?',['energiczny','wyczerpany','zmartwiony','bezsilny']],
- ['Które słowo oznacza spokój wewnętrzny?',['spokojny','poirytowany','zmartwiony','oburzony']]]},
-
-{id:'r10', qs:[
- ['Które słowo pasuje do strachu przed innymi?',['zastraszony','zuchwały','spokojny','wdzięczny']],
- ['Które słowo oznacza niepewność co do siebie?',['niewystarczający','zuchwały','spokojny','wdzięczny']],
- ['Które słowo opisuje chęć ucieczki?',['zamknięty w sobie','odważny','spokojny','wdzięczny']],
- ['Które słowo oznacza brak nadziei?',['bezsilny','odważny','zuchwały','spokojny']]]},
-
-{id:'r11', qs:[
- ['Które słowo pasuje do podziwu dla kogoś?',['szanowany','zlekceważony','zmartwiony','bezsilny']],
- ['Które słowo oznacza uznanie czyjejś pracy?',['doceniony','zlekceważony','zmartwiony','bezsilny']],
- ['Które słowo opisuje radość z czyjegoś sukcesu?',['wdzięczny','zazdrosny','zmartwiony','bezsilny']],
- ['Które słowo oznacza poczucie bycia gorszym?',[' Gorszy od innych','szanowany','zuchwały','spokojny']]]},
-
-{id:'r12', qs:[
- ['Które słowo pasuje do niezadowolenia z siebie?',['zawstydzony','dumny','spokojny','wdzięczny']],
- ['Które słowo oznacza chęć zmiany?',['skruszony','wrogo nastawiony','zazdrosny','zuchwały']],
- ['Które słowo opisuje ulgę po trudnym czasie?',['spokojny','zmartwiony','poirytowany','oburzony']],
- ['Które słowo oznacza nadzieję na coś dobrego?',['pełen nadziei','bezsilny','zmartwiony','zawstydzony']]]},
-
-{id:'r13', qs:[
- ['Które słowo pasuje do radości z niespodzianki?',['zaskoczony','zmartwiony','bezsilny','zawstydzony']],
- ['Które słowo oznacza zadowolenie z siebie?',['dumny','zawstydzony','bezsilny','zmartwiony']],
- ['Które słowo opisuje trudność w nazwaniu emocji?',['zakłopotany','spokojny','wdzięczny','zuchwały']],
- ['Które słowo oznacza chęć bycia bliżej kogoś?',['czuły','wrogo nastawiony','zmartwiony','bezsilny']]]},
-
-{id:'r14', qs:[
- ['Które słowo pasuje do poczucia, że świat jest zbyt trudny?',['przytłoczony','spokojny','wdzięczny','zuchwały']],
- ['Które słowo oznacza potrzebę odpoczynku?',['senny','odważny','zuchwały','spokojny']],
- ['Które słowo opisuje chęć poznania czegoś?',['dociekliwy','zmartwiony','bezsilny','zawstydzony']],
- ['Które słowo oznacza poczucie bycia oszukanym?',['zdradzony','wdzięczny','spokojny','zuchwały']]]},
-
-{id:'r15', qs:[
- ['Które słowo pasuje do smutku po stracie?',['w bólu, w żałobie','wesoły','zuchwały','spokojny']],
- ['Które słowo oznacza radość z akceptacji?',['szanowany','zlekceważony','zmartwiony','bezsilny']],
- ['Które słowo opisuje chęć pomocy innym?',['czuły','wrogo nastawiony','zmartwiony','bezsilny']],
- ['Które słowo oznacza niezadowolenie z czyjegoś zachowania?',['krytykancki','wdzięczny','spokojny','zuchwały']]]}
+// Drabina emocji — zatwierdzony zestaw zadań (40/20/10; jedno pytanie na zadanie).
+// Opcje mają pole accepted; silnik tasuje teksty i zachowuje klucz.
+window.SCENARIOS = window.SCENARIOS || [];
+window.ROZROZNIJ_SETS = window.ROZROZNIJ_SETS || [];
+window.LADDER_TASKS = [
+  {
+    "id": "a01",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Odwołane spotkanie",
+    "story": "Umówiłeś się ze znajomym na kawę. Zależało Ci na spotkaniu i jesteś już w drodze, gdy godzinę wcześniej dostajesz wiadomość, że nie może przyjść.",
+    "q": "Które zdanie najpewniej opisuje fakt, bez przypisywania znajomemu intencji?",
+    "options": [
+      {
+        "text": "Spotkanie zostało odwołane, gdy byłem już w drodze.",
+        "accepted": true
+      },
+      {
+        "text": "Może odwołał spotkanie, bo nie zależy mu na moim czasie.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Wiemy, że spotkanie odwołano, ale sam ten fakt nie mówi jeszcze, dlaczego znajomy to zrobił."
+  },
+  {
+    "id": "a02",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Przerwanie na spotkaniu",
+    "story": "Na zebraniu zaczynasz przedstawiać pomysł. Współpracownik wchodzi Ci w słowo. Zależało Ci na dokończeniu wypowiedzi.",
+    "q": "Które zdanie nazywa emocję, a nie potrzebę?",
+    "options": [
+      {
+        "text": "Czuję złość i rozczarowanie.",
+        "accepted": true
+      },
+      {
+        "text": "Chcę dokończyć myśl i zostać wysłuchany.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz jednocześnie odczuwać złość i potrzebować dokończyć myśl."
+  },
+  {
+    "id": "a03",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "przeżycie czy obserwowalne zachowanie",
+    "story": "Po nieprzyjemnej rozmowie osoba mówi „jestem zła”, po czym wychodzi z pokoju.",
+    "q": "Który element możesz bezpośrednio zaobserwować, nie opierając się na samoopisie?",
+    "options": [
+      {
+        "text": "Wyszła z pokoju.",
+        "accepted": true
+      },
+      {
+        "text": "Jest zła.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Wyjście z pokoju można zobaczyć, a emocję znamy z tego, co osoba o niej mówi."
+  },
+  {
+    "id": "a04",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Wiadomość po godzinach",
+    "story": "Przełożony wysyła wieczorem kolejne zadanie na rano. Takie wiadomości regularnie utrudniają Ci odpoczynek.",
+    "q": "Które zdanie nazywa potrzebę, a nie konkretną prośbę do przełożonego?",
+    "options": [
+      {
+        "text": "Potrzebuję odpoczynku i wyraźnej granicy między pracą a czasem prywatnym.",
+        "accepted": true
+      },
+      {
+        "text": "Proszę, nie wysyłaj mi zadań po godzinie osiemnastej.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Prośba może być jednym ze sposobów zadbania o odpoczynek i granice między pracą a czasem prywatnym."
+  },
+  {
+    "id": "a05",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Pochwała przy wszystkich",
+    "story": "Podczas spotkania szef chwali Twoją pracę. Cieszysz się, że została zauważona, ale nie lubisz być w centrum uwagi.",
+    "q": "Który opis najlepiej oddaje możliwość współistnienia dwóch stanów?",
+    "options": [
+      {
+        "text": "Mogę jednocześnie czuć dumę z pracy i skrępowanie uwagą innych.",
+        "accepted": true
+      },
+      {
+        "text": "Jeśli czuję skrępowanie, chyba nie mogę jednocześnie czuć dumy.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Radość i skrępowanie mogą pojawić się razem, nawet jeśli dotyczą różnych części tej samej sytuacji."
+  },
+  {
+    "id": "a06",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "zachowanie czy przypisana intencja",
+    "story": "W trakcie rozmowy ktoś zerka na telefon i odpowiada na wiadomość, gdy do niego mówisz.",
+    "q": "Które zdanie opisuje zachowanie, a nie domysł o motywie?",
+    "options": [
+      {
+        "text": "Zerknął na telefon i odpisał w trakcie rozmowy.",
+        "accepted": true
+      },
+      {
+        "text": "Odpisał, bo chciał pokazać, że rozmowa ze mną go nudzi.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Wiemy, że współpracownik spojrzał na telefon i odpisał, ale nie wiemy dlaczego."
+  },
+  {
+    "id": "a07",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Powrót do wypowiedzi",
+    "story": "Ktoś przerywa Ci na spotkaniu. Chcesz wrócić do swojej myśli, ale nie wiesz, czy zrobił to celowo.",
+    "q": "Która wypowiedź jasno stawia granicę, nie zakładając złej intencji?",
+    "options": [
+      {
+        "text": "Chciałbym dokończyć myśl — wrócę do tego, co mówiłem.",
+        "accepted": true
+      },
+      {
+        "text": "Mam wrażenie, że nie chcesz, żebym dokończył — chciałbym wrócić do swojej myśli.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Jasno wyrażając potrzebę dokończenia myśli, nie musisz zgadywać, dlaczego ktoś Ci przerwał."
+  },
+  {
+    "id": "a08",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Możliwy skutek granicy",
+    "story": "Spokojnie prosisz współpracownika, by pozwolił Ci dokończyć.",
+    "q": "Który wniosek opisuje to, na co masz wpływ, bez przewidywania reakcji drugiej osoby?",
+    "options": [
+      {
+        "text": "Jasno powiedziałem, czego potrzebuję.",
+        "accepted": true
+      },
+      {
+        "text": "Po spokojnej prośbie druga osoba może mnie zrozumieć i przeprosić.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz wybrać, jak wyrazić swoją potrzebę; reakcja drugiej osoby zależy także od niej."
+  },
+  {
+    "id": "a09",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "potrzeba czy strategia",
+    "story": "Rozmówca co chwilę sprawdza telefon, gdy opowiadasz mu o ważnej sprawie.",
+    "q": "Które zdanie nazywa potrzebę, a nie konkretną strategię?",
+    "options": [
+      {
+        "text": "Potrzebuję uważności i obecności w tej rozmowie.",
+        "accepted": true
+      },
+      {
+        "text": "Chcę, żebyś odłożył telefon na cały wieczór.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Prośba o odłożenie telefonu to jeden ze sposobów zadbania o uważną rozmowę."
+  },
+  {
+    "id": "a10",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Brak odpowiedzi",
+    "story": "Wysłałeś znajomemu wiadomość rano. Do wieczora nie ma odpowiedzi. Nie wiesz, co się wydarzyło.",
+    "q": "Które działanie może pomóc zdobyć informację, zamiast rozstrzygać za znajomego, co oznacza cisza?",
+    "options": [
+      {
+        "text": "Jeśli to dla mnie ważne, mogę napisać spokojnie i zapytać, czy wszystko w porządku.",
+        "accepted": true
+      },
+      {
+        "text": "Mogę się zastanawiać, czy brak odpowiedzi coś zmienił w naszej relacji.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Pytanie wprost może dać więcej informacji niż domyślanie się przyczyny ciszy."
+  },
+  {
+    "id": "a11",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Umówiony podział obowiązków",
+    "story": "W mieszkaniu ustaliliście, że w środę Ty wyniesiesz śmieci, a współlokator umyje naczynia. W czwartek naczynia nadal stoją w zlewie.",
+    "q": "Które zdanie najściślej opisuje to, co można zaobserwować?",
+    "options": [
+      {
+        "text": "W czwartek naczynia nadal stały w zlewie.",
+        "accepted": true
+      },
+      {
+        "text": "Współlokator nie liczy się z naszymi ustaleniami.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Naczynia w zlewie są obserwowalnym faktem; powody, dla których nie zostały umyte, nie są opisane."
+  },
+  {
+    "id": "a12",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "emocja czy potrzeba",
+    "story": "Znajoma odwołuje wspólny plan w ostatniej chwili. Zależało Ci na spotkaniu i trudno Ci przeorganizować wieczór.",
+    "q": "Które zdanie nazywa emocję?",
+    "options": [
+      {
+        "text": "Czuję rozczarowanie.",
+        "accepted": true
+      },
+      {
+        "text": "Potrzebuję wcześniej wiedzieć, gdy plany się zmieniają.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Rozczarowanie jest emocją, a wcześniejsza informacja o zmianie planów może być potrzebą."
+  },
+  {
+    "id": "a13",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Dwa stany naraz",
+    "story": "Po trudnym tygodniu spotkanie zostaje odwołane. Trochę czekałeś na rozmowę, ale czujesz też zmęczenie i myślisz o odpoczynku.",
+    "q": "Który opis najlepiej uwzględnia obie informacje?",
+    "options": [
+      {
+        "text": "Mogę być rozczarowany i jednocześnie czuć ulgę, że odpocznę.",
+        "accepted": true
+      },
+      {
+        "text": "Skoro czuję ulgę, spotkanie mogło nie być dla mnie aż tak ważne.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Ulga i rozczarowanie mogą współwystępować, bo spotkanie i odpoczynek są ważne na różne sposoby."
+  },
+  {
+    "id": "a14",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Czyje jedzenie?",
+    "story": "Współpracownik bierze z lodówki posiłek, który przygotowałeś dla siebie. Nie wiesz, czy pomylił pojemniki.",
+    "q": "Które zdanie nazywa potrzebę, a nie konkretną prośbę?",
+    "options": [
+      {
+        "text": "Chcę, żeby moje rzeczy były respektowane.",
+        "accepted": true
+      },
+      {
+        "text": "Proszę, podpiszmy pojemniki imionami.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Podpisanie pojemnika może pomóc chronić potrzebę respektowania swoich rzeczy."
+  },
+  {
+    "id": "a15",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "emocja czy interpretacja",
+    "story": "Po rozmowie ktoś mówi: „Czuję się odsunięta”.",
+    "q": "Które zdanie nazywa konkretną emocję?",
+    "options": [
+      {
+        "text": "Czuję smutek.",
+        "accepted": true
+      },
+      {
+        "text": "Czuję się odsunięta.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Poczucie odsunięcia mówi o tym, jak ktoś przeżywa sytuację, ale nie wskazuje jednej konkretnej emocji."
+  },
+  {
+    "id": "a16",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Spóźnienie",
+    "story": "Umówiony znajomy przychodzi dwadzieścia minut po czasie. Nie podał jeszcze powodu.",
+    "q": "Które zdanie pozostaje przy faktach?",
+    "options": [
+      {
+        "text": "Znajomy przyszedł dwadzieścia minut po umówionej godzinie.",
+        "accepted": true
+      },
+      {
+        "text": "Spóźnił się, bo nasze spotkanie nie jest dla niego ważne.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Spóźnienie o dwadzieścia minut jest faktem, a jego znaczenie dla znajomego wymagałoby dodatkowych informacji."
+  },
+  {
+    "id": "a17",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Zmiana planów",
+    "story": "Plan wspólnego wyjazdu kilka razy się zmienia. Czujesz niepokój i trudno Ci zdecydować, co przygotować.",
+    "q": "Które zdanie opisuje emocję, a nie potrzebę?",
+    "options": [
+      {
+        "text": "Czuję niepokój.",
+        "accepted": true
+      },
+      {
+        "text": "Potrzebuję jasnego planu, zanim zacznę się przygotowywać.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Niepokój jest emocją, a jasność planu może pomóc odpowiedzieć na potrzebę przewidywalności."
+  },
+  {
+    "id": "a18",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "zachowanie czy stan",
+    "story": "Po sporze osoba odsuwa krzesło i wychodzi z pokoju. Nie mówi, co czuje.",
+    "q": "Który element jest bezpośrednio zaobserwowalnym zachowaniem?",
+    "options": [
+      {
+        "text": "Odsunęła krzesło i wyszła z pokoju.",
+        "accepted": true
+      },
+      {
+        "text": "Poczuła się upokorzona.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Wyjście z pokoju jest widoczne; to, co osoba przeżywa, warto sprawdzić, zamiast zakładać."
+  },
+  {
+    "id": "a19",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Pochwała i skrępowanie",
+    "story": "Ktoś chwali Twoją prezentację. Cieszysz się, że została dobrze przyjęta, ale uwaga całej sali sprawia, że czujesz skrępowanie.",
+    "q": "Który opis najlepiej oddaje podane informacje?",
+    "options": [
+      {
+        "text": "Mogę czuć zadowolenie z prezentacji i skrępowanie uwagą innych.",
+        "accepted": true
+      },
+      {
+        "text": "Może mi się wydawać, że skrępowanie odbiera mi radość z pochwały.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Można cieszyć się z dobrze przyjętej prezentacji i jednocześnie czuć skrępowanie uwagą sali."
+  },
+  {
+    "id": "a20",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Rozmowa o granicy",
+    "story": "Prosisz bliską osobę, by uprzedzała Cię wcześniej o zmianie wspólnych planów.",
+    "q": "Który element zależy bezpośrednio od Ciebie?",
+    "options": [
+      {
+        "text": "To, że jasno wyrażę, czego potrzebuję.",
+        "accepted": true
+      },
+      {
+        "text": "To, że bliska osoba od razu zmieni swoje zachowanie.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz jasno powiedzieć, czego potrzebujesz, a druga osoba zdecyduje, jak zareaguje."
+  },
+  {
+    "id": "a21",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "emocja czy interpretacja",
+    "story": "W lodówce w pracy zostawiasz swój posiłek. W porze lunchu pojemnik jest pusty; nie wiesz, kto go wziął.",
+    "q": "Które zdanie nazywa emocję, a nie ocenę czyjejś intencji?",
+    "options": [
+      {
+        "text": "Czuję złość i zaskoczenie.",
+        "accepted": true
+      },
+      {
+        "text": "Ktoś uznał, że moje rzeczy są mniej ważne.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Złość i zaskoczenie opisują Twoje przeżycia, a ocena czyjejś intencji to już interpretacja."
+  },
+  {
+    "id": "a22",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Hałas w nocy",
+    "story": "Jest późno, sąsiad słucha głośno muzyki, a rano masz wstać wcześnie.",
+    "q": "Które zdanie nazywa potrzebę, a nie stan emocjonalny?",
+    "options": [
+      {
+        "text": "Potrzebuję ciszy i snu.",
+        "accepted": true
+      },
+      {
+        "text": "Czuję rozdrażnienie i zmęczenie.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Cisza i sen mogą być potrzebami, a rozdrażnienie i zmęczenie — stanami, które przy tej sytuacji się pojawiają."
+  },
+  {
+    "id": "a23",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Powierzony sekret",
+    "story": "Powierzyłeś znajomej prywatną informację i poprosiłeś, by jej nie przekazywała. Później usłyszałeś ją od kogoś innego.",
+    "q": "Które zdanie opisuje to, co wiesz z tej sytuacji, bez dopowiadania motywu?",
+    "options": [
+      {
+        "text": "Usłyszałem tę informację od innej osoby po tym, jak poprosiłem znajomą o dyskrecję.",
+        "accepted": true
+      },
+      {
+        "text": "Znajoma chciała, żebym poczuł się upokorzony.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Wiemy, że informacja do Ciebie dotarła, ale nie znamy jeszcze powodu jej przekazania."
+  },
+  {
+    "id": "a24",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "sygnał z ciała czy emocja",
+    "story": "Przed prezentacją zauważasz, że masz wilgotne dłonie i szybciej bije Ci serce.",
+    "q": "Który element jest sygnałem z ciała, a nie nazwą emocji?",
+    "options": [
+      {
+        "text": "Wilgotne dłonie i przyspieszone bicie serca.",
+        "accepted": true
+      },
+      {
+        "text": "Niepokój przed wystąpieniem.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Wilgotne dłonie i szybsze bicie serca to sygnały z ciała, które mogą towarzyszyć różnym emocjom."
+  },
+  {
+    "id": "a25",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Troska i irytacja",
+    "story": "Mama kilka razy pyta, czy jadłeś. Wiesz, że się o Ciebie troszczy, a powtarzające się pytanie zaczyna Cię drażnić.",
+    "q": "Który opis uwzględnia oba elementy?",
+    "options": [
+      {
+        "text": "Mogę doceniać jej troskę i jednocześnie czuć irytację.",
+        "accepted": true
+      },
+      {
+        "text": "Mogę się zastanawiać, czy za powtarzającymi się pytaniami kryje się brak zaufania.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz doceniać czyjąś troskę i jednocześnie odczuwać irytację, gdy pytanie się powtarza."
+  },
+  {
+    "id": "a26",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Awans znajomego",
+    "story": "Znajomy dostał awans, na który sam też liczyłeś. Cieszysz się z jego sukcesu, ale myślisz o własnym rozczarowaniu.",
+    "q": "Który opis najlepiej pasuje do podanych informacji?",
+    "options": [
+      {
+        "text": "Mogę cieszyć się jego sukcesem i jednocześnie odczuwać rozczarowanie swoją sytuacją.",
+        "accepted": true
+      },
+      {
+        "text": "Jego awans oznacza, że moje starania nie mają sensu.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Radość z sukcesu znajomego może współistnieć z rozczarowaniem własną sytuacją."
+  },
+  {
+    "id": "a27",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "potrzeba czy sposób jej zaspokojenia",
+    "story": "Wspólny plan kilka razy zmienia się w ostatniej chwili. Chcesz móc lepiej zaplanować swój czas.",
+    "q": "Które zdanie nazywa potrzebę, a nie konkretną prośbę?",
+    "options": [
+      {
+        "text": "Potrzebuję większej przewidywalności.",
+        "accepted": true
+      },
+      {
+        "text": "Proszę, potwierdźmy plan dzień wcześniej.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Potrzeba przewidywalności może być zaspokajana na różne sposoby, a potwierdzenie terminu to jedna z próśb."
+  },
+  {
+    "id": "a28",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Pożyczone pieniądze",
+    "story": "Znajomy nie oddał jeszcze pożyczonych pieniędzy i prosi o kolejną pożyczkę. Chcesz zachować relację, ale nie chcesz pożyczać bez ustaleń.",
+    "q": "Która odpowiedź stawia granicę bez przypisywania znajomemu intencji?",
+    "options": [
+      {
+        "text": "Na razie nie pożyczę kolejnej kwoty; najpierw ustalmy, kiedy oddasz poprzednią.",
+        "accepted": true
+      },
+      {
+        "text": "Chcesz mnie wykorzystać, skoro prosisz o kolejne pieniądze.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Jasne ustalenie spłaty pomaga zadbać o granicę bez przesądzania, dlaczego znajomy prosi o kolejną pożyczkę."
+  },
+  {
+    "id": "a29",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Odmowa pomocy",
+    "story": "Prosisz bliską osobę o pomoc w przeprowadzce. Odmawia, bo tego dnia ma już inne zobowiązania.",
+    "q": "Które pytanie pozwala sprawdzić, czy można znaleźć inne rozwiązanie?",
+    "options": [
+      {
+        "text": "Czy byłby inny termin, w którym możesz mi pomóc? Jeśli nie, poszukam kogoś innego.",
+        "accepted": true
+      },
+      {
+        "text": "Czyli nie mogę na Ciebie liczyć, kiedy naprawdę Cię potrzebuję.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz uwzględnić odmowę i równocześnie poszukać innego sposobu na uzyskanie pomocy."
+  },
+  {
+    "id": "a30",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "nastrój czy pojedyncza emocja",
+    "story": "Po przerwaniu wypowiedzi czujesz złość. Od kilku dni, także w innych sytuacjach, masz mniej energii i czujesz się przygaszony.",
+    "q": "Który opis bardziej odnosi się do nastroju utrzymującego się w różnych sytuacjach?",
+    "options": [
+      {
+        "text": "Od kilku dni czuję się przygaszony i mam mniej energii.",
+        "accepted": true
+      },
+      {
+        "text": "Poczułem złość, kiedy przerwano mi wypowiedź.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Utrzymujące się przez kilka dni poczucie przygaszenia może opisywać nastrój, a złość po przerwaniu — reakcję na konkretne zdarzenie."
+  },
+  {
+    "id": "a31",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Porównanie do rodzeństwa",
+    "story": "Rodzic mówi: „Twój brat w Twoim wieku miał już własne mieszkanie”. Ty masz inne plany i czujesz się oceniany.",
+    "q": "Które zdanie nazywa potrzebę, a nie emocję?",
+    "options": [
+      {
+        "text": "Potrzebuję, żeby moje wybory były traktowane poważnie.",
+        "accepted": true
+      },
+      {
+        "text": "Czuję złość i smutek.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Potrzeba uznania własnej drogi może współistnieć ze złością lub smutkiem po porównaniu."
+  },
+  {
+    "id": "a32",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Ktoś przedstawia wspólny projekt",
+    "story": "Współpracownik opowiada na spotkaniu o projekcie, nad którym pracowaliście razem. Nie wspomina jeszcze o Twoim wkładzie.",
+    "q": "Które zdanie opisuje sytuację bez przesądzania, dlaczego współpracownik tak mówi?",
+    "options": [
+      {
+        "text": "Do tej pory nie wspomniał o moim wkładzie.",
+        "accepted": true
+      },
+      {
+        "text": "Mam wrażenie, że chciałby przedstawić projekt jako swój.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Wiemy, że współpracownik nie wspomniał jeszcze o Twoim wkładzie, ale jego powodu nie znamy."
+  },
+  {
+    "id": "a33",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "emocja czy motyw",
+    "story": "Po rozmowie o awansie czujesz napięcie i zaczynasz przygotowywać się do kolejnego spotkania z przełożonym.",
+    "q": "Który element opisuje emocję lub stan, a nie motyw działania?",
+    "options": [
+      {
+        "text": "Napięcie przed kolejną rozmową.",
+        "accepted": true
+      },
+      {
+        "text": "Chęć uzyskania jasnej informacji o możliwościach awansu.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Napięcie opisuje stan, a chęć uzyskania informacji może kierować kolejnym działaniem."
+  },
+  {
+    "id": "a34",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Prezent, który nie pasuje",
+    "story": "Bliska osoba daje Ci prezent, którego raczej nie użyjesz. Widzisz, że włożyła wysiłek w jego wybór.",
+    "q": "Który opis może jednocześnie uwzględnić Twoje odczucia i intencję bliskiej osoby?",
+    "options": [
+      {
+        "text": "Mogę docenić jej staranie i jednocześnie nie czuć zadowolenia z samego prezentu.",
+        "accepted": true
+      },
+      {
+        "text": "Jeśli prezent mi nie pasuje, to znaczy, że bliska osoba wcale o mnie nie myślała.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz docenić czyjeś staranie, nawet jeśli sam prezent nie jest tym, czego potrzebujesz."
+  },
+  {
+    "id": "a35",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Zapomniane urodziny",
+    "story": "Bliski znajomy nie złożył Ci życzeń w dniu urodzin. Nie wiesz, czy pamiętał ani co się u niego działo.",
+    "q": "Które zdanie najlepiej oddziela możliwą potrzebę od przypuszczenia o relacji?",
+    "options": [
+      {
+        "text": "Mogę potrzebować poczuć, że bliscy o mnie pamiętają.",
+        "accepted": true
+      },
+      {
+        "text": "To znaczy, że znajomość przestała być dla niego ważna.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz potrzebować pamięci i uwagi bliskich, nie wiedząc jeszcze, dlaczego znajomy nie złożył życzeń."
+  },
+  {
+    "id": "a36",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "postawa czy zachowanie",
+    "story": "W zespole jedna osoba uważa, że każdy powinien mieć szansę dokończyć wypowiedź. Podczas spotkania regularnie czeka, aż inni skończą mówić.",
+    "q": "Który element opisuje postawę — przekonanie, a nie konkretne działanie?",
+    "options": [
+      {
+        "text": "Uważa, że każdy powinien mieć szansę dokończyć wypowiedź.",
+        "accepted": true
+      },
+      {
+        "text": "Czeka, aż inni skończą mówić.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Przekonanie o dawaniu innym głosu jest postawą, a czekanie na koniec wypowiedzi — działaniem."
+  },
+  {
+    "id": "a37",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Zgoda mimo zmęczenia",
+    "story": "Znajomy prosi Cię o pomoc w sobotę. Jesteś zmęczony, ale odruchowo odpowiadasz, że przyjdziesz.",
+    "q": "Które pytanie może pomóc Ci zauważyć własną potrzebę przed podjęciem decyzji?",
+    "options": [
+      {
+        "text": "Czy mam teraz przestrzeń na pomoc, czy potrzebuję odpoczynku?",
+        "accepted": true
+      },
+      {
+        "text": "Jak mogę się zmusić, żeby nie zawieść znajomego?",
+        "accepted": false
+      }
+    ],
+    "feedback": "Zauważenie tego, co czujesz i czego potrzebujesz, może pomóc zdecydować, czy przyjąć prośbę."
+  },
+  {
+    "id": "a38",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Przerwa w sporze",
+    "story": "Rozmowa staje się coraz bardziej napięta. Czujesz, że trudno Ci słuchać i spokojnie odpowiadać.",
+    "q": "Które działanie może pomóc zadbać o siebie i wrócić do rozmowy później?",
+    "options": [
+      {
+        "text": "Poprosić o krótką przerwę i ustalić, kiedy wrócicie do tematu.",
+        "accepted": true
+      },
+      {
+        "text": "Zakończyć rozmowę bez wyjaśnienia i oczekiwać, że druga osoba sama odgadnie, kiedy wrócisz.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Przerwa może dać czas na uspokojenie i umożliwić powrót do rozmowy w ustalonym momencie."
+  },
+  {
+    "id": "a39",
+    "level": 1,
+    "kind": "rozroznij",
+    "title": "zachowanie czy motyw",
+    "story": "Po nieporozumieniu ktoś dzwoni do znajomego i mówi, że chce przeprosić.",
+    "q": "Który element jest zachowaniem, które można zaobserwować?",
+    "options": [
+      {
+        "text": "Zadzwonił i powiedział, że chce przeprosić.",
+        "accepted": true
+      },
+      {
+        "text": "Chce naprawić relację.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Telefon i wypowiedziane słowa można zaobserwować, a motyw działania warto poznać z rozmowy."
+  },
+  {
+    "id": "a40",
+    "level": 1,
+    "kind": "scenariusz",
+    "title": "Zmieniony plan",
+    "story": "Wspólny plan zmienia się po raz kolejny. Czujesz rozczarowanie, ale wiesz, że nie znasz jeszcze przyczyny zmiany.",
+    "q": "Które zdanie łączy emocję z ostrożnym sposobem sprawdzenia sytuacji?",
+    "options": [
+      {
+        "text": "Jestem rozczarowany; mogę zapytać, co się zmieniło i ustalić, czy planujemy nowy termin.",
+        "accepted": true
+      },
+      {
+        "text": "Jestem rozczarowany, więc wiem, że druga osoba nie chciała się ze mną spotkać.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Rozczarowanie jest realne, ale samo nie wyjaśnia przyczyny zmiany planu; możesz o nią zapytać."
+  },
+  {
+    "id": "b01",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Odwołane spotkanie",
+    "story": "Zależało Ci na spotkaniu ze znajomym, ale jesteś też po ciężkim tygodniu. Godzinę przed spotkaniem znajomy odwołuje je.",
+    "q": "Które odpowiedzi łączą możliwy stan z potrzebą, zamiast przypisywać znajomemu intencję?",
+    "options": [
+      {
+        "text": "Rozczarowanie i potrzeba większej przewidywalności przy umawianiu się.",
+        "accepted": true
+      },
+      {
+        "text": "Ulga i potrzeba odpoczynku po ciężkim tygodniu.",
+        "accepted": true
+      },
+      {
+        "text": "Przypuszczenie, że znajomy wolał inne plany — to możliwa myśl, ale nie nazywa stanu i potrzeby.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Gdy jednocześnie zależy Ci na spotkaniu i jesteś zmęczony, rozczarowanie i ulga mogą współistnieć."
+  },
+  {
+    "id": "b02",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Telefon podczas rozmowy",
+    "story": "Opowiadasz partnerowi o trudnym dniu. Partner zerka na telefon i odpowiada na kilka wiadomości.",
+    "q": "Które potrzeby mogą zostać w tej chwili niezaspokojone?",
+    "options": [
+      {
+        "text": "Uważność i obecność w rozmowie.",
+        "accepted": true
+      },
+      {
+        "text": "Poczucie, że moja sprawa jest traktowana poważnie.",
+        "accepted": true
+      },
+      {
+        "text": "Kontrola nad tym, z kim partner może pisać.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Gdy uwaga rozmówcy ucieka do telefonu, możesz potrzebować obecności i poczucia bycia wysłuchanym."
+  },
+  {
+    "id": "b03",
+    "level": 2,
+    "kind": "rozroznij",
+    "title": "potrzeba, prośba czy emocja",
+    "story": "Chcesz porozmawiać z kimś, kto w czasie rozmowy często sprawdza telefon.",
+    "q": "Które zdanie jest konkretną prośbą, a nie samą potrzebą lub emocją?",
+    "options": [
+      {
+        "text": "Potrzebuję uważności, kiedy rozmawiamy.",
+        "accepted": false
+      },
+      {
+        "text": "Czy możesz odłożyć telefon na kilka minut, kiedy opowiadam?",
+        "accepted": true
+      },
+      {
+        "text": "Czuję się pominięty.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Konkretna prośba wskazuje jeden ze sposobów zadbania o potrzebę."
+  },
+  {
+    "id": "b04",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Powrót do przerwanej wypowiedzi",
+    "story": "Współpracownik przerywa Ci podczas spotkania. Nie wiesz, czy zrobił to celowo.",
+    "q": "Które zachowania mogą zakomunikować Twoją potrzebę bez przypisywania mu intencji?",
+    "options": [
+      {
+        "text": "Powiedzieć: „Chciałbym dokończyć myśl”.",
+        "accepted": true
+      },
+      {
+        "text": "Poczekać na przerwę i poprosić, by wrócić do Twojego punktu.",
+        "accepted": true
+      },
+      {
+        "text": "Powiedzieć: „Przerywasz, bo uważasz moje zdanie za nieważne”.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Możesz poprosić o dokończenie wypowiedzi, nie przesądzając, dlaczego ktoś Ci przerwał."
+  },
+  {
+    "id": "b05",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Co może się wydarzyć po postawieniu granicy?",
+    "story": "Prosisz współpracownika, by pozwolił Ci dokończyć wypowiedź.",
+    "q": "Które elementy są przede wszystkim po Twojej stronie, niezależnie od reakcji współpracownika?",
+    "options": [
+      {
+        "text": "Mogę jasno powiedzieć, że chcę dokończyć wypowiedź.",
+        "accepted": true
+      },
+      {
+        "text": "Mogę zdecydować, czy powtórzyć prośbę, czy wrócić do tematu później.",
+        "accepted": true
+      },
+      {
+        "text": "Mogę liczyć na to, że przeprosi i następnym razem da mi dokończyć.",
+        "accepted": false
+      }
+    ],
+    "feedback": "To, jak wyrazisz swoją potrzebę, zależy od Ciebie; reakcja drugiej osoby już nie."
+  },
+  {
+    "id": "b06",
+    "level": 2,
+    "kind": "rozroznij",
+    "title": "zachowanie, emocja czy wniosek",
+    "story": "Po przerwaniu osoba mówi: „Czuję się pominięta”, a potem robi krótką pauzę.",
+    "q": "Które zdanie jest wnioskiem/interpretacją, a nie czystym opisem zachowania ani nazwą emocji?",
+    "options": [
+      {
+        "text": "„Czuję się pominięta”.",
+        "accepted": true
+      },
+      {
+        "text": "„Zrobiła krótką pauzę”.",
+        "accepted": false
+      },
+      {
+        "text": "„Czuję złość”.",
+        "accepted": false
+      }
+    ],
+    "feedback": "„Czuję się pominięta” opisuje przeżycie, ale nie wskazuje jednej konkretnej emocji ani dokładnego zachowania drugiej osoby."
+  },
+  {
+    "id": "b07",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Pożyczona rzecz",
+    "story": "Współpracownik bierze z Twojego biurka ładowarkę bez pytania. Po chwili ją odkłada; nie wiesz, czy zauważył, że Ci to przeszkadza.",
+    "q": "Które odpowiedzi łączą możliwe przeżycie z potrzebą?",
+    "options": [
+      {
+        "text": "Złość i potrzeba, by pytano przed korzystaniem z moich rzeczy.",
+        "accepted": true
+      },
+      {
+        "text": "Zaskoczenie i potrzeba ustalenia jasnych zasad korzystania ze wspólnego sprzętu.",
+        "accepted": true
+      },
+      {
+        "text": "Przypuszczenie, że chciał mnie zdenerwować.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Gdy ktoś bierze naszą rzecz bez pytania, możemy potrzebować zarówno szacunku do własności, jak i jasnych ustaleń."
+  },
+  {
+    "id": "b08",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Prośba o zastępstwo",
+    "story": "Kolega prosi Cię o przejęcie całej jego sobotniej zmiany. Jesteś zmęczony, ale wiesz, że ma trudny tydzień.",
+    "q": "Które odpowiedzi mogą uwzględnić i Twoje możliwości, i jego sytuację?",
+    "options": [
+      {
+        "text": "Sprawdzić, czy mogę pomóc przez część zmiany, zamiast od razu brać całość.",
+        "accepted": true
+      },
+      {
+        "text": "Odmówić tej soboty i zapytać, czy można znaleźć inne rozwiązanie.",
+        "accepted": true
+      },
+      {
+        "text": "Zgodzić się od razu, a później liczyć, że jakoś dam radę.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Można brać pod uwagę potrzeby innych, nie pomijając własnego zmęczenia i granic."
+  },
+  {
+    "id": "b09",
+    "level": 2,
+    "kind": "rozroznij",
+    "title": "postawa, emocja czy zachowanie",
+    "story": "W zespole jedna osoba uważa, że każdy powinien mieć możliwość dokończenia wypowiedzi. Podczas spotkania czeka, aż inni skończą.",
+    "q": "Które zdanie opisuje postawę — przekonanie, a nie uczucie ani działanie?",
+    "options": [
+      {
+        "text": "Każdy powinien mieć możliwość dokończenia wypowiedzi.",
+        "accepted": true
+      },
+      {
+        "text": "Czuje irytację, gdy ktoś komuś przerywa.",
+        "accepted": false
+      },
+      {
+        "text": "Czeka, aż rozmówca skończy mówić.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Przekonanie o tym, jak warto traktować innych, jest postawą; czekanie na swoją kolej jest zachowaniem."
+  },
+  {
+    "id": "b10",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Rada, o którą nie proszono",
+    "story": "Opowiadasz bliskiej osobie o trudności. Zanim skończysz, zaczyna podawać rozwiązania. Wiesz, że chce pomóc, ale w tej chwili potrzebujesz przede wszystkim zostać wysłuchany.",
+    "q": "Które odpowiedzi łączą możliwe odczucie z potrzebą?",
+    "options": [
+      {
+        "text": "Wdzięczność za chęć pomocy i potrzeba dokończenia myśli.",
+        "accepted": true
+      },
+      {
+        "text": "Irytacja, że nie mogłem dokończyć, i potrzeba spokojnego wysłuchania.",
+        "accepted": true
+      },
+      {
+        "text": "Wniosek, że skoro daje rady, to nie zależy jej na mnie.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Czyjaś chęć pomocy i nasza potrzeba bycia wysłuchanym mogą pojawić się jednocześnie."
+  },
+  {
+    "id": "b11",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Wspólny projekt",
+    "story": "Na spotkaniu współpracownik omawia projekt, w którym miałeś duży udział. Nie wymienia Cię, ale spotkanie jeszcze trwa.",
+    "q": "Które działania mogą pomóc zadbać o uznanie Twojego wkładu?",
+    "options": [
+      {
+        "text": "Uzupełnić rozmowę o swoim konkretnym wkładzie w projekt.",
+        "accepted": true
+      },
+      {
+        "text": "Po spotkaniu porozmawiać z współpracownikiem lub przełożonym o tym, jak przedstawiać podział pracy.",
+        "accepted": true
+      },
+      {
+        "text": "Założyć, że pominięcie było celowe, i odpowiedzieć w podobny sposób.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Można upomnieć się o rzetelne pokazanie swojego wkładu, nie rozstrzygając od razu, dlaczego go pominięto."
+  },
+  {
+    "id": "b12",
+    "level": 2,
+    "kind": "rozroznij",
+    "title": "motyw, emocja czy zachowanie",
+    "story": "Po nieporozumieniu ktoś wysyła wiadomość z przeprosinami i proponuje rozmowę.",
+    "q": "Które zdanie opisuje możliwy motyw działania?",
+    "options": [
+      {
+        "text": "Chce naprawić relację.",
+        "accepted": true
+      },
+      {
+        "text": "Czuje żal z powodu nieporozumienia.",
+        "accepted": false
+      },
+      {
+        "text": "Wysłał wiadomość i zaproponował rozmowę.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Motyw może wyjaśniać, po co ktoś działa, ale najlepiej sprawdzać go w rozmowie, zamiast zakładać go z góry."
+  },
+  {
+    "id": "b13",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Zmieniające się plany",
+    "story": "Bliska osoba kilka razy przekłada wspólne spotkanie. Mówisz, że zależy Ci na kontakcie, ale potrzebujesz wcześniej wiedzieć o zmianach.",
+    "q": "Które możliwe skutki rozmowy są realistyczne?",
+    "options": [
+      {
+        "text": "Możecie ustalić sposób potwierdzania terminów, który będzie wygodniejszy dla obu stron.",
+        "accepted": true
+      },
+      {
+        "text": "Może się okazać, że druga osoba nie może obiecać stałych planów; wtedy możesz zdecydować, jak planować swój czas.",
+        "accepted": true
+      },
+      {
+        "text": "Jeśli jasno wyjaśnię potrzebę, druga osoba zareaguje dokładnie tak, jak sobie życzę.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Jasna rozmowa może pomóc ustalić możliwości, choć nie przesądza za drugą osobę o jej decyzji."
+  },
+  {
+    "id": "b14",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Ostry ton",
+    "story": "Ktoś odpowiada Ci ostrym tonem. Czujesz zakłopotanie i złość, ale nie wiesz, czy jego reakcja wynika z rozmowy z Tobą, czy z czegoś innego.",
+    "q": "Które potrzeby mogą być teraz ważne?",
+    "options": [
+      {
+        "text": "Spokojniejsza rozmowa i jasność, co druga osoba miała na myśli.",
+        "accepted": true
+      },
+      {
+        "text": "Chwila na ochłonięcie, zanim zdecyduję, czy chcę kontynuować rozmowę.",
+        "accepted": true
+      },
+      {
+        "text": "Ustalenie, że druga osoba chciała mnie zawstydzić.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Ostry ton można zauważyć, ale jego przyczyny nie zawsze są od razu jasne."
+  },
+  {
+    "id": "b15",
+    "level": 2,
+    "kind": "rozroznij",
+    "title": "nastrój czy reakcja na zdarzenie",
+    "story": "Po jednej sprzeczce czujesz złość. Od kilku dni masz mniej energii także w innych sytuacjach.",
+    "q": "Który opis bardziej dotyczy nastroju obejmującego dłuższy czas i różne sytuacje?",
+    "options": [
+      {
+        "text": "Złość po konkretnej sprzeczce.",
+        "accepted": false
+      },
+      {
+        "text": "Od kilku dni czuję się przygaszony i mam mniej energii w różnych sytuacjach.",
+        "accepted": true
+      },
+      {
+        "text": "Podniosłem głos podczas sprzeczki.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Jedno zdarzenie może wywołać emocję, a nastrój może towarzyszyć człowiekowi szerzej i dłużej."
+  },
+  {
+    "id": "b16",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Konflikt wartości i bezpieczeństwa",
+    "story": "W pracy zauważasz błąd w raporcie. Zależy Ci na rzetelności, ale obawiasz się, że zgłoszenie problemu może wywołać napięcie z przełożonym.",
+    "q": "Które potrzeby lub motywy mogą być jednocześnie obecne?",
+    "options": [
+      {
+        "text": "Potrzeba uczciwego przedstawienia danych.",
+        "accepted": true
+      },
+      {
+        "text": "Potrzeba bezpieczeństwa i namysłu nad tym, jak zgłosić problem.",
+        "accepted": true
+      },
+      {
+        "text": "Obawa, że przełożony może zareagować niechętnie.",
+        "accepted": false
+      }
+    ],
+    "feedback": "W trudnym wyborze mogą ścierać się ważne wartości i potrzeba poczucia bezpieczeństwa."
+  },
+  {
+    "id": "b17",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Pomoc mimo zmęczenia",
+    "story": "Znajomy prosi Cię o pomoc w sobotę. Ostatnio ma dużo na głowie. Ty też jesteś zmęczony po intensywnym tygodniu.",
+    "q": "Które odpowiedzi łączą możliwy stan z potrzebą?",
+    "options": [
+      {
+        "text": "Zmęczenie i potrzeba odpoczynku przed kolejnym tygodniem.",
+        "accepted": true
+      },
+      {
+        "text": "Troska o znajomego i potrzeba znalezienia takiej formy pomocy, na którą mam siłę.",
+        "accepted": true
+      },
+      {
+        "text": "Przypuszczenie, że jeśli odmówię, znajomy uzna, że mi na nim nie zależy.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Można troszczyć się o bliską osobę i jednocześnie brać pod uwagę własne zasoby."
+  },
+  {
+    "id": "b18",
+    "level": 2,
+    "kind": "rozroznij",
+    "title": "stan, potrzeba czy zachowanie",
+    "story": "Po długim dniu osoba mówi: „Jestem wyczerpana”, prosi o ciszę i wyłącza telewizor.",
+    "q": "Który element jest zachowaniem?",
+    "options": [
+      {
+        "text": "Jestem wyczerpana.",
+        "accepted": false
+      },
+      {
+        "text": "Potrzebuję ciszy.",
+        "accepted": false
+      },
+      {
+        "text": "Wyłącza telewizor.",
+        "accepted": true
+      }
+    ],
+    "feedback": "To samo zdarzenie może obejmować stan, potrzebę i konkretne działanie — warto je od siebie odróżniać."
+  },
+  {
+    "id": "b19",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Prośba o rozmowę",
+    "story": "Po sprzeczce chcesz wyjaśnić sprawę. Druga osoba odpowiada, że dziś nie ma siły rozmawiać, ale może wrócić do tematu jutro.",
+    "q": "Które odpowiedzi mogą pomóc Ci zadbać o kontakt i własną potrzebę jasności?",
+    "options": [
+      {
+        "text": "Ustalić konkretną porę rozmowy następnego dnia.",
+        "accepted": true
+      },
+      {
+        "text": "Powiedzieć, że zależy Ci na wyjaśnieniu sprawy, i zapytać, kiedy będzie gotowa wrócić do tematu.",
+        "accepted": true
+      },
+      {
+        "text": "Uznać, że propozycja rozmowy jutro oznacza brak chęci naprawienia relacji.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Przesunięcie rozmowy może oznaczać potrzebę czasu, a ustalenie terminu pomaga zadbać o jasność."
+  },
+  {
+    "id": "b20",
+    "level": 2,
+    "kind": "scenariusz",
+    "title": "Troska czy kontrola",
+    "story": "Bliska osoba kilka razy przypomina Ci o zabraniu kurtki. Wiesz, że martwi się o Ciebie, ale powtarzanie przypomnień zaczyna Cię drażnić.",
+    "q": "Które odpowiedzi mogą uwzględnić obie strony tej sytuacji?",
+    "options": [
+      {
+        "text": "Doceniam troskę i mogę poprosić, by przypomnienie wystarczyło raz.",
+        "accepted": true
+      },
+      {
+        "text": "Czuję irytację, a jednocześnie mogę rozumieć, że ta osoba chce zadbać o moje bezpieczeństwo.",
+        "accepted": true
+      },
+      {
+        "text": "Przypuszczenie, że powtarza to, żeby decydować za mnie.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Troska i irytacja mogą współistnieć, a o granicy można porozmawiać bez rozstrzygania intencji."
+  },
+  {
+    "id": "c01",
+    "level": 3,
+    "kind": "scenariusz",
+    "title": "Odwoływane plany",
+    "story": "Bliska osoba kilka razy odwołuje wspólne plany w ostatniej chwili. Zależy Ci na relacji, ale zaczynasz rezerwować mniej czasu na spotkania, dopóki nie potwierdzicie terminu.",
+    "q": "Które odpowiedzi łączą możliwy stan, potrzebę i działanie bez przesądzania o motywie bliskiej osoby?",
+    "options": [
+      {
+        "text": "Rozczarowanie, potrzeba przewidywalności i prośba o wcześniejsze potwierdzanie planu.",
+        "accepted": true
+      },
+      {
+        "text": "Niepewność, potrzeba jasności i decyzja, by umawiać się na terminy, które obie strony potwierdziły.",
+        "accepted": true
+      },
+      {
+        "text": "Podejrzenie, że bliska osoba robi to, by sprawdzić, jak dużo jej wybaczę.",
+        "accepted": false
+      },
+      {
+        "text": "Brak emocji, bo każdy termin można po prostu zmienić.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Powtarzające się zmiany planów mogą budzić różne odczucia; jasne ustalenia pomagają chronić czas obu osób."
+  },
+  {
+    "id": "c02",
+    "level": 3,
+    "kind": "scenariusz",
+    "title": "Współpracownik pomija wkład",
+    "story": "Podczas prezentacji współpracownik omawia wspólny projekt i nie wspomina o Twojej pracy. Nie wiesz, czy pominął ją celowo, czy po prostu skupił się na swojej części.",
+    "q": "Które działania mogą połączyć potrzebę uznania z rzetelnym sprawdzeniem sytuacji?",
+    "options": [
+      {
+        "text": "Uzupełnić prezentację o konkretny element, za który odpowiadałem.",
+        "accepted": true
+      },
+      {
+        "text": "Po spotkaniu porozmawiać o tym, jak przedstawić wkład każdej osoby.",
+        "accepted": true
+      },
+      {
+        "text": "Powiedzieć zespołowi, że współpracownik przywłaszczył sobie cały projekt.",
+        "accepted": false
+      },
+      {
+        "text": "Zrezygnować z udziału w kolejnych projektach bez rozmowy.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Można jasno przedstawić swój wkład i jednocześnie sprawdzić, jak druga osoba rozumie podział pracy."
+  },
+  {
+    "id": "c03",
+    "level": 3,
+    "kind": "rozroznij",
+    "title": "emocja, interpretacja czy fakt",
+    "story": "Po spotkaniu osoba mówi: „Czuję się pominięta, kiedy przechodzicie dalej bez pytania o moje zdanie”.",
+    "q": "Który opis najlepiej rozdziela elementy tej wypowiedzi?",
+    "options": [
+      {
+        "text": "„Czuję się pominięta” opisuje jej przeżycie; „przechodzicie dalej bez pytania” wskazuje konkretne zachowanie.",
+        "accepted": true
+      },
+      {
+        "text": "Całe zdanie jest wyłącznie nazwą emocji.",
+        "accepted": false
+      },
+      {
+        "text": "Całe zdanie opisuje tylko zachowanie, bez przeżycia.",
+        "accepted": false
+      },
+      {
+        "text": "Zdanie samo w sobie wyjaśnia, dlaczego inni tak postąpili.",
+        "accepted": false
+      }
+    ],
+    "feedback": "W jednej wypowiedzi mogą pojawić się naraz przeżycie i opis zachowania, ale nie musi ona wyjaśniać cudzych motywów."
+  },
+  {
+    "id": "c04",
+    "level": 3,
+    "kind": "scenariusz",
+    "title": "Zazdrość i uznanie",
+    "story": "Znajomy dostaje awans, o który Ty także się starałeś. Cieszysz się z jego sukcesu, a jednocześnie zastanawiasz się, co ta decyzja oznacza dla Twoich planów.",
+    "q": "Które odpowiedzi łączą możliwe emocje z potrzebą lub motywem?",
+    "options": [
+      {
+        "text": "Radość z sukcesu znajomego i potrzeba docenienia własnego wkładu.",
+        "accepted": true
+      },
+      {
+        "text": "Rozczarowanie własną sytuacją i motywacja, by dowiedzieć się, jakie są dalsze możliwości.",
+        "accepted": true
+      },
+      {
+        "text": "Myśl, że awans znajomego może skłonić mnie do zwątpienia we własne starania.",
+        "accepted": false
+      },
+      {
+        "text": "Zastanawianie się, czy sposób, w jaki przełożony postrzega moją pracę, miał wpływ na decyzję.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Cudzy sukces może wywołać więcej niż jedno odczucie, a pytanie o własne możliwości daje konkretniejsze informacje niż domysły."
+  },
+  {
+    "id": "c05",
+    "level": 3,
+    "kind": "scenariusz",
+    "title": "Zgoda pod presją",
+    "story": "Ktoś prosi Cię o dodatkowe zadanie, choć masz już napięty termin. Mówisz „dobrze”, a chwilę później czujesz napięcie i żal.",
+    "q": "Które połączenia stanu, potrzeby i działania mogą pomóc Ci odpowiedzieć bardziej świadomie?",
+    "options": [
+      {
+        "text": "Napięcie może sygnalizować potrzebę sprawdzenia obciążenia przed przyjęciem zadania.",
+        "accepted": true
+      },
+      {
+        "text": "Żal może wskazywać, że chcę omówić priorytety albo zaproponować inny termin.",
+        "accepted": true
+      },
+      {
+        "text": "Może mi być trudno wrócić do ustaleń po tym, jak już się zgodziłem.",
+        "accepted": false
+      },
+      {
+        "text": "Mogę się zastanawiać, czy współpracownik zauważył moje obecne obciążenie.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Zauważenie napięcia i żalu może pomóc wrócić do ustaleń, zanim obciążenie stanie się większe."
+  },
+  {
+    "id": "c06",
+    "level": 3,
+    "kind": "rozroznij",
+    "title": "potrzeba, strategia czy emocja",
+    "story": "Współpracownik często zmienia ustalenia. Mówisz: „Potrzebuję przewidywalności, więc proszę, potwierdzajmy plan dzień wcześniej”.",
+    "q": "Który fragment jest konkretną strategią/prośbą, a nie potrzebą ani emocją?",
+    "options": [
+      {
+        "text": "Potrzebuję przewidywalności.",
+        "accepted": false
+      },
+      {
+        "text": "Potwierdzajmy plan dzień wcześniej.",
+        "accepted": true
+      },
+      {
+        "text": "Czuję niepokój, gdy ustalenia się zmieniają.",
+        "accepted": false
+      },
+      {
+        "text": "Zależy mi na spokojnej współpracy.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Potrzeba mówi, czego brakuje, a prośba wskazuje konkretny sposób, który może pomóc ją zaspokoić."
+  },
+  {
+    "id": "c07",
+    "level": 3,
+    "kind": "scenariusz",
+    "title": "Sprzeczne sygnały w relacji",
+    "story": "Ktoś mówi, że potrzebuje przerwy w kontakcie, ale po kilku dniach sam inicjuje rozmowę. Zależy Ci na tej osobie i trudno Ci zrozumieć, czego oczekuje.",
+    "q": "Które odpowiedzi mogą pomóc połączyć własne odczucia z jasnym działaniem?",
+    "options": [
+      {
+        "text": "Mogę czuć tęsknotę i niepewność, a jednocześnie zapytać, jakiego kontaktu ta osoba teraz chce.",
+        "accepted": true
+      },
+      {
+        "text": "Mogę potrzebować jasnych granic i powiedzieć, jaki rodzaj kontaktu jest dla mnie w porządku.",
+        "accepted": true
+      },
+      {
+        "text": "Mogę pomyśleć, że ta osoba sama nie jest pewna, jakiego kontaktu chce.",
+        "accepted": false
+      },
+      {
+        "text": "Jeśli tęsknię, muszę zgodzić się na każdy sposób kontaktu.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Tęsknota nie odbiera prawa do jasnych granic, a pytanie może pomóc ustalić, czego chce każda ze stron."
+  },
+  {
+    "id": "c08",
+    "level": 3,
+    "kind": "scenariusz",
+    "title": "Milczenie po konflikcie",
+    "story": "Po nieporozumieniu bliska osoba przez kilka godzin nie odpowiada na wiadomości. Nie wiesz, czy potrzebuje czasu, jest zajęta, czy nie chce rozmawiać.",
+    "q": "Które działania mogą uwzględnić Twoją potrzebę jasności i jednocześnie zostawić miejsce na różne wyjaśnienia?",
+    "options": [
+      {
+        "text": "Wysłać jedną spokojną wiadomość z pytaniem, czy chce wrócić do rozmowy później.",
+        "accepted": true
+      },
+      {
+        "text": "Ustalić dla siebie, kiedy ponowię kontakt, i w międzyczasie zająć się innymi sprawami.",
+        "accepted": true
+      },
+      {
+        "text": "Wysłać kilka wiadomości, aż odpowie.",
+        "accepted": false
+      },
+      {
+        "text": "Uznać ciszę za odpowiedź na pytanie o całą relację.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Brak odpowiedzi może mieć różne przyczyny; można zadbać o własną jasność, nie próbując wymusić reakcji."
+  },
+  {
+    "id": "c09",
+    "level": 3,
+    "kind": "rozroznij",
+    "title": "zachowanie, skutek czy motyw",
+    "story": "Osoba mówi: „Chcę, żebyśmy znowu mogli sobie ufać”, po czym proponuje regularne rozmowy o tym, co jest dla każdej strony ważne.",
+    "q": "Który element opisuje konkretną propozycję działania?",
+    "options": [
+      {
+        "text": "Chce odbudować zaufanie.",
+        "accepted": false
+      },
+      {
+        "text": "Proponuje regularne rozmowy o potrzebach obu stron.",
+        "accepted": true
+      },
+      {
+        "text": "Ma nadzieję, że bliska osoba poczuje ulgę.",
+        "accepted": false
+      },
+      {
+        "text": "Zaufanie między nimi jest już odbudowane.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Intencja, działanie i jego możliwy skutek są różnymi elementami jednego procesu."
+  },
+  {
+    "id": "c10",
+    "level": 3,
+    "kind": "scenariusz",
+    "title": "Złość i granica",
+    "story": "Podczas rozmowy ktoś kilkakrotnie przerywa Ci i odpowiada za Ciebie. Czujesz złość, a jednocześnie nie chcesz eskalować konfliktu.",
+    "q": "Które połączenia emocji, potrzeby i zachowania mogą pomóc Ci zadbać o swoją wypowiedź?",
+    "options": [
+      {
+        "text": "Złość może wskazywać, że ważne jest dla mnie dokończenie myśli; mogę poprosić o przestrzeń do wypowiedzi.",
+        "accepted": true
+      },
+      {
+        "text": "Mogę potrzebować chwili, by się uspokoić, i wrócić do tematu, gdy będę gotów.",
+        "accepted": true
+      },
+      {
+        "text": "Kiedy czuję złość, mogę mieć ochotę odpowiedzieć ostrym tonem, żeby pokazać, że przerwanie mi przeszkadza.",
+        "accepted": false
+      },
+      {
+        "text": "Mogę odłożyć swoją wypowiedź, jeśli w danej chwili trudno mi ją spokojnie dokończyć.",
+        "accepted": false
+      }
+    ],
+    "feedback": "Zauważenie stanu i potrzeby może pomóc wybrać reakcję, która chroni Twoją przestrzeń bez konieczności eskalowania rozmowy."
+  }
 ];
