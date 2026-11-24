@@ -20,6 +20,18 @@
     return !!(baseUrl() && anonKey());
   }
 
+  // Adres strony, na którą wraca link z maila (potwierdzenie konta, reset hasła).
+  // Wyznaczany z bieżącej lokalizacji, więc działa na GitHub Pages
+  // (https://3lmov3.github.io/emlove/) i na własnej domenie.
+  function authPageUrl() {
+    try {
+      const u = new URL('auth.html', location.href);
+      return u.origin + u.pathname;
+    } catch (e) {
+      return 'https://3lmov3.github.io/emlove/auth.html';
+    }
+  }
+
   // ── sesja ────────────────────────────────────────────────────
   function readSession() {
     try { return JSON.parse(localStorage.getItem(SESSION_KEY) || 'null'); }
@@ -90,6 +102,7 @@
       body: {
         email: email.trim(),
         password,
+        redirect_to: authPageUrl(),
         gotrue_meta_security: captchaToken ? {captcha_token: captchaToken} : undefined,
       },
     });
@@ -141,6 +154,7 @@
     await request('/auth/v1/recover', {
       body: {
         email: email.trim(),
+        redirect_to: authPageUrl(),
         gotrue_meta_security: captchaToken ? {captcha_token: captchaToken} : undefined,
       },
     });
@@ -153,6 +167,7 @@
       body: {
         type: 'signup',
         email: email.trim(),
+        redirect_to: authPageUrl(),
         gotrue_meta_security: captchaToken ? {captcha_token: captchaToken} : undefined,
       },
     });
