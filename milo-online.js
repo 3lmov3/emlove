@@ -21,6 +21,14 @@
     provider_error: 'Dostawca modelu odrzucił żądanie.',
     service: 'Milo nie mógł teraz odpowiedzieć. Spróbuj ponownie.',
     network: 'Brak połączenia. Sprawdź internet i spróbuj ponownie.',
+    // Kody zwracane przez funkcję private26 — bez tego wyciekały do czatu.
+    quota_exceeded: 'Osiągnięto dzienny limit rozmów. Spróbuj ponownie jutro.',
+    provider_unavailable: 'Dostawca modelu jest chwilowo niedostępny. Spróbuj za chwilę.',
+    provider_empty: 'Model nie zwrócił odpowiedzi. Spróbuj ponownie.',
+    unavailable: 'Serwer jest chwilowo niedostępny. Spróbuj ponownie.',
+    too_large: 'Wiadomość jest za długa.',
+    disabled: 'Milo online jest wyłączone.',
+    method: 'Nieprawidłowa metoda żądania.',
   };
 
   function messageOf(error, fallback) {
