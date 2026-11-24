@@ -1,0 +1,54 @@
+{
+  "id": "2026-12",
+  "title": "Grudzień 2026",
+  "scenarios": [
+    {
+      "id": "twoj-unikalny-id",
+      "title": "Krótki tytuł zadania",
+      "story": "Opis sytuacji. Zwykłym językiem, 2–4 zdania. Bez terminów psychologicznych.",
+      "qs": [
+        ["Pytanie 1 — najłatwiejsze?", ["Poprawna odpowiedź", "Zła 1", "Zła 2", "Zła 3"]],
+        ["Pytanie 2?", ["Poprawna odpowiedź", "Zła 1", "Zła 2", "Zła 3"]],
+        ["Pytanie 3?", ["Poprawna odpowiedź", "Zła 1", "Zła 2", "Zła 3"]],
+        ["Pytanie 4 — najtrudniejsze?", ["Poprawna odpowiedź", "Zła 1", "Zła 2", "Zła 3"]]
+      ]
+    }
+  ],
+  "rozroznij": [
+    {
+      "id": "rozroznij-2026-12-1",
+      "qs": [
+        ["Które słowo pasuje do …?", ["poprawna", "zła1", "zła2", "zła3"]],
+        ["Które słowo oznacza …?", ["poprawna", "zła1", "zła2", "zła3"]],
+        ["Które słowo opisuje …?", ["poprawna", "zła1", "zła2", "zła3"]],
+        ["Które słowo pasuje do …?", ["poprawna", "zła1", "zła2", "zła3"]]
+      ]
+    }
+  ],
+  "simulations": [
+    {
+      "id": "symulacja-2026-12-1",
+      "icon": "🎭",
+      "title": "Tytuł symulacji",
+      "short": "Jedno zdanie zachęty.",
+      "story": "Opis sytuacji.",
+      "steps": [
+        {"q": "Pytanie kroku?", "choices": [
+          {"t": "Treść wyboru 1", "next": "Reakcja Milo na ten wybór."},
+          {"t": "Treść wyboru 2", "next": "Reakcja Milo na ten wybór."},
+          {"t": "Treść wyboru 3", "next": "Reakcja Milo na ten wybór."}
+        ]},
+        {"q": "Pytanie kroku 2?", "choices": [
+          {"t": "Wybór 1", "next": "Reakcja."},
+          {"t": "Wybór 2", "next": "Reakcja."},
+          {"t": "Wybór 3", "next": "Reakcja."}
+        ]},
+        {"q": "Pytanie kroku 3?", "choices": [
+          {"t": "Wybór 1", "next": "Reakcja."},
+          {"t": "Wybór 2", "next": "Reakcja."},
+          {"t": "Wybór 3", "next": "Reakcja."}
+        ]}
+      ]
+    }
+  ]
+}
