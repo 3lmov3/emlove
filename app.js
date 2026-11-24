@@ -838,6 +838,15 @@ renderChat = function(){
     node.appendChild(btn);
   });
 };
+// Serwer potrafi zwrócić HTTP 200 z treścią, która jest de facto komunikatem
+// błędu (np. „Nie udało się wysłać zapytania do modelu. Możliwe przyczyny:
+// quota_exceeded…”). Takiego tekstu nie pokazujemy jako wypowiedzi Milo.
+function looksLikeServerError(text){
+ const s=String(text||'');
+ if(!s.trim())return true;
+ return /quota_exceeded|quota_unavailable|bad_provider|provider_unavailable|provider_empty|not_configured|unauthorized|invalid_request|too_large|upstream_status|upstream_error/i.test(s)
+     || /Nie udało się wysłać zapytania|Możliwe przyczyny/i.test(s);
+}
 function showTyping(){
   const el=document.getElementById('chatMessages');
   const d=document.createElement('div'); d.className='msg milo'; d.id='typingMsg';
@@ -862,9 +871,16 @@ function hideTyping(){ document.getElementById('typingMsg')?.remove(); }
       if(aiSettings.enabled){ reply=await miloReplyAI(text); }
       else { reply=miloReply(text); }
     }catch(err){
-      reply='⚠️ '+aiErrorMessage(err)+' Odpowiadam po swojemu: '+miloReply(text);
+      const _c=err&&err.code;
+      // Przy limicie nie udajemy odpowiedzi — użytkownik ma wiedzieć, że ją stracił.
+      reply = (_c==='quota_exceeded'||_c==='limit')
+        ? '⚠️ '+aiErrorMessage(err)
+        : '⚠️ '+aiErrorMessage(err)+' Odpowiadam po swojemu: '+miloReply(text);
     }
     hideTyping();
+    if(looksLikeServerError(reply)){
+      reply='Milo nie mógł teraz odpowiedzieć. Najczęstsza przyczyna to wyczerpany limit lub błąd dostawcy modelu — sprawdź klucz API w „Klucze API” i spróbuj ponownie.';
+    }
     addMsg('milo', reply);
     TTS.speak(reply);
     SoundEngine.pop();
@@ -1390,10 +1406,19 @@ function aiErrorMessage(e){
       bad_model: 'Nazwa modelu jest nieprawidłowa.',
       bad_text: 'Wiadomość jest pusta albo za długa.',
       invalid_request: 'Żądanie jest niepoprawne.',
+      quota_exceeded: 'Osiągnięto dzienny limit rozmów. Spróbuj ponownie jutro.',
+      provider_unavailable: 'Dostawca modelu jest chwilowo niedostępny. Spróbuj za chwilę.',
+      provider_empty: 'Model nie zwrócił odpowiedzi. Spróbuj ponownie.',
+      unavailable: 'Serwer jest chwilowo niedostępny. Spróbuj ponownie.',
       quota_unavailable: 'Nie udało się sprawdzić limitu.',
       mail_failed: 'Nie udało się wysłać maila.',
     });
 
-  const text = map[code] || 'Nie udało się uzyskać odpowiedzi.';
-  return text + (label ? ' [' + label + ': ' + code + ']' : ' [' + code + ']');
+  const text = map[code];
+  // Znamy kod → sam przyjazny komunikat. Nazwa funkcji i surowy kod
+  // trafiały wcześniej do dymka Milo i wyglądały jak błąd dla użytkownika.
+  if(text) return text;
+  // Nieznanego kodu nie tłumaczymy na siłę — zostawiamy go do zgłoszenia.
+  if(!code) return 'Milo nie mógł teraz odpowiedzieć.';
+  return 'Milo nie mógł teraz odpowiedzieć.' + (label ? ' (' + label + ': ' + code + ')' : ' (' + code + ')');
 }
