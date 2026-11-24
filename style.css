@@ -158,6 +158,8 @@ textarea:focus,input:focus{outline:2px solid #FFD9C2;border-color:var(--primary)
 
 /* === v2: dźwięk + AI === */
 .sound-bar{flex-wrap:wrap}
+/* v32: pasek górny w dwóch grupach — dźwięk osobno, akcje osobno */
+.bar-sound,.bar-actions{display:flex;align-items:center;gap:10px;flex-wrap:wrap;min-width:0}
 .icon-btn{width:40px;height:40px;border-radius:12px;border:1px solid var(--border);background:#fff;cursor:pointer;font-size:18px;display:grid;place-items:center}
 .sound-bar select{padding:9px 10px;border-radius:12px;border:1px solid var(--border);background:#fff;font-weight:600}
 .sound-bar input[type=range]{width:90px;accent-color:var(--teal)}
@@ -299,9 +301,9 @@ h1,h2,h3{letter-spacing:-.3px}
   .topbar{gap:10px;margin-bottom:14px}
   .topbar h1{font-size:21px;line-height:1.25}
   .topbar p{font-size:13px}
-  .sound-bar{flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:2px;scrollbar-width:none}
-  .sound-bar::-webkit-scrollbar{display:none}
-  .sound-bar .btn,.sound-bar select,.sound-bar .icon-btn{flex:0 0 auto}
+  /* v32: pasek górny łamie się na rzędy zamiast znikać za ekranem */
+  .sound-bar{flex-wrap:wrap;overflow:visible;gap:8px;width:100%}
+  .sound-bar select{flex:1 1 132px;min-width:0}
   .sound-bar input[type="range"]{width:74px;flex:0 0 auto}
   .tabs{flex-wrap:nowrap;overflow-x:auto;gap:6px;padding-bottom:6px;scrollbar-width:none;-webkit-overflow-scrolling:touch}
   .tabs::-webkit-scrollbar{display:none}
@@ -326,6 +328,10 @@ h1,h2,h3{letter-spacing:-.3px}
   .hero p{font-size:14px}
   .topbar h1{font-size:20px}
   .sound-bar input[type="range"]{display:none}
+  /* v32: na telefonie każda grupa zajmuje własny rząd, przyciski się rozciągają */
+  .bar-sound,.bar-actions{flex:1 1 100%;flex-wrap:wrap;gap:6px}
+  .sound-bar .bar-actions .btn{flex:1 1 140px}
+  .bar-actions .date-pill{flex:1 1 100%;text-align:center}
   .card h2{font-size:19px}
   .scenario-box{font-size:14px}
   .choice-btn{font-size:14px;padding:13px 14px}
