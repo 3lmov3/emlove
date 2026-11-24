@@ -140,7 +140,14 @@
 
     if (failed) {
       // Bez danych pokazujemy dotychczasowe koło — aplikacja ma działać.
-      if (typeof window.legacyWheel === 'function') { window.legacyWheel(); return; }
+      if (typeof window.legacyWheel === 'function') {
+        // Stare koło siedzi w kontenerze z atrybutem hidden — trzeba go odsłonić.
+        const legacy = host.parentElement && host.parentElement.querySelector('.grid-2');
+        if (legacy) legacy.removeAttribute('hidden');
+        host.innerHTML = '';
+        window.legacyWheel();
+        return;
+      }
       host.innerHTML = '<p class="muted">Nie udało się wczytać koła emocji. Brakuje pliku <code>wheel-reference.json</code>.</p>';
       return;
     }
