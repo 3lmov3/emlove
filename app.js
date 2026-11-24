@@ -437,8 +437,20 @@ const AI_SETTINGS_KEY = 'emocje_ai_settings';
 const _CFG = (typeof window !== 'undefined' && window.EMLOVE_CONFIG) || {};
 const _saved = JSON.parse(localStorage.getItem(AI_SETTINGS_KEY) || 'null') || {};
 let aiSettings = {
-  // o „pełnym Milo” decyduje wyłącznie administrator w config.js
-  enabled: !!(_CFG.aiEndpoint && _CFG.aiEndpoint.length > 5),
+  // „Pełny Milo” jest dostępny, gdy działa choć jedna z trzech dróg:
+  //   a) użytkownik dodał własny klucz (BYOK),
+  //   b) jest zalogowany — klucz administratora leży w Supabase,
+  //   c) administrator ustawił własny endpoint OpenAI-compatible w config.js.
+  // Wcześniej ta flaga zależała WYŁĄCZNIE od aiEndpoint, więc zalogowany
+  // użytkownik z działającą funkcją Supabase dostawał odpowiedzi lokalne.
+  get enabled(){
+    const byok = !!(window.EmloveProviders && window.EmloveProviders.activeProvider
+                    && window.EmloveProviders.activeProvider() !== 'admin');
+    const onlineReady = !!(window.EmloveOnline && window.EmloveAuth
+                           && window.EmloveAuth.currentUser && window.EmloveAuth.currentUser());
+    const ownEndpoint = !!(_CFG.aiEndpoint && _CFG.aiEndpoint.length > 5);
+    return byok || onlineReady || ownEndpoint;
+  },
   baseUrl: _CFG.aiEndpoint || '',
   model: _CFG.aiModel || 'emlove',
   temp: 0.8,
@@ -686,8 +698,10 @@ function openSettings(){
   const c2 = byId('setVoiceEnabled'); if (c2) c2.checked = aiSettings.voiceEnabled;
   const note = byId('settingsMiloMode');
   if (note) note.textContent = aiSettings.enabled
-    ? 'Milo jest skonfigurowany przez administratora i układa odpowiedzi sam.'
-    : 'Milo działa lokalnie. Pełną rozmowność włącza administrator aplikacji — nie musisz nic ustawiać.';
+    ? 'Milo układa odpowiedzi sam — klucz administratora (wystarczy zalogowanie) albo Twój własny z „Klucze API”.'
+    : (window.EmloveOnline
+        ? 'Milo działa lokalnie. Zaloguj się, aby rozmawiać z pełnym Milo — albo dodaj własny klucz w „Klucze API”.'
+        : 'Milo działa lokalnie. Pełną rozmowność włącza administrator aplikacji.');
   SoundEngine.click();
 }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; SoundEngine.click(); }
@@ -725,7 +739,9 @@ function saveSettings(){
 
 // ---------- Generowanie z Milo ----------
 async function generateExpressWithAI(){
-  if(!aiSettings.enabled){ alert('Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji. Na razie proponuję gotowe sytuacje.'); return; }
+  if(!aiSettings.enabled){ alert(window.EmloveOnline
+    ? 'Ta funkcja wymaga pełnego Milo. Zaloguj się w panelu bocznym albo dodaj własny klucz w „Klucze API”. Na razie proponuję gotowe sytuacje.'
+    : 'Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji. Na razie proponuję gotowe sytuacje.'); return; }
   const btn=event.target; btn.textContent='⏳ Milo wymyśla…';
   try{
     const r=await callAI([{role:'system',content:'Jesteś Milo. Wymyśl jedną krótką, codzienną sytuację społeczną, w której trudno wyrazić emocję. Odpowiedz TYLKO treścią sytuacji, bez cudzysłowu, po polsku, max 20 słów.'},{role:'user',content:'Wymyśl sytuację do ćwiczenia komunikatu Ja.'}]);
@@ -741,7 +757,9 @@ async function generateExpressWithAI(){
   btn.textContent='✨ Poproś Milo o nową';
 }
 async function generateSimWithAI(){
-  if(!aiSettings.enabled){ alert('Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji.'); return; }
+  if(!aiSettings.enabled){ alert(window.EmloveOnline
+    ? 'Ta funkcja wymaga pełnego Milo. Zaloguj się w panelu bocznym albo dodaj własny klucz w „Klucze API”.'
+    : 'Ta funkcja wymaga pełnego Milo, którego włącza administrator aplikacji.'); return; }
   const btn=event.target; btn.textContent='⏳ Milo wymyśla sytuację…';
   try{
     const prompt=`Wymyśl nową symulację emocji w formacie JSON: {"icon":"🎭","title":"...","short":"...","story":"...","steps":[{"q":"...","choices":[{"t":"...","next":"..."},{"t":"...","next":"..."},{"t":"...","next":"..."}]},{"q":"...","choices":[...]},{"q":"...","choices":[...]}]}. Temat: codzienna trudna sytuacja społeczna. Odpowiedz TYLKO JSON, bez markdown.`;
@@ -816,7 +834,7 @@ function hideTyping(){ document.getElementById('typingMsg')?.remove(); }
       if(aiSettings.enabled){ reply=await miloReplyAI(text); }
       else { reply=miloReply(text); }
     }catch(err){
-      reply='⚠️ Pełny Milo nie odpowiedział ('+err.message+'). Odpowiadam po swojemu: '+miloReply(text);
+      reply='⚠️ '+aiErrorMessage(err)+' Odpowiadam po swojemu: '+miloReply(text);
     }
     hideTyping();
     addMsg('milo', reply);
