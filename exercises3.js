@@ -39,7 +39,20 @@ function makeWheelPool(level){
  return pool;
 }
 function newCycle(){return {started:null,done:[0,0,0],correct:[0,0,0],round:null};}
-function loadCycle(){let c;try{c=JSON.parse(localStorage.getItem(CYCLE_KEY));}catch(e){} if(!c||(c.started!==null&&!Number.isFinite(c.started))||!Array.isArray(c.done)||!Array.isArray(c.correct)||(c.started!==null&&Date.now()>=c.started+DURATION)){c=newCycle();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));} if(migrateUnansweredIntensity(c.round))localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); return c;}
+/**
+ * Stare rundy (zadania jednopytaniowe, bez tablicy questions) nie pasują do
+ * nowego silnika. Taką rundę zerujemy — postęp cyklu (done/correct) zostaje,
+ * użytkownik po prostu zaczyna nową rundę.
+ */
+function migrateUnansweredIntensity(c){
+ const r=c&&c.round;
+ if(!r||r.phase!=='quiz'||!Array.isArray(r.tasks))return false;
+ const legacy=r.tasks.some(t=>!t||!Array.isArray(t.questions)||t.questions.length===0);
+ if(!legacy)return false;
+ c.round=null;
+ return true;
+}
+function loadCycle(){let c;try{c=JSON.parse(localStorage.getItem(CYCLE_KEY));}catch(e){} if(!c||(c.started!==null&&!Number.isFinite(c.started))||!Array.isArray(c.done)||!Array.isArray(c.correct)||(c.started!==null&&Date.now()>=c.started+DURATION)){c=newCycle();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));} if(migrateUnansweredIntensity(c))localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); return c;}
 function saveCycle(c){localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); updateHeartsSidebar();}
 function currentLevel(c){return LIMITS.findIndex((n,i)=>c.done[i]<n)+1 || 4;}
 function updateHeartsSidebar(){const el=document.getElementById('statHearts');if(el){const c=loadCycle();el.textContent=c.correct.reduce((a,b)=>a+b,0);}}
@@ -109,7 +122,7 @@ window.WheelCourse=WheelCourse;
 window.showTrainingFamily=function(i){const f=TRAIN_WHEEL[i],el=document.getElementById('wheelDetail');if(!f||!el)return;el.innerHTML=`<h3>${escWheel(f.name)}</h3><p class="muted small">Podgrupa → słowa z zewnętrznego pierścienia</p>${f.groups.map(g=>`<p><b>${escWheel(g[0])}</b><br>${g[1].map(escWheel).join(' · ')}</p>`).join('')}`;};
 function initWheelCourse(){
  const section=document.getElementById('view-exercises');if(!section||document.getElementById('wheelCourse'))return;
- section.innerHTML=`<div class="tabs"><button class="tab active" id="courseTab">Drabina emocji</button><button class="tab" id="expressTab">Wyraź</button></div><div id="coursePanel"><div class="card" id="wheelCourse"></div></div><div id="expressPanel" style="display:none"><div class="card"><h2>🗣️ Wyraź</h2><p>Napisz własnymi słowami, co czujesz. Nie ma tu poprawnych odpowiedzi ani oceny.</p><p class="muted small">Jak to działa: napisz <b>Milo</b>, a Milo odpowie. Potem napisz <b>Ja</b> — odpowie emotkami. Gdy odpiszesz samymi emotkami, Milo zdradzi sekret.</p><label for="expressText">Co chcesz wyrazić?</label><textarea id="expressText" rows="5" maxlength="2000" placeholder="Możesz zacząć od: Czuję… gdy…"></textarea><p id="expressHint" class="muted small"></p><div class="ex-actions"><button class="btn btn-primary" id="expressSubmit">Zanotuj</button></div><div id="expressLog" class="scenario-box" style="display:block;max-height:260px;overflow-y:auto" role="log" aria-live="polite"></div><p class="muted small">„Zanotuj" zapisuje wpis do dziennika z odznaką „Wyraż +1". Do 5 punktów na miesiąc. Nic nie jest wysyłane na serwer.</p></div></div>`;
+ section.innerHTML=`<div class="tabs"><button class="tab active" id="courseTab">Drabina emocji</button><button class="tab" id="expressTab">Wyraź</button></div><div id="coursePanel"><div class="card" id="wheelCourse"></div></div><div id="expressPanel" style="display:none"><div class="card"><h2>🗣️ Wyraź</h2><p>Napisz własnymi słowami, co czujesz. Nie ma tu poprawnych odpowiedzi ani oceny.</p><label for="expressText">Co chcesz wyrazić?</label><textarea id="expressText" rows="5" maxlength="2000" placeholder="Możesz zacząć od: Czuję… gdy…"></textarea><p id="expressHint" class="muted small"></p><div class="ex-actions"><button class="btn btn-primary" id="expressSubmit">Zanotuj</button></div><div id="expressLog" class="scenario-box" style="display:block;max-height:260px;overflow-y:auto" role="log" aria-live="polite"></div><p class="muted small">„Zanotuj" zapisuje wpis do dziennika z odznaką „Wyraż +1". Do 5 punktów na miesiąc. Nic nie jest wysyłane na serwer.</p></div></div>`;
  if(window.EmloveExpress) window.EmloveExpress.init();
  const switchTab=(isCourse)=>{document.getElementById('coursePanel').style.display=isCourse?'':'none';document.getElementById('expressPanel').style.display=isCourse?'none':'';document.getElementById('courseTab').classList.toggle('active',isCourse);document.getElementById('expressTab').classList.toggle('active',!isCourse);};
  document.getElementById('courseTab').onclick=()=>switchTab(true);document.getElementById('expressTab').onclick=()=>switchTab(false);
