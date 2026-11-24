@@ -78,20 +78,24 @@
         <p id="viewSubtitle">Poznaj, nazwij i wyraź to, co czujesz — w swoim tempie.</p>
       </div>
       <div class="top-actions sound-bar">
-        <span id="ambientStatus" class="ambient-status"></span>
-        <button class="icon-btn" id="muteBtn" title="Włącz/wyłącz dźwięk" onclick="toggleMute()">🔊</button>
-        <select id="ambientSelect" title="Dźwięk otoczenia" onchange="setAmbient(this.value)">
-          <option value="off">🔇 Bez tła</option>
-          <option value="rain">🌧️ Deszcz</option>
-          <option value="ocean">🌊 Ocean</option>
-          <option value="fire">🔥 Kominek</option>
-          <option value="forest">🌲 Las</option>
-        </select>
-        <input type="range" id="volumeRange" min="0" max="100" value="70" title="Głośność" oninput="setVolume(this.value)">
-        <button class="btn btn-ghost" id="installBtn" onclick="installPWA()" style="display:none">📲 Zainstaluj Emlove</button>
-        <button class="btn btn-ghost" onclick="openSettings()">⚙️ Milo</button>
-        <button class="btn btn-ghost" onclick="goTo('checkin')">+ Nowy check-in</button>
-        <div class="date-pill" id="todayPill"></div>
+        <div class="bar-sound">
+          <span id="ambientStatus" class="ambient-status"></span>
+          <button class="icon-btn" id="muteBtn" title="Włącz/wyłącz dźwięk" onclick="toggleMute()">🔊</button>
+          <select id="ambientSelect" title="Dźwięk otoczenia" onchange="setAmbient(this.value)">
+            <option value="off">🔇 Bez tła</option>
+            <option value="rain">🌧️ Deszcz</option>
+            <option value="ocean">🌊 Ocean</option>
+            <option value="fire">🔥 Kominek</option>
+            <option value="forest">🌲 Las</option>
+          </select>
+          <input type="range" id="volumeRange" min="0" max="100" value="70" title="Głośność" oninput="setVolume(this.value)">
+        </div>
+        <div class="bar-actions">
+          <button class="btn btn-ghost" id="installBtn" onclick="installPWA()" style="display:none">📲 Zainstaluj Emlove</button>
+          <button class="btn btn-ghost" onclick="openSettings()">⚙️ Milo</button>
+          <button class="btn btn-ghost" onclick="goTo('checkin')">+ Nowy check-in</button>
+          <div class="date-pill" id="todayPill"></div>
+        </div>
       </div>
     </header>
 
@@ -470,5 +474,5 @@
 <script src="personality.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}</script>
 <script>if(window.EmloveContent)window.EmloveContent.load();</script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5f7bb3c2d2a357b',t:'MTc5NTUxNjE1NA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5f7bb3c2d2a357b',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
