@@ -712,10 +712,26 @@ function openSettings(){
   SoundEngine.click();
 }
 function closeSettings(){ document.getElementById('settingsModal').style.display='none'; SoundEngine.click(); }
-function deleteLocalUserData(){
-  const accepted=window.confirm('Usunąć z tego urządzenia wpisy, rozmowy, wynik testu osobowości, serduszka i postępy w ćwiczeniach? Tego nie można cofnąć. Dane na innych urządzeniach i serwerach nie zostaną usunięte. Sesja Milo i ustawienia dźwięku pozostaną. Zamknij inne otwarte karty Emlove przed usunięciem.');
+async function deleteLocalUserData(){
+  const accepted=window.confirm('Usunąć wszystkie wpisy, rozmowy, wynik testu osobowości, serduszka i postępy w ćwiczeniach?\n\nZostaną usunięte z tego urządzenia, a jeśli jesteś zalogowany — również z chmury. Tego nie można cofnąć.\n\nSesja i ustawienia dźwięku pozostaną. Zamknij inne otwarte karty Emlove przed usunięciem.');
   if(!accepted)return;
   try{
+    // 1. Zaznacz wpisy jako usunięte na serwerze. Bez tego sync pobrałby
+    //    je z powrotem zaraz po przeładowaniu i wyglądałoby, że nic się nie stało
+    //    (pojedyncze usuwanie działa właśnie dlatego, że woła markDeleted).
+    if(window.EmloveSync){
+      state.entries.forEach(e=>{ if(e.id) window.EmloveSync.markDeleted(e.id); });
+    }
+    // 2. Opróżnij stan w pamięci: flush nie może wysłać starych wpisów jako
+    //    „brudnych”, a postępy mają wyjechać jako 0, nie jako stare wartości.
+    state.entries = [];
+    state.points = 0;
+    state.exercisesDone = 0;
+    // 3. Wyślij usunięcia ZANIM strona zostanie przeładowana.
+    if(window.EmloveSync && window.EmloveSync.flush){
+      try{ await window.EmloveSync.flush(); }catch(e){ /* kolejka zostaje — nadrobi przy następnej próbie */ }
+    }
+    // 4. Wyczyść urządzenie.
     ['emocje_entries','emocje_points','emocje_exercises','emocje_chat','emlove_personality','emlove_wheel_cycle_v1'].forEach(k=>localStorage.removeItem(k));
     // Własne klucze API też znikają z urządzenia.
     Object.keys(localStorage).forEach(k=>{ if(k.indexOf('emlove.provider.')===0) localStorage.removeItem(k); });

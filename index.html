@@ -460,7 +460,7 @@
     <h3>🔒 Prywatność na tym urządzeniu</h3>
     <p class="muted small">Możesz usunąć zapisane tutaj wpisy, rozmowy, wynik testu i postępy. To nie usuwa danych z serwerów ani z innych urządzeń. Sesja Milo i ustawienia dźwięku pozostaną.</p>
     <p class="muted small"><a href="polityka-prywatnosci.html" target="_blank" rel="noopener">Polityka prywatności</a> — jakie dane przetwarzamy, komu je udostępniamy i jak długo je przechowujemy.</p>
-    <button class="btn btn-secondary" type="button" onclick="deleteLocalUserData()">Usuń wpisy i postępy z tego urządzenia</button>
+    <button class="btn btn-secondary" type="button" onclick="deleteLocalUserData()">Usuń wpisy i postępy (urządzenie + chmura)</button>
     <p class="muted small">Konto w chmurze: usuwa login, hasło i wpisy zapisane w Supabase. Wpisy na tym urządzeniu pozostają — możesz je usunąć osobno.</p>
     <button class="btn btn-secondary" type="button" id="deleteAccountBtn" onclick="deleteAccount()">Usuń konto z chmury</button>
 
@@ -495,5 +495,5 @@
 <script src="personality.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js").catch(()=>{})}</script>
 <script>if(window.EmloveContent)window.EmloveContent.load();</script>
-</body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5f8b30edc24ecbc',t:'MTc5NTUyNjMwNQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5f8b30edc24ecbc',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
