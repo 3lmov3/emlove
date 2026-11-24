@@ -53,7 +53,14 @@
       {'Content-Type': 'application/json', apikey: anonKey()},
       options.headers || {}
     );
-    const res = await fetch(baseUrl() + path, {
+    // GoTrue czyta redirect_to z PARAMETRU URL, nie z ciała żądania.
+    // Bez tego link z maila jest budowany z Site URL (a ten bywa pusty).
+    let url = baseUrl() + path;
+    if (options.query) {
+      const qs = new URLSearchParams(options.query).toString();
+      if (qs) url += (url.indexOf('?') === -1 ? '?' : '&') + qs;
+    }
+    const res = await fetch(url, {
       method: options.method || 'POST',
       headers,
       body: options.body ? JSON.stringify(options.body) : undefined,
@@ -102,9 +109,9 @@
       body: {
         email: email.trim(),
         password,
-        redirect_to: authPageUrl(),
         gotrue_meta_security: captchaToken ? {captcha_token: captchaToken} : undefined,
       },
+      query: {redirect_to: authPageUrl()},
     });
     // Przy włączonym potwierdzeniu adresu Supabase nie zwraca sesji.
     if (data.session && data.session.access_token) {
@@ -154,9 +161,9 @@
     await request('/auth/v1/recover', {
       body: {
         email: email.trim(),
-        redirect_to: authPageUrl(),
         gotrue_meta_security: captchaToken ? {captcha_token: captchaToken} : undefined,
       },
+      query: {redirect_to: authPageUrl()},
     });
   }
 
@@ -167,9 +174,9 @@
       body: {
         type: 'signup',
         email: email.trim(),
-        redirect_to: authPageUrl(),
         gotrue_meta_security: captchaToken ? {captcha_token: captchaToken} : undefined,
       },
+      query: {redirect_to: authPageUrl()},
     });
   }
 
