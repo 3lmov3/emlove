@@ -595,7 +595,14 @@ const TTS = {
     if(toggle && !toggle.checked) return;
     if(!('speechSynthesis' in window)) return;
     speechSynthesis.cancel();
-    const clean=text.replace(/[„"“”]/g,'').replace(/[*_#>`]/g,'').slice(0,600);
+    const clean=String(text)
+      .replace(/[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2B00}-\u{2BFF}\u{FE0F}\u{200D}]/gu,'')
+      .replace(/[\u201E\u201C\u201D"]/g,'')
+      .replace(/[*_#>`]/g,'')
+      .replace(/\s+/g,' ')
+      .trim()
+      .slice(0,600)
+      .trim();
     const u=new SpeechSynthesisUtterance(clean);
     u.lang='pl-PL';
     const sel=document.getElementById('voiceSelect');
@@ -804,9 +811,14 @@ renderChat = function(){
   // dodaj przyciski odsłuchu do wiadomości Milo
   el.querySelectorAll('.msg.milo').forEach((node,idx)=>{
     if(node.querySelector('.speak-btn')) return;
+    // Tekst wiadomości zbieramy ZANIM dodamy przycisk — inaczej TTS czytał
+    // etykietę „🔊 Odsłuchaj” na końcu każdej wypowiedzi.
+    const clone=node.cloneNode(true);
+    clone.querySelectorAll('.who,.speak-btn').forEach(n=>n.remove());
+    const txt=clone.textContent.replace(/\s+/g,' ').trim();
     const btn=document.createElement('button');
     btn.className='speak-btn'; btn.textContent='🔊 Odsłuchaj';
-    btn.onclick=()=>{ const txt=node.textContent.replace('MILO','').replace('Milo','').trim(); TTS.speak(txt); };
+    btn.onclick=()=>TTS.speak(txt);
     node.appendChild(btn);
   });
 };
