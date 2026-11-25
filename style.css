@@ -531,3 +531,17 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
 @media (prefers-reduced-motion:reduce){
   *,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}
 }
+
+/* Floating desktop sidebar: inset from the viewport with a soft rounded frame. */
+@media (min-width:741px){
+  .app{gap:16px}
+  .sidebar{
+    top:16px;height:calc(100vh - 32px);height:calc(100dvh - 32px);
+    margin:16px 0 16px 16px;border:1px solid rgba(183,229,219,.18);border-radius:24px;
+    box-shadow:0 0 0 1px rgba(255,255,255,.025) inset,0 18px 48px rgba(8,38,34,.19)
+  }
+}
+@media (min-width:741px) and (max-width:1020px){
+  .app{gap:13px}
+  .sidebar{top:13px;height:calc(100vh - 26px);height:calc(100dvh - 26px);margin:13px 0 13px 13px;border-radius:21px}
+}
