@@ -26,6 +26,26 @@
   }
   function writeList(key, list) { localStorage.setItem(key, JSON.stringify(list)); }
 
+  function mergeLadderStates(local, remote) {
+    if (!remote) return local;
+    if (!local) return remote;
+    const localTime = Date.parse(local.updatedAt || '') || 0;
+    const remoteTime = Date.parse(remote.updatedAt || '') || 0;
+    const winner = remoteTime > localTime ? remote : local;
+    if (local.started !== remote.started) return winner;
+    const done = (local.done || []).map((n, i) => Math.max(n || 0, (remote.done || [])[i] || 0));
+    const correct = done.map((n, i) => Math.min(n, Math.max((local.correct || [])[i] || 0, (remote.correct || [])[i] || 0)));
+    const union = (a, b) => [...new Set([...(Array.isArray(a) ? a : []), ...(Array.isArray(b) ? b : [])])];
+    const merged = {...winner, done, correct,
+      usedScenarios: union(local.usedScenarios, remote.usedScenarios),
+      usedRozroznij: union(local.usedRozroznij, remote.usedRozroznij)};
+    const changed = JSON.stringify(done) !== JSON.stringify(winner.done) || JSON.stringify(correct) !== JSON.stringify(winner.correct)
+      || JSON.stringify(merged.usedScenarios) !== JSON.stringify(winner.usedScenarios || [])
+      || JSON.stringify(merged.usedRozroznij) !== JSON.stringify(winner.usedRozroznij || []);
+    if (changed) merged.updatedAt = new Date(Math.max(Date.now(), localTime, remoteTime) + 1).toISOString();
+    return merged;
+  }
+
   function setStatus(text, kind) {
     lastStatus = kind || 'idle';
     document.dispatchEvent(new CustomEvent('emlove:sync', {detail: {text, kind}}));
@@ -169,6 +189,8 @@
       }
 
       if (window.EmloveState) {
+        const ladder = window.EmloveLadderSync ? window.EmloveLadderSync.get() : null;
+        if (ladder && !ladder.updatedAt) ladder.updatedAt = new Date().toISOString();
         await rest('/rest/v1/emlove_progress?on_conflict=user_id', {
           method: 'POST',
           headers: {Prefer: 'resolution=merge-duplicates'},
@@ -176,6 +198,8 @@
             user_id: window.EmloveAuth.currentUser().id,
             points: window.EmloveState.points,
             exercises_done: window.EmloveState.exercisesDone,
+            ladder_state: ladder,
+            ladder_updated_at: ladder ? ladder.updatedAt : null,
             updated_at: new Date().toISOString(),
           }],
         });
@@ -250,6 +274,15 @@
         if (row && window.EmloveState) {
           window.EmloveState.points = Math.max(window.EmloveState.points, row.points || 0);
           window.EmloveState.exercisesDone = Math.max(window.EmloveState.exercisesDone, row.exercises_done || 0);
+          if (row.ladder_state && window.EmloveLadderSync) {
+            const localLadder = window.EmloveLadderSync.get();
+            const remoteLadder = {...row.ladder_state, updatedAt: row.ladder_updated_at || row.ladder_state.updatedAt};
+            const mergedLadder = mergeLadderStates(localLadder, remoteLadder);
+            if (JSON.stringify(mergedLadder) !== JSON.stringify(localLadder)) {
+              window.EmloveLadderSync.setFromCloud(mergedLadder);
+              if ((Date.parse(mergedLadder.updatedAt || '') || 0) > (Date.parse(remoteLadder.updatedAt || '') || 0)) scheduleFlush();
+            }
+          }
           if (window.EmloveSave) window.EmloveSave();
         }
       }
