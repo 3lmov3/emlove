@@ -120,6 +120,17 @@ function revealActiveNavItem(behavior='smooth'){
   if(!navMenu)return;
   const active=navMenu.querySelector('.nav-btn.active');
   if(!active)return;
+  if(window.matchMedia('(max-width:740px)').matches){
+    const sidebar=document.getElementById('sidebar');
+    if(sidebar){
+      const panel=sidebar.getBoundingClientRect(),item=active.getBoundingClientRect();
+      const maxScroll=Math.max(0,sidebar.scrollHeight-sidebar.clientHeight);
+      const top=Math.max(0,Math.min(maxScroll,sidebar.scrollTop+item.top-panel.top-(sidebar.clientHeight-active.offsetHeight)/2));
+      sidebar.scrollTo({top,behavior});
+      requestAnimationFrame(updateNavMenuEdges);
+      return;
+    }
+  }
   const maxScroll=Math.max(0,navMenu.scrollHeight-navMenu.clientHeight);
   const top=Math.max(0,Math.min(maxScroll,active.offsetTop-(navMenu.clientHeight-active.offsetHeight)/2));
   navMenu.scrollTo({top,behavior});

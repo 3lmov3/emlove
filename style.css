@@ -552,23 +552,25 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
   .sidebar{
     width:min(90vw,360px);max-width:calc(100vw - 16px);height:100vh;height:100dvh;max-height:100dvh;
     padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));
-    gap:7px;overflow:hidden;border:1px solid rgba(183,229,219,.18);border-left:0;border-radius:0 22px 22px 0;
+    gap:7px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;
+    border:1px solid rgba(183,229,219,.18);border-left:0;border-radius:0 22px 22px 0;
   }
-  /* On phones, keep the brand and crisis note compact and pin them outside the independently scrolling menu. */
+  .sidebar::-webkit-scrollbar{display:none}
+  /* One touch-scroll area for the entire drawer, not a tiny nested nav viewport. */
   .sidebar>.milo-card,.sidebar>.ai-status,.sidebar>.progress-box{display:none!important}
   .sidebar>.logo{gap:9px;padding:0 3px;min-height:38px}
   .sidebar>.logo .logo-icon{width:36px;height:36px;flex-basis:36px;border-radius:11px}
   .sidebar>.logo strong{font-size:17px}
   .sidebar>.logo span{margin-top:2px;font-size:9px}
-  .nav{flex:1 1 auto;min-height:0;max-height:none!important;padding:6px 2px;gap:3px;}
+  .nav{flex:0 0 auto;min-height:0;max-height:none!important;padding:6px 2px;gap:3px;overflow:visible}
   .nav-btn{min-height:42px;padding:9px 10px;font-size:13px}
-  .nav::before,.nav::after{height:24px}
+  .nav::before,.nav::after{display:none}
   .account-box{flex:0 0 auto;padding:8px 10px;margin:0}
   .account-box strong{font-size:11px}
   .account-box p{margin:3px 0 6px;font-size:10px;line-height:1.35}
-  .account-actions{gap:6px}
+  .account-actions{flex-direction:row;gap:6px}
   .account-actions .btn{min-height:32px;padding:6px 8px;font-size:10px}
-  .sidebar>.disclaimer{display:block!important;flex:0 0 auto;max-height:78px;overflow-y:auto;margin:0;padding:7px 9px;font-size:9px;line-height:1.32}
+  .sidebar>.disclaimer{position:sticky;bottom:0;z-index:10;display:block!important;flex:0 0 auto;max-height:78px;overflow-y:auto;margin-top:auto;padding:7px 9px;border-color:rgba(240,108,151,.27);background:rgba(11,23,22,.96);backdrop-filter:blur(10px);font-size:9px;line-height:1.32}
   .top-actions,.bar-sound,.bar-actions{max-width:100%;min-width:0}
   .bar-actions .btn{min-width:0;overflow-wrap:anywhere}
   .modal-overlay#authModal{display:flex;align-items:center;justify-content:center;padding:12px;overflow-y:auto}
