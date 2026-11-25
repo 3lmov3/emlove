@@ -53,6 +53,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 }
 .sidebar::-webkit-scrollbar{width:6px}
 .sidebar::-webkit-scrollbar-thumb{background:rgba(220,245,240,.2);border-radius:10px}
+/* Remove redundant Milo promo panels in the sidebar; the chat and settings remain accessible elsewhere. */
+.sidebar>.milo-card,.sidebar>.ai-status{display:none!important}
 .logo{display:flex;align-items:center;gap:12px;padding:2px 4px 4px;flex:0 0 auto}
 .logo-icon{width:46px;height:46px;flex:0 0 46px;display:grid;place-items:center;border-radius:15px;background:linear-gradient(135deg,var(--primary),var(--pink));color:#fff;font-size:23px;box-shadow:0 8px 20px rgba(15,140,134,.28);overflow:hidden}
 .logo strong{display:block;color:#F4FCFA;font-size:20px;line-height:1.05;letter-spacing:-.04em}
@@ -559,7 +561,6 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
   }
   .sidebar::-webkit-scrollbar{display:none}
   /* One touch-scroll area for the whole drawer; keep useful sections compact. */
-  .sidebar>.milo-card,.sidebar>.ai-status{display:none!important}
   .sidebar>.logo{gap:9px;padding:0 3px;min-height:38px}
   .sidebar>.logo .logo-icon{width:36px;height:36px;flex-basis:36px;border-radius:11px}
   .sidebar>.logo strong{font-size:17px}
