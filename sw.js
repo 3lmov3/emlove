@@ -1,5 +1,5 @@
 // Emlove PWA: pliki i dźwięki dostępne offline po pierwszej instalacji.
-const CACHE = 'emlove-v58';
+const CACHE = 'emlove-v59';
 const ASSETS = ['./','./index.html','./polityka-prywatnosci.html','./style.css','./config.js','./app.js','./auth.js','./sync.js','./providers.js','./byok.js','./milo-online.js','./summary-mail.js','./wheel-view.js','./wheel-reference.json','./ambient.js','./personality.js','./wheel.js','./exercises2.js','./exercises3.js','./content-loader.js','./express.js','./ladder-data.js','./ladder.js','./milo-client.js','./manifest.json','./icon-192.png','./icon-512.png','./apple-touch-icon.png?v=14','./phoenix-award.jpg','./og-emlove.jpg','./audio/rain.mp3','./audio/ocean.mp3','./audio/fire.mp3','./audio/forest.mp3','./audio/LICENCJE.html'];
 self.addEventListener('install', e => e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting())));
 self.addEventListener('activate', e => e.waitUntil(caches.keys().then(keys => Promise.all(keys.filter(k => k.startsWith('emlove-') && k !== CACHE).map(k => caches.delete(k)))).then(() => self.clients.claim())));

@@ -1057,7 +1057,7 @@ function renderAccount(){
       '<strong>👤 Konto</strong>' +
       '<p class="muted small">Zaloguj się, aby zapisać wpisy w chmurze i mieć je na każdym urządzeniu.</p>' +
       '<div class="account-actions">' +
-        '<button class="btn btn-small" type="button" onclick="openAuth(\'login\')">Zaloguj się</button>' +
+        '<button class="btn btn-small btn-primary" type="button" onclick="openAuth(\'login\')">Zaloguj się</button>' +
         '<button class="btn btn-small btn-ghost" type="button" onclick="openAuth(\'signup\')">Zarejestruj się</button>' +
       '</div>';
     return;
