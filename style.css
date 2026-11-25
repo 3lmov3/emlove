@@ -516,7 +516,7 @@ html,body{max-width:100%;overflow-x:hidden}
 @media (min-width:901px){
   .app{display:flex;align-items:flex-start;width:100%;min-height:100vh}
   .sidebar{flex:0 0 280px;width:280px;height:100vh;min-height:0;position:sticky;top:0}
-  .main{flex:1 1 0;width:auto;min-width:0;max-width:1440px;margin:0 auto;padding:28px clamp(22px,3.2vw,52px) 64px}
+  .main{flex:1 1 0;width:auto;min-width:0;max-width:1440px;margin:0;padding:28px clamp(22px,3.2vw,52px) 64px}
   .topbar{align-items:center;flex-wrap:wrap}
   .top-actions{min-width:0;max-width:100%;flex-wrap:wrap;justify-content:flex-end}
   .bar-sound,.bar-actions{min-width:0;flex-wrap:wrap}
