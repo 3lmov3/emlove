@@ -92,6 +92,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible,
 .account-box p{margin:7px 0 10px}
 .account-actions{display:flex;gap:7px;flex-wrap:wrap}
 .account-actions .btn{flex:1 1 92px;justify-content:center;min-width:0}
+.account-actions .btn:not(.btn-ghost){color:#fff!important;-webkit-text-fill-color:#fff!important;background:linear-gradient(135deg,#119A91,#08716C)!important;border:1px solid #08716C!important;box-shadow:0 4px 12px rgba(15,140,134,.2)}
 .milo-card{display:flex;align-items:flex-start;gap:11px;padding:14px;border:1px solid rgba(217,234,230,.85);border-radius:17px;color:var(--ink);background:linear-gradient(135deg,#FFF8F1,#E8F7F4);box-shadow:0 8px 22px rgba(0,0,0,.12);flex:0 0 auto}
 .milo-avatar{width:40px;height:40px;flex:0 0 40px;display:grid;place-items:center;border-radius:14px;color:#fff;background:linear-gradient(145deg,var(--primary),var(--primary-dark));font-weight:800}
 .milo-card strong{font-size:14px}
@@ -552,7 +553,8 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
   .sidebar{
     width:min(90vw,360px);max-width:calc(100vw - 16px);height:100vh;height:100dvh;max-height:100dvh;
     padding:max(10px,env(safe-area-inset-top)) 12px max(10px,env(safe-area-inset-bottom));
-    gap:7px;overflow-x:hidden;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;
+    gap:7px;overflow-x:hidden;overflow-y:scroll;overscroll-behavior-y:contain;scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;touch-action:pan-y;
     border:1px solid rgba(183,229,219,.18);border-left:0;border-radius:0 22px 22px 0;
   }
   .sidebar::-webkit-scrollbar{display:none}
