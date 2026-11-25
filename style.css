@@ -550,11 +550,18 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
 @media (max-width:740px){
   .app{width:100%;overflow-x:clip}
   .sidebar{
-    width:min(88vw,360px);max-width:calc(100vw - 16px);height:100vh;height:100dvh;max-height:100dvh;
-    padding: max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
-    gap:12px;border:1px solid rgba(183,229,219,.18);border-left:0;border-radius:0 22px 22px 0;
+    width:min(90vw,360px);max-width:calc(100vw - 16px);height:100vh;height:100dvh;max-height:100dvh;
+    padding:max(16px,env(safe-area-inset-top)) 14px max(16px,env(safe-area-inset-bottom));
+    gap:10px;overflow:hidden;border:1px solid rgba(183,229,219,.18);border-left:0;border-radius:0 22px 22px 0;
   }
-  .nav{max-height:min(42vh,360px);max-height:min(42dvh,360px);min-height:150px;padding-block:18px}
+  /* Give the actual navigation almost all available height; hide decorative sidebar cards on phones. */
+  .sidebar>.milo-card,.sidebar>.ai-status,.sidebar>.progress-box,.sidebar>.disclaimer{display:none!important}
+  .nav{flex:1 1 auto;min-height:0;max-height:none!important;padding:8px 2px;gap:5px;}
+  .nav-btn{min-height:48px;padding:11px 12px;font-size:14px}
+  .nav::before,.nav::after{height:26px}
+  .account-box{flex:0 0 auto;padding:10px 12px;margin:0}
+  .account-box p{margin:4px 0 8px}
+  .account-actions .btn{min-height:38px}
   .top-actions,.bar-sound,.bar-actions{max-width:100%;min-width:0}
   .bar-actions .btn{min-width:0;overflow-wrap:anywhere}
   .modal-overlay#authModal{display:flex;align-items:center;justify-content:center;padding:12px;overflow-y:auto}
@@ -563,7 +570,7 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
   #authModal .auth-tab{min-width:0;padding:9px 4px;color:#45635E!important;background:#F2F8F6!important;font-size:11px;line-height:1.25}
   #authModal .auth-tab.active{color:#075D59!important;background:#DDF2EE!important;border-color:#0F8C86!important}
   #authModal .settings-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-  #authModal #authSubmit{display:inline-flex!important;align-items:center;justify-content:center;min-height:44px;color:#fff!important;-webkit-text-fill-color:#fff!important;background:linear-gradient(135deg,#119A91,#08716C)!important;border:1px solid #08716C!important;text-shadow:0 1px 1px rgba(0,0,0,.2);opacity:1!important}
-  #authModal #authSubmit:disabled{opacity:.78!important}
+  #authModal #authSubmit{display:inline-flex!important;align-items:center;justify-content:center;min-height:44px;color:#063F3A!important;-webkit-text-fill-color:#063F3A!important;background:linear-gradient(135deg,#C5F0E9,#A8E2D8)!important;border:1px solid #72C3B7!important;text-shadow:none;opacity:1!important}
+  #authModal #authSubmit:disabled{opacity:.82!important}
   #authModal .settings-actions .btn-ghost{color:#0A6B66!important;-webkit-text-fill-color:#0A6B66!important;background:#fff!important}
 }
