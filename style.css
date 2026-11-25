@@ -499,3 +499,35 @@ html,body{max-width:100%;overflow-x:hidden}
 .wheel-empty{margin-top:16px;background:#F4FAF7;border-color:#E1EEE8}
 .wheel-empty h3{font-size:16px;font-weight:700;color:#284C4B;margin:0 0 6px}
 .wheel-disclaimer{font-size:12px;line-height:18px;color:#7B8E89;margin:16px 0}
+
+/* Tablet/small desktop: show both navigation and page content instead of an open-looking drawer. */
+@media (min-width:681px) and (max-width:900px){
+  .app{display:flex;align-items:flex-start;width:100%;min-height:100vh}
+  .sidebar{position:sticky;left:auto;top:0;bottom:auto;flex:0 0 230px;width:230px;height:100vh;max-height:100vh;transform:none!important;transition:none;z-index:1;padding:18px 12px}
+  .sidebar-backdrop{display:none!important}
+  .hamburger{display:none}
+  .main{flex:1 1 0;width:auto;min-width:0;max-width:none;margin:0;padding:20px 18px 56px}
+  .topbar{flex-direction:column;align-items:stretch}
+  .top-actions{width:100%;min-width:0;max-width:100%;justify-content:flex-start;flex-wrap:wrap}
+  .bar-sound,.bar-actions{min-width:0;flex-wrap:wrap}
+}
+
+/* Desktop: keep the sidebar fixed-width and let the workspace use the remaining viewport. */
+@media (min-width:901px){
+  .app{display:flex;align-items:flex-start;width:100%;min-height:100vh}
+  .sidebar{flex:0 0 280px;width:280px;height:100vh;min-height:0;position:sticky;top:0}
+  .main{flex:1 1 0;width:auto;min-width:0;max-width:1440px;margin:0 auto;padding:28px clamp(22px,3.2vw,52px) 64px}
+  .topbar{align-items:center;flex-wrap:wrap}
+  .top-actions{min-width:0;max-width:100%;flex-wrap:wrap;justify-content:flex-end}
+  .bar-sound,.bar-actions{min-width:0;flex-wrap:wrap}
+  .hero{grid-template-columns:minmax(0,1.12fr) minmax(260px,.88fr)}
+  .grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media (min-width:901px) and (max-width:1180px){
+  .sidebar{flex-basis:250px;width:250px;padding:20px 14px}
+  .main{padding:24px 22px 56px}
+  .topbar{align-items:flex-start;flex-direction:column}
+  .top-actions{justify-content:flex-start;width:100%}
+  .hero{grid-template-columns:1fr;padding:22px}
+}
