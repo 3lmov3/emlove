@@ -289,8 +289,12 @@
     } catch (e) { /* postępy są pomocnicze */ }
 
     writeList(REMOTE_IDS_PREFIX + userId, [...remoteIds]);
-    if (merged > 0) setStatus('Zsynchronizowano ' + merged + ' zmian z chmury', 'ok');
-    else setStatus('Chmura aktualna', 'ok');
+    const cycle = window.EmloveLadderSync ? window.EmloveLadderSync.get() : null;
+    const ladderStatus = cycle
+      ? ` · Drabina ${cycle.done.reduce((a,b)=>a+b,0)}/70 zadań, ${cycle.correct.reduce((a,b)=>a+b,0)}/70 serduszek`
+      : '';
+    if (merged > 0) setStatus('Zsynchronizowano ' + merged + ' zmian z chmury' + ladderStatus, 'ok');
+    else setStatus('Chmura aktualna' + ladderStatus, 'ok');
     return {merged};
   }
 
