@@ -27,9 +27,16 @@
   }
   function writeList(key, list) { localStorage.setItem(key, JSON.stringify(list)); }
 
+  function ladderHasProgress(c) {
+    return !!c && (c.started !== null || !!c.round || (c.done || []).some(n => n > 0) || (c.correct || []).some(n => n > 0));
+  }
   function mergeLadderStates(local, remote) {
     if (!remote) return local;
     if (!local) return remote;
+    const localHas = ladderHasProgress(local), remoteHas = ladderHasProgress(remote);
+    // A blank legacy cycle must never erase real earned progress just because it was synced later.
+    if (localHas && !remoteHas) return local;
+    if (remoteHas && !localHas) return remote;
     const localTime = Date.parse(local.updatedAt || '') || 0;
     const remoteTime = Date.parse(remote.updatedAt || '') || 0;
     const winner = remoteTime > localTime ? remote : local;
@@ -191,18 +198,28 @@
 
       if (window.EmloveState) {
         const ladder = window.EmloveLadderSync ? window.EmloveLadderSync.get() : null;
-        if (ladder && !ladder.updatedAt) ladder.updatedAt = new Date().toISOString();
+        const hasLadderProgress = !!ladder && (
+          ladder.started !== null || (ladder.done || []).some(n => n > 0) ||
+          (ladder.correct || []).some(n => n > 0) || !!ladder.round
+        );
+        const shouldSyncLadder = !!ladder && (!!ladder.updatedAt || hasLadderProgress);
+        if (shouldSyncLadder && !ladder.updatedAt) ladder.updatedAt = new Date().toISOString();
+        const progressRow = {
+          user_id: window.EmloveAuth.currentUser().id,
+          points: window.EmloveState.points,
+          exercises_done: window.EmloveState.exercisesDone,
+          updated_at: new Date().toISOString(),
+        };
+        // A blank legacy PWA cycle is not a reset: do not overwrite a mobile cycle
+        // in the cloud with an uninitialized local zero state.
+        if (shouldSyncLadder) {
+          progressRow.ladder_state = ladder;
+          progressRow.ladder_updated_at = ladder.updatedAt;
+        }
         await rest('/rest/v1/emlove_progress?on_conflict=user_id', {
           method: 'POST',
           headers: {Prefer: 'resolution=merge-duplicates'},
-          body: [{
-            user_id: window.EmloveAuth.currentUser().id,
-            points: window.EmloveState.points,
-            exercises_done: window.EmloveState.exercisesDone,
-            ladder_state: ladder,
-            ladder_updated_at: ladder ? ladder.updatedAt : null,
-            updated_at: new Date().toISOString(),
-          }],
+          body: [progressRow],
         });
       }
 
