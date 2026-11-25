@@ -558,7 +558,8 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
     border:1px solid rgba(183,229,219,.18);border-left:0;border-radius:0 22px 22px 0;
   }
   .sidebar::-webkit-scrollbar{display:none}
-  /* One touch-scroll area for the whole drawer; keep every section, but make it compact. */
+  /* One touch-scroll area for the whole drawer; keep useful sections compact. */
+  .sidebar>.milo-card,.sidebar>.ai-status{display:none!important}
   .sidebar>.logo{gap:9px;padding:0 3px;min-height:38px}
   .sidebar>.logo .logo-icon{width:36px;height:36px;flex-basis:36px;border-radius:11px}
   .sidebar>.logo strong{font-size:17px}
