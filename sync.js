@@ -16,6 +16,7 @@
   let timer = null;
   let flushing = false;
   let lastStatus = 'offline';
+  let ladderCloudInfo = 'niepobrano';
 
   function cfg() { return window.EMLOVE_CONFIG || {}; }
   function baseUrl() { return String(cfg().supabaseUrl || '').replace(/\/$/, ''); }
@@ -205,7 +206,11 @@
         });
       }
 
-      setStatus('Zapisano w chmurze', 'ok');
+      const ladder = window.EmloveLadderSync ? window.EmloveLadderSync.get() : null;
+      const localLadderInfo = ladder
+        ? `${ladder.done.reduce((a,b)=>a+b,0)}/70 zadań, ${ladder.correct.reduce((a,b)=>a+b,0)}/70 serduszek`
+        : 'brak lokalnego odczytu';
+      setStatus(`Zapisano w chmurze · Drabina lokalnie: ${localLadderInfo} · w chmurze przed zapisem: ${ladderCloudInfo}`, 'ok');
     } catch (e) {
       const code = e.code === 'login_required' || e.status === 401 ? 'Sesja wygasła — zaloguj się ponownie'
         : e.status === 404 ? 'Brak tabel w bazie — uruchom emlove_account.sql'
@@ -264,6 +269,7 @@
       if (window.EmloveSave) window.EmloveSave();
     }
 
+    ladderCloudInfo = 'odczyt trwa';
     try {
       const p = await fetch(baseUrl() + '/rest/v1/emlove_progress?select=*', {
         headers: {apikey: cfg().supabaseAnonKey, Authorization: 'Bearer ' + token},
@@ -271,6 +277,13 @@
       if (p.ok) {
         const rowsP = await p.json();
         const row = (rowsP || [])[0];
+        if (!row) ladderCloudInfo = 'brak rekordu postępu';
+        else if (!row.ladder_state) ladderCloudInfo = 'rekord jest, ale brak ladder_state';
+        else {
+          const cloudDone=(row.ladder_state.done||[]).reduce((a,b)=>a+b,0);
+          const cloudHearts=(row.ladder_state.correct||[]).reduce((a,b)=>a+b,0);
+          ladderCloudInfo=`${cloudDone}/70 zadań, ${cloudHearts}/70 serduszek`;
+        }
         if (row && window.EmloveState) {
           window.EmloveState.points = Math.max(window.EmloveState.points, row.points || 0);
           window.EmloveState.exercisesDone = Math.max(window.EmloveState.exercisesDone, row.exercises_done || 0);
@@ -285,8 +298,8 @@
           }
           if (window.EmloveSave) window.EmloveSave();
         }
-      }
-    } catch (e) { /* postępy są pomocnicze */ }
+      } else ladderCloudInfo=`błąd HTTP ${p.status}`;
+    } catch (e) { ladderCloudInfo='błąd odczytu postępów'; }
 
     writeList(REMOTE_IDS_PREFIX + userId, [...remoteIds]);
     const cycle = window.EmloveLadderSync ? window.EmloveLadderSync.get() : null;
