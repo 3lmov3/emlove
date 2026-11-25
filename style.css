@@ -531,3 +531,22 @@ html,body{max-width:100%;overflow-x:hidden}
   .top-actions{justify-content:flex-start;width:100%}
   .hero{grid-template-columns:1fr;padding:22px}
 }
+
+/* Navigacja boczna: niezależne przewijanie z rozmytymi krawędziami. */
+.nav{
+  position:relative;flex:0 1 auto;min-height:0;max-height:min(52vh,520px);
+  overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;scrollbar-gutter:stable;
+  padding:24px 4px;scrollbar-width:thin;scrollbar-color:rgba(220,245,240,.3) transparent;
+}
+.nav-btn{flex:0 0 auto}
+.nav::-webkit-scrollbar{width:7px}
+.nav::-webkit-scrollbar-track{background:transparent}
+.nav::-webkit-scrollbar-thumb{background:rgba(220,245,240,.28);border-radius:99px}
+.nav::before,.nav::after{
+  content:'';position:absolute;left:0;right:0;height:36px;z-index:3;
+  pointer-events:none;opacity:0;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);
+  transition:opacity .18s ease
+}
+.nav::before{top:0;background:linear-gradient(to bottom,rgba(10,22,20,.92),rgba(10,22,20,.42),transparent)}
+.nav::after{bottom:0;background:linear-gradient(to top,rgba(10,22,20,.92),rgba(10,22,20,.42),transparent)}
+.nav.has-scroll-up::before,.nav.has-scroll-down::after{opacity:1}

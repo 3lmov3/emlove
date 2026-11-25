@@ -110,10 +110,26 @@ const TITLES = {
   library:['Biblioteka emocji 📚','Słownik emocji z sygnałami i pytaniami.'],
   keys:['Klucze API 🔑','Wybierz, którego klucza ma używać Milo.'],
 };
+const navMenu=document.querySelector('.nav');
+function updateNavMenuEdges(){
+  if(!navMenu)return;
+  navMenu.classList.toggle('has-scroll-up',navMenu.scrollTop>2);
+  navMenu.classList.toggle('has-scroll-down',navMenu.scrollTop+navMenu.clientHeight<navMenu.scrollHeight-2);
+}
+function revealActiveNavItem(behavior='smooth'){
+  if(!navMenu)return;
+  const active=navMenu.querySelector('.nav-btn.active');
+  if(!active)return;
+  const maxScroll=Math.max(0,navMenu.scrollHeight-navMenu.clientHeight);
+  const top=Math.max(0,Math.min(maxScroll,active.offsetTop-(navMenu.clientHeight-active.offsetHeight)/2));
+  navMenu.scrollTo({top,behavior});
+  requestAnimationFrame(updateNavMenuEdges);
+}
 function goTo(view){
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
+  revealActiveNavItem();
   const meta = TITLES[view] || [view, ''];
   document.getElementById('viewTitle').textContent = meta[0];
   document.getElementById('viewSubtitle').textContent = meta[1];
@@ -122,6 +138,11 @@ function goTo(view){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.view)));
+if(navMenu){
+  navMenu.addEventListener('scroll',updateNavMenuEdges,{passive:true});
+  window.addEventListener('resize',updateNavMenuEdges);
+  requestAnimationFrame(()=>{revealActiveNavItem('auto');updateNavMenuEdges();});
+}
 function openSidebar(){ document.getElementById('sidebar').classList.add('open'); const b=document.getElementById('sidebarBackdrop'); if(b) b.classList.add('show'); }
 function closeSidebar(){ document.getElementById('sidebar').classList.remove('open'); const b=document.getElementById('sidebarBackdrop'); if(b) b.classList.remove('show'); }
 document.getElementById('hamburger').addEventListener('click',()=>{
