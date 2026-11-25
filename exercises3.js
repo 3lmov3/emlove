@@ -12,113 +12,93 @@ const TRAIN_WHEEL = [
 const CYCLE_KEY='emlove_wheel_cycle_v1', LIMITS=[40,20,10], DURATION=30*24*60*60*1000;
 function shuffleWheel(xs){const a=xs.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function escWheel(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
-function makeWheelPool(level){
- const pool=[];
- for(const f of TRAIN_WHEEL) for(const [g,words] of f.groups){
-  if(level===1){
-   // Powtarzające się nazwy grup nie mają jednej odpowiedzi — nie zadajemy takich pytań.
-   if(TRAIN_WHEEL.filter(x=>x.groups.some(y=>y[0]===g)).length!==1) continue;
-   const near=f.name==='Szczęśliwy'?['Zaskoczony','Słaby','Lękliwy']:['Rozgniewany','Lękliwy','Smutny','Zniesmaczony','Słaby','Zaskoczony'];
-   const options=shuffleWheel([f.name,...shuffleWheel(near.filter(x=>x!==f.name)).slice(0,3)]);
-   pool.push({q:`W którym głównym obszarze koła znajduje się podgrupa „${g}”?`,options,answer:options.indexOf(f.name),path:`${f.name} → ${g}`});
-  } else if(level===2){
-   for(const word of words){
-    if(f.groups.filter(x=>x[1].includes(word)).length!==1) continue;
-    const options=shuffleWheel([g,...shuffleWheel([...new Set(f.groups.filter(x=>x[0]!==g).map(x=>x[0]))]).slice(0,3)]);
-    pool.push({q:`W obszarze „${f.name}”: do której podgrupy na kole należy słowo „${word}”?`,options,answer:options.indexOf(g),path:`${f.name} → ${g} → ${word}`});
-   }
-  } else {
-   for(const word of words){
-    const other=f.groups.filter(x=>x[0]!==g).flatMap(x=>x[1]).filter(x=>!words.includes(x));
-    if(other.length<3) continue;
-    const options=shuffleWheel([word,...shuffleWheel([...new Set(other)]).slice(0,3)]);
-    pool.push({q:`W obszarze „${f.name}” otwieramy podgrupę „${g}”. Które słowo leży w niej na kole?`,options,answer:options.indexOf(word),path:`${f.name} → ${g} → ${word}`});
-   }
-  }
- }
- return pool;
-}
-function newCycle(){return {started:null,done:[0,0,0],correct:[0,0,0],round:null};}
-/**
- * Stare rundy (zadania jednopytaniowe, bez tablicy questions) nie pasują do
- * nowego silnika. Taką rundę zerujemy — postęp cyklu (done/correct) zostaje,
- * użytkownik po prostu zaczyna nową rundę.
- */
+function newCycle(){return {started:null,done:[0,0,0],correct:[0,0,0],round:null,plans:[],usedScenarios:[],usedRozroznij:[]};}
+/** Resetuj tylko aktywną rundę ze starego formatu; ukończone serca zostają. */
 function migrateUnansweredIntensity(c){
- const r=c&&c.round;
- if(!r||r.phase!=='quiz'||!Array.isArray(r.tasks))return false;
- const legacy=r.tasks.some(t=>!t||!Array.isArray(t.questions)||t.questions.length===0);
- if(!legacy)return false;
- c.round=null;
- return true;
+ const r=c&&c.round;if(!r)return false;
+ const valid=Array.isArray(r.tasks)&&r.tasks.every(t=>t&&Array.isArray(t.questions)&&t.questions.length===1&&
+  Array.isArray(t.questions[0].accepted)&&typeof t.questions[0].feedback==='string');
+ if(valid)return false;c.round=null;return true;
 }
-function loadCycle(){let c;try{c=JSON.parse(localStorage.getItem(CYCLE_KEY));}catch(e){} if(!c||(c.started!==null&&!Number.isFinite(c.started))||!Array.isArray(c.done)||!Array.isArray(c.correct)||(c.started!==null&&Date.now()>=c.started+DURATION)){c=newCycle();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));} if(migrateUnansweredIntensity(c))localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); return c;}
-function saveCycle(c){localStorage.setItem(CYCLE_KEY,JSON.stringify(c)); updateHeartsSidebar();}
-function currentLevel(c){return LIMITS.findIndex((n,i)=>c.done[i]<n)+1 || 4;}
+function loadCycle(){
+ let c;try{c=JSON.parse(localStorage.getItem(CYCLE_KEY));}catch(e){}
+ if(!c||!Array.isArray(c.done)||!Array.isArray(c.correct)||c.done.length!==3||c.correct.length!==3||
+  c.done.some((d,i)=>!Number.isInteger(d)||d<0||d>LIMITS[i])||c.correct.some((n,i)=>!Number.isInteger(n)||n<0||n>c.done[i])||
+  (c.started!==null&&!Number.isFinite(c.started))||(c.started!==null&&Date.now()>=c.started+DURATION)){
+  c=newCycle();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));
+ }
+ if(migrateUnansweredIntensity(c))localStorage.setItem(CYCLE_KEY,JSON.stringify(c));
+ if(!Array.isArray(c.plans))c.plans=[];if(!Array.isArray(c.usedScenarios))c.usedScenarios=[];if(!Array.isArray(c.usedRozroznij))c.usedRozroznij=[];
+ return c;
+}
+function saveCycle(c){c.updatedAt=new Date().toISOString();localStorage.setItem(CYCLE_KEY,JSON.stringify(c));updateHeartsSidebar();if(window.EmloveSync)window.EmloveSync.scheduleFlush();}
+function setCycleFromCloud(c){
+ if(!c||!Array.isArray(c.done)||!Array.isArray(c.correct)||c.done.length!==3||c.correct.length!==3)return false;
+ localStorage.setItem(CYCLE_KEY,JSON.stringify(c));
+ const normalized=loadCycle();
+ updateHeartsSidebar();
+ if(window.WheelCourse)window.WheelCourse.render();
+ return normalized.done.length===3;
+}
+function currentLevel(c){return LIMITS.findIndex((n,i)=>c.done[i]<n)+1||4;}
 function updateHeartsSidebar(){const el=document.getElementById('statHearts');if(el){const c=loadCycle();el.textContent=c.correct.reduce((a,b)=>a+b,0);}}
 function cycleInfo(c){
  const h=c.correct.reduce((a,b)=>a+b,0), n=c.done.reduce((a,b)=>a+b,0),level=currentLevel(c),deadline=c.started===null?'30 dni od pierwszej rundy':new Date(c.started+DURATION).toLocaleString('pl-PL',{dateStyle:'medium',timeStyle:'short'});
  const remaining=level<=3?LIMITS[level-1]-c.done[level-1]:0;
- const details=level<=3?`<p><strong>Poziom ${level}: ${c.correct[level-1]} zdobytych · ${remaining} serduszek jeszcze do zdobycia</strong><br><span class="muted small">${c.done[level-1]} z ${LIMITS[level-1]} zadań za Tobą. Niewykorzystanych serduszek z błędnych odpowiedzi nie można odzyskać w tym cyklu.</span></p>`:'';
- return `<p><strong>Postęp:</strong> ${n}/70 zadań · ♥ ${h}/70</p>${details}<p class="muted small">Zadania na poziomach: ${c.done.map((d,i)=>`${d}/${LIMITS[i]}`).join(' · ')}<br>Cykl trwa do: ${deadline} (czas na tym urządzeniu).</p>`;
+ const details=level<=3?`<p><strong>Poziom ${['A','B','C'][level-1]}: ${c.correct[level-1]} zdobytych · ${remaining} serduszek jeszcze do zdobycia</strong><br><span class="muted small">${c.done[level-1]} z ${LIMITS[level-1]} zadań za Tobą. Niewykorzystanych serduszek z błędnych odpowiedzi nie można odzyskać w tym cyklu.</span></p>`:'';
+ return `<p><strong>Postęp:</strong> ${n}/70 zadań · ♥ ${h}/70</p>${details}<p class="muted small">Zadania na poziomach: ${c.done.map((d,i)=>`${['A','B','C'][i]} ${d}/${LIMITS[i]}`).join(' · ')}<br>Cykl trwa do: ${deadline} (czas na tym urządzeniu).</p>`;
 }
 const WheelCourse={
- start(withOnline=false){
+ start(){
   const c=loadCycle(),level=currentLevel(c);if(level>3)return this.render();
   if(c.started===null)c.started=Date.now();
   const tasks=ladderMakeRound(c,level);
   c.round={level,tasks,answers:[],taskIndex:0,qIndex:0,wins:0,phase:'quiz',practice:false,id:Date.now().toString(36)+Math.random().toString(36).slice(2)};saveCycle(c);this.render();
-  if(withOnline)this.enrich(c.round.id);
- },
- async enrich(id){
-  if(!window.MiloClient || !MiloClient.configured())return;
-  try {const contexts=await MiloClient.contexts(); const c=loadCycle();if(!c.round||c.round.id!==id||c.round.practice)return; c.round.tasks.forEach((t,i)=>{t.context=contexts[i]||''});saveCycle(c);this.render();}catch(e){/* Offline lub brak konfiguracji — lokalne zadania nadal działają. */}
  },
  answer(i){
   const c=loadCycle(),r=c.round;if(!r||r.phase!=='quiz')return this.render();
-  const t=r.tasks[r.taskIndex],q=t&&t.questions[r.qIndex];
-  if(!q||!Number.isInteger(i)||i<0||i>=q.options.length)return;
-  r.answers.push({task:r.taskIndex,q:r.qIndex,chosen:i,correct:i===q.answer});
-  if(r.qIndex<t.questions.length-1){r.qIndex++;}
-  else{r.taskIndex++;r.qIndex=0;}
-  if(r.taskIndex>=r.tasks.length){
-   r.phase='summary';
-   if(!r.practice){
-    const wins=r.tasks.reduce((n,task,ti)=>{
-     const as=r.answers.filter(x=>x.task===ti);
-     return n+(as.length===task.questions.length&&as.every(x=>x.correct)?1:0);
-    },0);
-    r.wins=wins;
-    c.done[r.level-1]+=r.tasks.length;c.correct[r.level-1]+=wins;
-    state.exercisesDone+=r.tasks.length;state.points+=wins*4;saveState();
-   }
+  const t=r.tasks[r.taskIndex],q=t&&t.questions[0];if(!q||!Number.isInteger(i)||i<0||i>=q.options.length)return;
+  if(r.answers.some(a=>a.task===r.taskIndex))return;
+  r.answers.push({task:r.taskIndex,q:0,chosen:i,correct:q.accepted.includes(i)});
+  r.phase='feedback';saveCycle(c);this.render();
+ },
+ continueAfterAnswer(){
+  const c=loadCycle(),r=c.round;if(!r||r.phase!=='feedback')return this.render();
+  if(r.taskIndex<r.tasks.length-1){r.taskIndex++;r.qIndex=0;r.phase='quiz';saveCycle(c);this.render();return;}
+  r.phase='summary';
+  const wins=r.tasks.reduce((n,_task,ti)=>n+(r.answers.some(a=>a.task===ti&&a.correct)?1:0),0);r.wins=wins;
+  if(!r.practice){
+   if(r.correction)c.correct[r.level-1]=Math.min(c.done[r.level-1],c.correct[r.level-1]+wins);
+   else{c.done[r.level-1]+=r.tasks.length;c.correct[r.level-1]+=wins;state.exercisesDone+=r.tasks.length;state.points+=wins*4;saveState();}
   }
   saveCycle(c);this.render();
  },
- retry(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return; c.round={...c.round,answers:[],taskIndex:0,qIndex:0,wins:0,phase:'quiz',practice:true};saveCycle(c);this.render();},
- next(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return; c.round=null;saveCycle(c);this.render();},
+ retry(){const c=loadCycle(),r=c.round;if(!r||r.phase!=='summary'||r.practice)return;const tasks=r.tasks.filter((_t,i)=>!r.answers.some(a=>a.task===i&&a.correct));if(!tasks.length)return;c.round={level:r.level,tasks,answers:[],taskIndex:0,qIndex:0,wins:0,phase:'quiz',practice:false,correction:true,recovery:!!r.recovery};saveCycle(c);this.render();},
+ next(){const c=loadCycle();if(!c.round||c.round.phase!=='summary')return;c.round=null;saveCycle(c);this.render();},
  render(){
   const el=document.getElementById('wheelCourse');if(!el)return;const c=loadCycle(),r=c.round,level=currentLevel(c);updateHeartsSidebar();
-  if(!r&&level===4){const score=c.correct.reduce((a,b)=>a+b,0),gold=score>=63; el.innerHTML=`<h2>Ukończono drogę Emlove</h2>${cycleInfo(c)}<p><b>${score}/70 · ${(score/70*100).toFixed(1).replace('.',',')}%</b></p><img src="${gold?'phoenix-award.jpg':'icon-512.png'}" alt="${gold?'Odznaka złotego feniksa':'Odznaka białego serca'}" class="award-image"><h3>${gold?'Odznaka feniksa':'Odznaka białego serca'}</h3><p>${gold?'Gratulacje! Wynik co najmniej 95%.':'Dziękujemy za przejście całej drogi. Feniks jest za wynik co najmniej 95%.'} Nowy cykl rozpocznie się po upływie 30 dni.</p>`;return;}
-  if(!r){el.innerHTML=`<h2>🧭 Drabina emocji</h2>${cycleInfo(c)}<p>Trzy poziomy: <b>40, 20 i 10 zadań</b>. Poziom 1 ma po 2 pytania w zadaniu, poziom 2 po 3, poziom 3 po 4. Co trzecie zadanie to <b>Rozróżnij</b>. Zadanie jest zaliczone tylko wtedy, gdy wszystkie jego pytania są poprawne.</p>${MiloClient.configured()?'<p class="muted small">Możesz zacząć lokalnie lub pobrać nowe tła przez internet. W opcji internetowej prośba trafia przez Supabase do OpenRoutera i dostawcy modelu; Twoje odpowiedzi na zadania nie są wysyłane. Weryfikacja Cloudflare może otrzymać adres IP.</p>':'<p class="muted small">Milo działa lokalnie; zadania losowane są z przygotowanej puli i mogą się powtarzać.</p>'}<p>Runda ma <b>5 zadań</b> — za zaliczoną rundę dostajesz do 5 serduszek. Informację zwrotną zobaczysz na końcu. Feniksa dostaje się przy <b>63 serduszkach</b> (90% z 70), a do 5 dodatkowych można zdobyć w ćwiczeniu <b>Wyraż</b>. Cykl trwa 30 dni.</p><p><button class="btn btn-ghost" onclick="goTo('wheel')">Zobacz koło emocji</button></p><p class="muted small">Zadania korzystają z koła i przykładowych wypowiedzi. Nie oceniamy Twoich uczuć: ta sama sytuacja może wywoływać różne reakcje.</p>${MiloClient.configured()?`<div class="ex-actions"><button class="btn btn-secondary" onclick="WheelCourse.start(false)">Rozpocznij lokalnie · poziom ${level}</button><button class="btn btn-primary" onclick="WheelCourse.start(true)">Rozpocznij z nowym tłem przez internet</button></div>`:`<button class="btn btn-primary" onclick="WheelCourse.start(false)">Rozpocznij rundę · poziom ${level}</button>`}`;return;}
+  if(!r&&level===4){const score=c.correct.reduce((a,b)=>a+b,0),gold=score>=63;el.innerHTML=`<h2>Ukończono drogę Emlove</h2>${cycleInfo(c)}<p><b>${score}/70 · ${(score/70*100).toFixed(1).replace('.',',')}%</b></p><img src="${gold?'phoenix-award.jpg':'icon-512.png'}" alt="${gold?'Odznaka złotego feniksa':'Odznaka białego serca'}" class="award-image"><h3>${gold?'Odznaka feniksa':'Odznaka białego serca'}</h3><p>${gold?'Gratulacje! Wynik co najmniej 90%.':'Dziękujemy za przejście całej drogi. Feniks jest za wynik co najmniej 90%.'} Nowy cykl rozpocznie się po upływie 30 dni.</p>`;return;}
+  if(!r){el.innerHTML=`<h2>🧭 Drabina emocji</h2>${cycleInfo(c)}<p>Poziom A: <b>40 zadań</b> po jednym pytaniu i 2 opcje. Poziom B: <b>20 zadań</b> i 3 opcje. Poziom C: <b>10 zadań</b> i 4 opcje. Co trzecie zadanie to <b>Rozróżnij</b>.</p><p class="muted small">Zadania działają lokalnie i nie wymagają internetu. Odpowiedzi pozostają na tym urządzeniu.</p><p>Runda ma <b>5 zadań</b>. Zaznaczasz jedną opcję; w niektórych pytaniach więcej niż jedna może być akceptowana. Po każdej odpowiedzi zobaczysz jedno krótkie zdanie wyjaśnienia. Za każde zaliczone zadanie dostajesz serce. Feniks jest za <b>63 serca z 70</b>. Cykl trwa 30 dni.</p><p><button class="btn btn-ghost" onclick="goTo('wheel')">Zobacz koło emocji</button></p><p class="muted small">To przykładowe sytuacje i możliwe połączenia. Nie oceniamy Twoich osobistych uczuć.</p><button class="btn btn-primary" onclick="WheelCourse.start()">Rozpocznij rundę · poziom ${['A','B','C'][level-1]}</button>`;return;}
   if(r.phase==='quiz'){
-   const t=r.tasks[r.taskIndex],q=t&&t.questions[r.qIndex];if(!q)return;
-   const totalQ=r.tasks.reduce((n,x)=>n+x.questions.length,0);
-   const doneQ=r.answers.length;
-   el.innerHTML=`<h2>Poziom ${r.level} · ${r.practice?'powtórka':'runda'}</h2>${cycleInfo(c)}<p class="muted">${escWheel(LADDER_LABEL[t.kind]||'Koło emocji')} · Zadanie ${r.taskIndex+1} z ${r.tasks.length} · Pytanie ${r.qIndex+1} z ${t.questions.length}${r.practice?' · ćwiczenie bez zmiany wyniku cyklu':''}</p><div class="ex-progress"><div style="width:${100*doneQ/totalQ}%"></div></div>${t.story?`<p class="ex-story">${escWheel(t.story)}</p>`:''}<p class="ex-prompt">${escWheel(q.q)}</p><div class="exercise-options">${q.options.map((o,i)=>`<button class="choice-btn" onclick="WheelCourse.answer(${i})">${escWheel(o)}</button>`).join('')}</div><p class="muted small">Nie ma podpowiedzi ani oceny po pojedynczym pytaniu. Odpowiedzi zobaczysz po całej rundzie.</p>`;
+   const t=r.tasks[r.taskIndex],q=t&&t.questions[0];if(!q)return;
+   const total=r.tasks.length,done=r.answers.length;
+   el.innerHTML=`<h2>Poziom ${['A','B','C'][r.level-1]} · ${r.practice?'powtórka':'runda'}</h2>${cycleInfo(c)}<p class="muted">${escWheel(LADDER_LABEL[t.kind]||'Scenariusz')} · Zadanie ${r.taskIndex+1} z ${r.tasks.length}${r.practice?' · ćwiczenie bez zmiany wyniku cyklu':''}</p><div class="ex-progress"><div style="width:${100*done/total}%"></div></div>${t.title?`<p class="ex-prompt"><b>${escWheel(t.title)}</b></p>`:''}${t.story?`<p class="ex-story">${escWheel(t.story)}</p>`:''}<p class="ex-prompt">${escWheel(q.q)}</p><div class="exercise-options">${q.options.map((o,i)=>`<button class="choice-btn" onclick="WheelCourse.answer(${i})">${escWheel(o)}</button>`).join('')}</div>`;
+   return;
+  }
+  if(r.phase==='feedback'){
+   const t=r.tasks[r.taskIndex],q=t&&t.questions[0];if(!q)return;
+   el.innerHTML=`<h2>Poziom ${['A','B','C'][r.level-1]} · ${r.practice?'powtórka':'runda'}</h2><p class="muted">${escWheel(LADDER_LABEL[t.kind]||'Scenariusz')} · Zadanie ${r.taskIndex+1} z ${r.tasks.length}</p>${t.story?`<p class="ex-story">${escWheel(t.story)}</p>`:''}<p class="ex-prompt">${escWheel(q.feedback)}</p><div class="ex-actions"><button class="btn btn-primary" onclick="WheelCourse.continueAfterAnswer()">Dalej</button></div>`;
    return;
   }
   const got=typeof r.wins==='number'?r.wins:0;
-  el.innerHTML=`<h2>Podsumowanie rundy · poziom ${r.level}</h2>${cycleInfo(c)}<div class="hearts">${'♥'.repeat(got)}${'♡'.repeat(r.tasks.length-got)}</div><p>${got}/${r.tasks.length} zadań zaliczonych${r.practice?' w powtórce — wynik cyklu bez zmian':''}</p><div class="ex-review">${r.tasks.map((t,i)=>{
-   const as=r.answers.filter(x=>x.task===i),ok=as.length===t.questions.length&&as.every(x=>x.correct);
-   return `<div class="ex-review-item ${ok?'ok':'no'}"><b>${i+1}. ${escWheel(t.title||LADDER_LABEL[t.kind]||'Zadanie')}</b>${t.questions.map((q,qi)=>{
-    const a=as.find(x=>x.q===qi);
-    return `<p>${escWheel(q.q)}<br>Twoja odpowiedź: ${a?escWheel(q.options[a.chosen]):'—'}${a&&!a.correct?`<br>Poprawnie: ${escWheel(q.options[q.answer])}`:''}</p>`;
-   }).join('')}${t.explain?`<p class="muted small">${escWheel(t.explain)}</p>`:''}</div>`;
-  }).join('')}</div><div class="ex-actions"><button class="btn btn-primary" onclick="WheelCourse.next()">${level===4?'Zobacz odznakę':'Idziemy dalej'}</button><button class="btn btn-secondary" onclick="WheelCourse.retry()">Poprawiamy tę rundę</button></div><p class="muted small">Zadanie jest zaliczone tylko wtedy, gdy wszystkie jego pytania są poprawne. Powtórka pomaga ćwiczyć, ale nie zmienia wyniku cyklu.</p>`;
+  el.innerHTML=`<h2>Podsumowanie rundy · poziom ${['A','B','C'][r.level-1]}</h2>${cycleInfo(c)}<div class="hearts">${'♥'.repeat(got)}${'♡'.repeat(r.tasks.length-got)}</div><p>${got}/${r.tasks.length} zadań zaliczonych${r.practice?' w powtórce — wynik cyklu bez zmian':''}</p><div class="ex-review">${r.tasks.map((t,i)=>{
+   const a=r.answers.find(x=>x.task===i),q=t.questions[0];
+   return `<div class="ex-review-item"><b>${i+1}. ${escWheel(LADDER_LABEL[t.kind]||'Scenariusz')} · ${escWheel(t.title||'')}</b><p>${escWheel(q.q)}<br>Wybrana odpowiedź: ${a?escWheel(q.options[a.chosen]):'—'}</p></div>`;
+  }).join('')}</div><div class="ex-actions"><button class="btn btn-primary" onclick="WheelCourse.next()">${level===4?'Zobacz odznakę':'Idziemy dalej'}</button>${got<r.tasks.length&&!r.practice?'<button class="btn btn-secondary" onclick="WheelCourse.retry()">Popraw niezaliczone zadania</button>':''}</div>`;
  }
 };
 window.WheelCourse=WheelCourse;
+window.EmloveLadderSync={get:loadCycle,setFromCloud:setCycleFromCloud};
 window.showTrainingFamily=function(i){const f=TRAIN_WHEEL[i],el=document.getElementById('wheelDetail');if(!f||!el)return;el.innerHTML=`<h3>${escWheel(f.name)}</h3><p class="muted small">Podgrupa → słowa z zewnętrznego pierścienia</p>${f.groups.map(g=>`<p><b>${escWheel(g[0])}</b><br>${g[1].map(escWheel).join(' · ')}</p>`).join('')}`;};
 function initWheelCourse(){
  const section=document.getElementById('view-exercises');if(!section||document.getElementById('wheelCourse'))return;
