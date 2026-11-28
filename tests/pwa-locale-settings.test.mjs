@@ -9,8 +9,9 @@ const localeScript = fs.readFileSync(new URL('../locales.js', here), 'utf8');
 const values = new Map();
 const events = [];
 const root = {lang: 'pl', dataset: {}};
+const checkinCatalog = JSON.parse(fs.readFileSync(new URL('../translations/checkin.json', here), 'utf8'));
 const sandbox = {
-  window: {dispatchEvent: e => events.push(e)},
+  window: {EMLOVE_TRANSLATION_CATALOG: {checkin: checkinCatalog}, dispatchEvent: e => events.push(e)},
   document: {
     documentElement: root,
     addEventListener() {},
@@ -27,6 +28,8 @@ const sandbox = {
 vm.runInNewContext(localeScript, sandbox);
 const locale = sandbox.window.EmloveLocale;
 assert.equal(locale.language(), 'de', 'auto uses the first supported browser language');
+assert.equal(locale.content('checkin', 'title'), 'Check-in');
+assert.equal(locale.content('checkin', 'step'), 'Schritt');
 for (const code of ['pl', 'en', 'de', 'fr', 'hu', 'uk']) {
   assert.equal(locale.setLanguage(code), true);
   assert.equal(locale.language(), code);
@@ -48,10 +51,17 @@ assert.equal(resolveLocale('en-GB'), 'en');
 assert.equal(resolveLocale('xx'), null);
 
 const css = fs.readFileSync(new URL('../style.css', here), 'utf8');
-assert.match(css, /html\[data-theme="night"\] \.topbar h1\{color:#EEF2FA!important\}/);
+assert.match(css, /html\[data-theme="night"\] \.topbar h1,html\[data-theme="night"\] \.card h2,html\[data-theme="night"\] \.card h3,html\[data-theme="night"\] \.field-label\{color:#F2F5FB\}/);
+assert.match(css, /html\[data-theme="night"\] \.emotion-btn,html\[data-theme="night"\] \.chip/);
+assert.match(css, /html\[data-theme="night"\] input::placeholder,html\[data-theme="night"\] textarea::placeholder\{color:#AAB8CA!important/);
 assert.match(css, /html\[data-theme="night"\] \.btn-ghost\{color:#F1F4FA!important/);
-assert.match(css, /html\[data-theme="night"\] \.btn-secondary\{color:#FFD7E7!important/);
+assert.match(css, /html\[data-theme="night"\] \.btn-secondary\{color:#FFE7F1!important/);
 assert.match(css, /html\[data-theme="night"\] #authModal \.settings-actions \.btn-ghost\{color:#F1F4FA!important/);
+const html = fs.readFileSync(new URL('../index.html', here), 'utf8');
+assert.match(html, /style\.css\?v=night-contrast-1/);
+const sw = fs.readFileSync(new URL('../sw.js', here), 'utf8');
+assert.match(sw, /emlove-v71/);
+assert.match(sw, /style\.css\?v=night-contrast-1/);
 
 const launcherManifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', here), 'utf8'));
 assert.deepEqual(launcherManifest.icons.map(icon => icon.src), ['icon-192.png', 'icon-512.png', 'icon-512.png']);
