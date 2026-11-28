@@ -2,7 +2,7 @@
 
 ## Wdrożone w źródłach
 - Odblokowano wybór PL/EN/DE/FR/HU/UK oraz tryb Auto (język przeglądarki/urządzenia).
-- Dodano zapisany lokalnie wybór motywu: Miętowy, Nocny i Lawendowy.
+- Dodano zapisany lokalnie wybór motywu: Miętowy, Nocny i Lawendowy. Logo wewnątrz aplikacji zmienia wariant; ikona launchera na ekranie telefonu/desktopu, favicon, Apple Touch i manifest pozostają jedną wspólną ikoną-fuzją. System może nie odświeżyć ikony ekranu głównego aplikacji, która była już zainstalowana.
 - Klient Milo przekazuje wybrany język do ścieżek online administratora i BYOK; odpowiedź bez potwierdzenia zgodnego języka jest odrzucana.
 - Edge Functions mają lokalizowane prompty i odpowiedzi kryzysowe dla sześciu języków, bez dobierania numeru pomocy na podstawie języka.
 - Lokalny Milo oraz cztery wbudowane symulacje korzystają z zatwierdzonych zasobów tłumaczeń.
