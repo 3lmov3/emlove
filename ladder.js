@@ -7,13 +7,17 @@ const LADDER_LABEL = {scenariusz:'Scenariusz', rozroznij:'Rozróżnij'};
 const LADDER_OPTIONS_PER_LEVEL = [2,3,4];
 
 function ladderBuildTask(src){
-  const shuffled=shuffleWheel(src.options);
+  const locale=window.EmloveLocale?window.EmloveLocale.language():'pl';
+  const catalog=window.EMLOVE_TRANSLATION_CATALOG?.['ladder-content']?.[locale]?.[src.id];
+  const localizedOptions=Array.isArray(catalog?.options)&&catalog.options.length===src.options.length?catalog.options:null;
+  const shuffled=shuffleWheel(src.options.map((option,index)=>({...option,text:localizedOptions?localizedOptions[index]:option.text,sourceIndex:index})));
   const options=shuffled.map(o=>o.text);
   const accepted=shuffled.flatMap((o,i)=>o.accepted?[i]:[]);
+  const title=catalog?.title||src.title,story=catalog?.story||src.story,q=catalog?.q||src.q,feedback=catalog?.feedback||src.feedback;
   return {
-    kind:src.kind,id:src.id,title:src.title,story:src.story,
-    questions:[{q:src.q,options,accepted,feedback:src.feedback}],
-    path:src.title
+    kind:src.kind,id:src.id,title,story,
+    questions:[{q,options,accepted,feedback}],
+    path:title
   };
 }
 

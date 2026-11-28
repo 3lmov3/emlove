@@ -1,0 +1,6 @@
+Emlove PWA hotfix overlay
+
+Extract the contents of this archive into the repository root, preserving paths and replacing files when prompted.
+The archive includes the updated locale runtime, translation catalog, app files, translations, icons, and service worker cache bump (emlove-v72).
+Then commit and publish the complete overlay together. Do not publish only index.html or only translation-catalog.js.
+No build is required for these static files.

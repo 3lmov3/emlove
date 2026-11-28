@@ -160,7 +160,7 @@ const ANIMAL_REFLECTIONS = {
   "aksolotl": "Co przychodzi Ci na myśl, kiedy słyszysz słowo «regeneracja»?",
   "orzel": "Jakie znaczenie ma dla Ciebie patrzenie na coś z innej perspektywy?"
 };
-function animalReflection(id) { return ANIMAL_REFLECTIONS[id] || 'Jakie skojarzenia budzi w Tobie ten symbol?'; }
+function animalReflection(id) { return bfAnimals()[id]?.question || ANIMAL_REFLECTIONS[id] || 'Jakie skojarzenia budzi w Tobie ten symbol?'; }
 
 function bfScoreFromAnswers(answers){
   // answers: array of 1..5 (index matches BF_ITEMS)
@@ -193,15 +193,20 @@ function matchAnimals(profile){
 }
 
 function profileSummary(profile){
-  return 'Zestawienie opiera się na odpowiedziach w tym ćwiczeniu. Nie jest diagnozą ani porównaniem z innymi osobami.';
+  return bfText('summary','This summary is based on your answers in this exercise. It is not a diagnosis or comparison with other people.');
 }
 
 // ================= UI =================
 const BF_STORE_KEY = 'emlove_personality';
 let bfSession = { i: 0, answers: [], active: false };
+function bfText(key,fallback,vars){return window.EmloveLocale?.content('personality-ui',key,vars)||fallback;}
+function bfItems(){return window.EmloveLocale?.content('personality-items')||{};}
+function bfAnimals(){return window.EmloveLocale?.content('animal-reflections','animals')||{};}
+function bfEsc(s){return String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
+function bfAnimalName(id){return bfAnimals()[id]?.name||ANIMALS.find(a=>a.id===id)?.name||id;}
 
 if (typeof TITLES !== 'undefined') {
-  TITLES.personality = ['Twoja osobowość 🐾', 'Ćwiczenie inspirowane pięcioma wymiarami osobowości — dla refleksji, nie diagnoza.'];
+  TITLES.personality = ['page.personality.title', 'page.personality.subtitle'];
 }
 
 function bfLoadProfile() {
@@ -222,14 +227,14 @@ function bfRenderIntro() {
   const root = document.getElementById('bfRoot');
   root.innerHTML = `
     <div class="card">
-      <span class="badge">🐾 30 zdań · 5 wymiarów · ok. 4 minuty</span>
-      <h2 style="margin:12px 0 8px">Poznaj swój sposób przeżywania świata</h2>
-      <p class="muted">Odpowiesz na 30 krótkich zdań. Nie ma odpowiedzi lepszych ani gorszych — chodzi o to, jak jest u Ciebie, nie jak „powinno być”.</p>
-      <div class="result-hint" style="background:#F1FBFA;border:1px solid #D8EDEA;border-radius:10px;padding:14px;margin:14px 0;font-size:.92rem;line-height:1.6;color:#0A6B66">
-        <b>Na końcu zobaczysz zwierzę-towarzysza</b> — symbol dobrany na podstawie odpowiedzi. To zaproszenie do refleksji, a nie opis osoby ani diagnoza. Możesz powtórzyć test w dowolnej chwili.
-      </div>
-      <p class="muted small">To ćwiczenie edukacyjne inspirowane pięcioma wymiarami osobowości. Nie zastępuje diagnozy psychologicznej. Wynik zapisuje się tylko w tej przeglądarce.</p>
-      <button class="btn btn-primary" onclick="bfStart()">Zacznij test 🐾</button>
+      <span class="badge">🐾 ${bfEsc(bfText('intro','30 statements · 5 dimensions · about 4 minutes.'))}</span>
+      <h2 style="margin:12px 0 8px">${bfEsc(bfText('title','Your personality'))}</h2>
+      <h3>${bfEsc(bfText('purposeTitle','Why in Emlove?'))}</h3>
+      <p class="muted">${bfEsc(bfText('purpose','This exercise is a starting point for your own reflection.'))}</p>
+      <h3>${bfEsc(bfText('rulesTitle','How it works'))}</h3>
+      <div class="result-hint">${bfEsc(bfText('rules','There are no right or wrong answers.'))}</div>
+      <p class="muted small">${bfEsc(bfText('disclaimer','This is an educational exercise, not a diagnosis.'))}</p>
+      <button class="btn btn-primary" onclick="bfStart()">${bfEsc(bfText('start','Start the test 🐾'))}</button>
     </div>`;
 }
 
@@ -240,28 +245,18 @@ function bfStart() {
 }
 
 function bfRenderQuestion() {
-  const root = document.getElementById('bfRoot');
-  const i = bfSession.i;
-  const it = BF_ITEMS[i];
-  const pct = Math.round((i / BF_ITEMS.length) * 100);
-  root.innerHTML = `
+  const root=document.getElementById('bfRoot'),i=bfSession.i,it=BF_ITEMS[i],pct=Math.round((i/BF_ITEMS.length)*100),pack=bfItems();
+  const facet=pack.facets?.[i]||it.f,text=pack.items?.[i]||it.t,scale=pack.scale||BF_SCALE;
+  root.innerHTML=`
     <div class="card">
-      <div style="display:flex;justify-content:space-between;align-items:center">
-        <span class="bf-facet">${it.f}</span>
-        <span class="muted small">${i + 1} / ${BF_ITEMS.length}</span>
-      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center"><span class="bf-facet">${bfEsc(facet)}</span><span class="muted small">${i+1} / ${BF_ITEMS.length}</span></div>
       <div class="bf-progress"><div style="width:${pct}%"></div></div>
-      <h3 class="bf-q">${it.t}</h3>
-      <p class="muted small">Na ile to o Tobie? Wybierz to, co pierwsze przychodzi.</p>
-      <div class="bf-scale">
-        ${BF_SCALE.map((label, idx) => `
-          <button class="bf-opt" onclick="bfAnswer(${idx + 1})">
-            <b>${idx + 1}</b><span>${label}</span>
-          </button>`).join('')}
-      </div>
+      <h3 class="bf-q">${bfEsc(text)}</h3>
+      <p class="muted small">${bfEsc(bfText('quizHint','How much is this like you? Choose your first impression.'))}</p>
+      <div class="bf-scale">${scale.map((label,idx)=>`<button class="bf-opt" onclick="bfAnswer(${idx+1})"><b>${idx+1}</b><span>${bfEsc(label)}</span></button>`).join('')}</div>
       <div class="bf-nav">
-        <button class="btn btn-ghost" onclick="bfPrev()" ${i === 0 ? 'disabled style="opacity:.4"' : ''}>← Wstecz</button>
-        <span class="muted small" style="align-self:center">Bez pośpiechu. Możesz wrócić.</span>
+        <button class="btn btn-ghost" onclick="bfPrev()" ${i===0?'disabled style="opacity:.4"':''}>${bfEsc(bfText('back','← Back'))}</button>
+        <span class="muted small" style="align-self:center">${bfEsc(bfText('quizFooter','Take your time. You can go back.'))}</span>
       </div>
     </div>`;
 }
@@ -303,16 +298,17 @@ function bfRenderResult(record, justFinished = false) {
 
   root.innerHTML = `
     ${justFinished ? `<div class="card" style="background:#0B1514;border-color:#1E332F;color:#F3FBFA">
-      <h2 style="color:#F3FBFA;margin:0 0 4px">Gotowe. Dziękuję za szczerość ♥</h2>
-      <p style="color:#B9D6D2;margin:0">To nie etykieta — to punkt wyjścia do rozmowy ze sobą.</p>
+      <h2 style="color:#F3FBFA;margin:0 0 4px">${bfEsc(bfText('finished','Finished. Thank you for your honesty ♥'))}</h2>
+      <p style="color:#B9D6D2;margin:0">${bfEsc(bfText('finishedNote','This is a starting point for reflection, not a label.'))}</p>
     </div>` : ''}
 
     <div class="bf-result-grid" style="margin-top:14px">
       <div class="card">
-        <h3 style="margin-top:0">Twój profil</h3>
+        <h3 style="margin-top:0">${bfEsc(bfText('profile','Your profile'))}</h3>
         <p class="muted small" style="margin-bottom:14px">${profileSummary(profile)}</p>
         ${dims.map(d => {
-          const dim = BIG_FIVE_DIMS[d];
+          const sourceDim=BIG_FIVE_DIMS[d],localizedDim=bfItems().dimensions?.[d]||{};
+          const dim={...sourceDim,name:localizedDim.name||sourceDim.name,desc:localizedDim.description||sourceDim.desc};
           const v = profile[d];
           return `<div class="bf-dim">
             <div class="bf-dim-head"><b>${dim.name}</b><span class="muted">${v}/100</span></div>
@@ -320,30 +316,30 @@ function bfRenderResult(record, justFinished = false) {
             <div class="muted small" style="margin-top:4px">${dim.desc}</div>
           </div>`;
         }).join('')}
-        <p class="muted small" style="margin-top:10px">Wartości wynikają z odpowiedzi w tym ćwiczeniu. Nie stanowią diagnozy ani porównania z innymi osobami.</p>
+        <p class="muted small" style="margin-top:10px">${bfEsc(bfText('valuesNote','Values come from your answers in this exercise. They are not a diagnosis or comparison.'))}</p>
       </div>
 
       <div>
         <div class="animal-card">
           <div class="animal-emoji">${animal.emoji}</div>
-          <div class="animal-key">Zwierzę-towarzysz</div>
-          <div class="animal-name">${animal.name}</div>
-          <p class="animal-line">Symbol dobrany z odpowiedzi — zaproszenie do refleksji, nie opis osoby.</p>
-          <div class="animal-row"><b>Milo pyta:</b><span>${animalReflection(animal.id)}</span></div>
+          <div class="animal-key">${bfEsc(bfText('symbol','Companion animal'))}</div>
+          <div class="animal-name">${bfEsc(bfAnimalName(animal.id))}</div>
+          <p class="animal-line">${bfEsc(bfText('symbolDescription','A symbol selected from your answers: an invitation to reflect, not a description of who you are.'))}</p>
+          <div class="animal-row"><b>${bfEsc(bfText('miloAsks','Milo asks:'))}</b><span>${bfEsc(animalReflection(animal.id))}</span></div>
         </div>
         <div class="card" style="margin-top:12px">
-          <h3 style="margin-top:0">Inne symbole dobrane z odpowiedzi</h3>
-          <p class="muted small">To kolejne symbole wybrane przez ten sam algorytm; nie musisz się z nimi utożsamiać.</p>
+          <h3 style="margin-top:0">${bfEsc(bfText('other','Other symbols selected from your answers'))}</h3>
+          <p class="muted small">${bfEsc(bfText('otherNote','These are other symbols selected by the same method; you do not have to identify with them.'))}</p>
           <div class="animal-alt">
-            ${matches.slice(1).map(a => `<div class="animal-chip"><span>${a.emoji}</span>${a.name}</div>`).join('')}
+            ${matches.slice(1).map(a => `<div class="animal-chip"><span>${a.emoji}</span>${bfEsc(bfAnimalName(a.id))}</div>`).join('')}
           </div>
         </div>
         <div class="card">
-          <h3 style="margin-top:0">Co dalej?</h3>
+          <h3 style="margin-top:0">${bfEsc(bfText('whatNext','What next?'))}</h3>
           <div style="display:flex;flex-wrap:wrap;gap:8px">
-            <button class="btn btn-primary" onclick="bfAskMilo()">💬 Zapytaj Milo o mój profil</button>
-            <button class="btn btn-secondary" onclick="bfGoExercise()">🧩 Przejdź do ćwiczeń</button>
-            <button class="btn btn-ghost" onclick="bfRestart()">↻ Powtórz test</button>
+            <button class="btn btn-primary" onclick="bfAskMilo()">${bfEsc(bfText('askMilo','💬 Ask Milo about my profile'))}</button>
+            <button class="btn btn-secondary" onclick="bfGoExercise()">${bfEsc(bfText('goExercises','🧩 Go to exercises'))}</button>
+            <button class="btn btn-ghost" onclick="bfRestart()">↻ ${bfEsc(bfText('repeat','Repeat the test'))}</button>
           </div>
           <div id="bfMiloOut" class="preview-box" style="display:none;margin-top:12px"></div>
         </div>
@@ -351,7 +347,7 @@ function bfRenderResult(record, justFinished = false) {
     </div>
 
     <div class="card" style="margin-top:14px">
-      <p class="muted small">Emlove jest narzędziem edukacyjnym dla dorosłych (18+), nie terapią. Kontakty pomocy dla regionu urządzenia: <span data-crisis-summary></span>.</p>
+      <p class="muted small">${bfEsc(window.EmloveLocale?.t('app.disclaimer')||'Emlove is an educational tool for adults, not therapy.')} ${bfEsc(bfText('regionHelp','Support contacts for your device region:'))} <span data-crisis-summary></span>.</p>
     </div>`;
 }
 
@@ -371,7 +367,7 @@ function bfAskMilo() {
   // Odpowiedź lokalna: bez wysyłania odpowiedzi i profilu do internetu.
   out.style.display = 'block';
   const shown = record.profile ? matchAnimals(record.profile)[0] : null;
-  out.textContent = 'Milo: ' + animalReflection(shown ? shown.id : record.animal);
+  out.textContent = bfText('miloAsks','Milo asks:')+' '+animalReflection(shown ? shown.id : record.animal);
 }
 
 // init

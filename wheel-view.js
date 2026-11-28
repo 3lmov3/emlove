@@ -34,6 +34,11 @@
       .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
   }
 
+  function wheelLocale(){return window.EmloveLocale?window.EmloveLocale.language():'pl';}
+  function wheelTerm(value){const locale=wheelLocale();const res=window.EMLOVE_TRANSLATION_CATALOG?.['wheel-reference-locales'];const dict=res?.locales?.[locale]||{};return dict[value]||value;}
+  function wheelUi(key,fallback){return window.EmloveLocale?.content('wheel-ui',key)||fallback||key;}
+  function wheelData(){return data?{...data,center:wheelTerm(data.center),areas:data.areas.map(a=>({name:wheelTerm(a.name),sourceName:a.name,groups:a.groups.map(([g,words])=>[wheelTerm(g),words.map(wheelTerm)])}))}:null;}
+
   // ── geometria ───────────────────────────────────────────────
   function point(r, a) {
     return [CENTER + r * Math.cos(a), CENTER + r * Math.sin(a)];
@@ -75,24 +80,25 @@
 
   // ── widok główny ────────────────────────────────────────────
   function mainSvg() {
-    const count = data.areas.length;
+    const viewData=wheelData();
+    const count = viewData.areas.length;
     const step = (Math.PI * 2) / count;
-    const paths = data.areas.map((area, i) =>
+    const paths = viewData.areas.map((area, i) =>
       `<path d="${slicePath(i, count)}" fill="${COLORS[i % COLORS.length]}" stroke="#FFFFFF" stroke-width="2" ` +
       `style="cursor:pointer" onclick="EmloveWheel.choose(${i})"><title>${esc(area.name)}</title></path>`
     ).join('');
 
-    const labels = data.areas.map((area, i) => {
+    const labels = viewData.areas.map((area, i) => {
       const [x, y] = point(107, -Math.PI / 2 + i * step);
       return `<text x="${x.toFixed(2)}" y="${y.toFixed(2)}" text-anchor="middle" dominant-baseline="middle" ` +
         `font-size="9.5" font-weight="700" fill="#284446" pointer-events="none">${esc(area.name)}</text>`;
     }).join('');
 
-    return `<svg viewBox="0 0 ${VIEW} ${VIEW}" width="100%" role="img" aria-label="Koło emocji">` +
+    return `<svg viewBox="0 0 ${VIEW} ${VIEW}" width="100%" role="img" aria-label="${esc(wheelUi('title','Emotion wheel'))}">` +
       `${paths}<circle cx="${CENTER}" cy="${CENTER}" r="${INNER - 1}" fill="#FFFDFC" stroke="#DFEAE5" stroke-width="1.5"/>` +
       `${labels}` +
       `<text x="${CENTER}" y="${CENTER - 6}" text-anchor="middle" font-size="19" fill="#D386A6" pointer-events="none">♥</text>` +
-      `<text x="${CENTER}" y="${CENTER + 12}" text-anchor="middle" font-size="12" font-weight="700" fill="${INK}" pointer-events="none">${esc(data.center)}</text>` +
+      `<text x="${CENTER}" y="${CENTER + 12}" text-anchor="middle" font-size="12" font-weight="700" fill="${INK}" pointer-events="none">${esc(viewData.center)}</text>` +
       `</svg>`;
   }
 
@@ -127,10 +133,10 @@
     });
 
     out += `<circle cx="${D_CENTER}" cy="${D_CENTER}" r="63" fill="#FFFDFC" stroke="#DFEAE5" stroke-width="2"/>`;
-    out += `<text x="${D_CENTER}" y="${D_CENTER - 4}" text-anchor="middle" font-size="19" pointer-events="none">${ICONS[area.name] || ''}</text>`;
+    out += `<text x="${D_CENTER}" y="${D_CENTER - 4}" text-anchor="middle" font-size="19" pointer-events="none">${ICONS[area.sourceName||area.name] || ''}</text>`;
     out += `<text x="${D_CENTER}" y="${D_CENTER + 14}" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" pointer-events="none">${esc(area.name)}</text>`;
 
-    return `<svg viewBox="0 0 480 480" width="${zoom ? '155%' : '100%'}" role="img" aria-label="Obszar ${esc(area.name)}">${out}</svg>`;
+    return `<svg viewBox="0 0 480 480" width="${zoom ? '155%' : '100%'}" role="img" aria-label="${esc(wheelUi('chooseArea','Area: {name}').replace('{name}',area.name))}">${out}</svg>`;
   }
 
   // ── render ──────────────────────────────────────────────────
@@ -148,51 +154,52 @@
         window.legacyWheel();
         return;
       }
-      host.innerHTML = '<p class="muted">Nie udało się wczytać koła emocji. Brakuje pliku <code>wheel-reference.json</code>.</p>';
+      host.innerHTML = `<p class="muted">${esc(wheelUi('loadError','Could not load the emotion wheel.'))} <code>wheel-reference.json</code>.</p>`;
       return;
     }
     if (!data) {
-      host.innerHTML = '<p class="muted">Wczytywanie koła…</p>';
+      host.innerHTML = `<p class="muted">${esc(wheelUi('loading','Loading the emotion wheel…'))}</p>`;
       return;
     }
 
-    const area = selected === null ? null : data.areas[selected];
-    const count = data.areas.length;
+    const viewData=wheelData();
+    const area = selected === null ? null : viewData.areas[selected];
+    const count = viewData.areas.length;
 
-    const areaButtons = data.areas.map((a, i) =>
+    const areaButtons = viewData.areas.map((a, i) =>
       `<button type="button" class="wheel-area${selected === i ? ' active' : ''}" ` +
       `style="background:${COLORS[i % COLORS.length]}" onclick="EmloveWheel.choose(${i})">${esc(a.name)}</button>`
     ).join('');
 
     host.innerHTML = `
       <div class="wheel-card">
-        <p class="wheel-eyebrow">POZNAJ SWOJE EMOCJE</p>
-        <h2 class="wheel-title">Koło emocji</h2>
-        <p class="wheel-intro">Zatrzymaj się na chwilę. Wybierz obszar koła, a potem przyjrzyj się słowom poniżej.</p>
+        <p class="wheel-eyebrow">${esc(wheelUi('eyebrow','GET TO KNOW YOUR EMOTIONS'))}</p>
+        <h2 class="wheel-title">${esc(wheelUi('title','Emotion wheel'))}</h2>
+        <p class="wheel-intro">${esc(wheelUi('intro','Pause for a moment. Choose an area of the wheel, then explore the words below.'))}</p>
 
         <div class="wheel-canvas${zoom ? ' zoomed' : ''}">
           ${area === null ? mainSvg() : detailSvg(area)}
         </div>
 
-        <p class="wheel-hint">${area ? 'Kliknij słowo na kole albo wybierz je z listy poniżej.' : 'Kliknij kolor albo wybierz nazwę poniżej.'}</p>
+        <p class="wheel-hint">${area ? esc(wheelUi('wordPrompt','Tap a word on the wheel or choose one from the list below')) : esc(wheelUi('areaHint','Tap a colour or choose a name below'))}</p>
 
-        <button type="button" class="btn btn-ghost wheel-zoom" onclick="EmloveWheel.toggleZoom()">${zoom ? 'Zmniejsz koło' : 'Powiększ koło'}</button>
-        ${zoom ? '<p class="wheel-hint">Przewiń koło w bok, aby obejrzeć całość.</p>' : ''}
+        <button type="button" class="btn btn-ghost wheel-zoom" onclick="EmloveWheel.toggleZoom()">${esc(wheelUi(zoom?'zoomOut':'zoomIn',zoom?'Reduce wheel':'Enlarge wheel'))}</button>
+        ${zoom ? `<p class="wheel-hint">${esc(wheelUi('zoomHint','Swipe sideways to explore the whole wheel.'))}</p>` : ''}
 
         <div class="wheel-areas">
-          <button type="button" class="wheel-area home${selected === null ? ' active' : ''}" onclick="EmloveWheel.reset()">♥ ${esc(data.center)}</button>
+          <button type="button" class="wheel-area home${selected === null ? ' active' : ''}" onclick="EmloveWheel.reset()">♥ ${esc(viewData.center)}</button>
           ${areaButtons}
         </div>
 
-        ${word ? `<p class="wheel-selected" role="status">Wybrane słowo: <strong>${esc(word.label)}</strong></p>` : ''}
+        ${word ? `<p class="wheel-selected" role="status">${esc(wheelUi('selectedWord','Selected word:'))} <strong>${esc(wheelTerm(word.label))}</strong></p>` : ''}
       </div>
 
       ${area ? detailCard(area) : `<div class="card wheel-empty">
-        <h3>Zacznij tam, gdzie jesteś</h3>
-        <p class="muted">Wybierz obszar, aby zobaczyć powiązane słowa. Nie ma tu dobrych ani złych odpowiedzi.</p>
+        <h3>${esc(wheelUi('emptyTitle','Start where you are'))}</h3>
+        <p class="muted">${esc(wheelUi('emptyText','Choose an area to see related words. There are no right or wrong answers.'))}</p>
       </div>`}
 
-      <p class="wheel-disclaimer">Słowa pochodzą z transkrypcji Twojego koła i mogą wymagać sprawdzenia z oryginałem. Koło nie jest diagnozą.</p>
+      <p class="wheel-disclaimer">${esc(wheelUi('disclaimer','The wheel is a reflection tool, not a diagnosis.'))}</p>
     `;
   }
 
@@ -209,15 +216,15 @@
     `).join('');
 
     return `<div class="card wheel-detail">
-      <p class="wheel-eyebrow">WYBRANY OBSZAR</p>
+      <p class="wheel-eyebrow">${esc(wheelUi('selectedArea','SELECTED AREA'))}</p>
       <h3>${esc(area.name)}</h3>
-      <p class="wheel-detail-intro">Co najlepiej opisuje to, co czujesz? Możesz kliknąć dowolne słowo.</p>
+      <p class="wheel-detail-intro">${esc(wheelUi('detailIntro','Which words best describe what you feel? Tap any word to explore it.'))}</p>
       ${groups}
       ${word ? `<div class="wheel-reflection" role="status">
-        <p class="wheel-eyebrow">WYBRANE SŁOWO</p>
-        <p class="wheel-reflection-word">${esc(word.label)}</p>
-        <p class="wheel-reflection-text">Co przychodzi Ci na myśl, gdy o nim myślisz?</p>
-        <p class="wheel-reflection-note">Wybór jest tylko do refleksji — nie zapisuje się.</p>
+        <p class="wheel-eyebrow">${esc(wheelUi('selectedWordLabel','SELECTED WORD'))}</p>
+        <p class="wheel-reflection-word">${esc(wheelTerm(word.label))}</p>
+        <p class="wheel-reflection-text">${esc(wheelUi('reflectionPrompt','What comes to mind when you think about this word?'))}</p>
+        <p class="wheel-reflection-note">${esc(wheelUi('reflectionNote','This choice is just for reflection; it is not saved.'))}</p>
       </div>` : ''}
     </div>`;
   }
@@ -251,5 +258,5 @@
     render();
   }
 
-  window.EmloveWheel = {mount, choose, reset, pickGroup, pickWord, toggleZoom};
+  window.EmloveWheel = {mount, choose, reset, pickGroup, pickWord, toggleZoom, render};
 })();

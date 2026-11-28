@@ -97,16 +97,19 @@ function saveState(){
 function addPoints(n){ state.points+=n; saveState(); }
 
 function renderProgress(){
-  document.getElementById('pointsLabel').textContent = state.points+' pkt';
-  const pct = Math.min(100, state.points);
-  document.getElementById('progressFill').style.width = pct+'%';
-  document.getElementById('progressText').textContent = state.points<20 ? 'Zacznij od dzisiejszego check-inu' : state.points<60 ? 'Świetnie! Kontynuuj ćwiczenia i symulacje' : 'Jesteś wspaniałym odkrywcą emocji! 🌟';
-  document.getElementById('statEntries').textContent = state.entries.length;
-  document.getElementById('statExercises').textContent = state.exercisesDone;
+  const tr=key=>window.EmloveLocale?.t(key)||key;
+  document.getElementById('pointsLabel').textContent=state.points+' '+tr('progress.points');
+  const pct=Math.min(100,state.points);
+  document.getElementById('progressFill').style.width=pct+'%';
+  document.getElementById('progressText').textContent=state.points<20?tr('progress.start'):state.points<60?tr('progress.continue'):tr('progress.great');
+  document.getElementById('statEntries').textContent=state.entries.length;
+  document.getElementById('statExercises').textContent=state.exercisesDone;
   // streak: unique dates
   const dates = [...new Set(state.entries.map(e=>e.date))];
   document.getElementById('statStreak').textContent = dates.length;
 }
+function trContent(section,key,fallback='',vars){const value=window.EmloveLocale&&window.EmloveLocale.content(section,key,vars);return typeof value==='string'&&value?value:fallback;}
+function miloPrompt(key){const prompts=window.EmloveLocale?.content('milo-ui','prompts')||{};return prompts[key]||key;}
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 function todayLabel(){ const lang=window.EmloveLocale?window.EmloveLocale.language():'pl'; return new Date().toLocaleDateString(lang,{weekday:'long', day:'numeric', month:'long'}); }
 document.getElementById('todayPill').textContent = todayLabel();
@@ -166,7 +169,7 @@ function goTo(view){
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.view)));
-window.addEventListener('emlove:language-change',()=>{if(window.EmloveLocale)window.EmloveLocale.apply();goTo(currentView);if(currentView==='checkin')renderCheckin();if(currentView==='journal')renderJournal();if(currentView==='home')renderRecent();if(currentView==='chat')renderChat();document.getElementById('todayPill').textContent=todayLabel();if(currentView==='simulations'){renderSims();if(state.simIndex!==null&&document.getElementById('simPlayer').style.display!=='none')renderSimStep();}if(typeof TTS!=='undefined')TTS.loadVoices();});
+window.addEventListener('emlove:language-change',()=>{if(window.EmloveLocale)window.EmloveLocale.apply();goTo(currentView);if(currentView==='checkin'){renderCheckin();updateIPreview();}if(currentView==='journal')renderJournal();if(currentView==='home')renderRecent();if(currentView==='chat'){renderChat();updateAIStatus();updateMiloGate();updateKeysStatus();}if(currentView==='library')renderLibrary();if(currentView==='keys')renderKeys();if(currentView==='personality'&&typeof bfRender==='function')bfRender();document.getElementById('todayPill').textContent=todayLabel();renderProgress();if(currentView==='simulations'){renderSims();if(state.simIndex!==null&&document.getElementById('simPlayer').style.display!=='none')renderSimStep();}if(currentView==='exercises'&&window.WheelCourse)window.WheelCourse.render();if(currentView==='wheel'&&window.EmloveWheel)window.EmloveWheel.render();if(typeof TTS!=='undefined')TTS.loadVoices();});
 if(navMenu){
   navMenu.addEventListener('scroll',updateNavMenuEdges,{passive:true});
   window.addEventListener('resize',updateNavMenuEdges);
@@ -182,10 +185,18 @@ document.addEventListener('keydown', e=>{ if(e.key==='Escape') closeSidebar(); }
 
 // Check-in
 function renderCheckin(){
-  const grid = document.getElementById('checkinEmotions');
-  grid.innerHTML = EMOTIONS.map(e=>`<button class="emotion-btn" data-id="${e.id}" onclick="selectEmotion('${e.id}')"><span class="emoji">${e.emoji}</span><strong>${e.name}</strong></button>`).join('');
-  document.getElementById('bodyChips').innerHTML = BODY_SIGNALS.map(s=>`<button class="chip" onclick="toggleChip('body','${s}',this)">${s}</button>`).join('');
-  document.getElementById('needChips').innerHTML = NEEDS.map(s=>`<button class="chip" onclick="toggleChip('need','${s}',this)">${s}</button>`).join('');
+  const grid=document.getElementById('checkinEmotions'),loc=window.EmloveLocale?window.EmloveLocale.language():'pl';
+  const emotionLabels=window.EmloveLocale?.content('checkin','emotions')||{};
+  if(grid)grid.innerHTML=EMOTIONS.map(e=>`<button class="emotion-btn${state.selectedEmotion===e.id?' selected':''}" data-id="${e.id}" onclick="selectEmotion('${e.id}')"><span class="emoji">${e.emoji}</span><strong>${escapeHtml(emotionLabels[e.id]||e.name)}</strong></button>`).join('');
+  const bodyDict=window.EmloveLocale?.content('checkin','bodyParts')||{};
+  const needDict=window.EmloveLocale?.content('checkin','needOptions')||{};
+  const bodyKeys=['head','throat','chest','stomach','arms','hands','legs','intimate','whole'];
+  const needKeys=['calm','connection','boundaries','rest','understanding','safety','expression','support'];
+  const body=document.getElementById('bodyChips'),needs=document.getElementById('needChips');
+  if(body)body.innerHTML=bodyKeys.map(k=>`<button class="chip${state.selectedBody.has(k)?' selected':''}" onclick="toggleChip('body','${k}',this)">${escapeHtml(bodyDict[k]||BODY_SIGNALS[0])}</button>`).join('');
+  if(needs)needs.innerHTML=needKeys.map(k=>`<button class="chip${state.selectedNeeds.has(k)?' selected':''}" onclick="toggleChip('need','${k}',this)">${escapeHtml(needDict[k]||NEEDS[0])}</button>`).join('');
+  const lang=loc, hint=trContent('checkin','writeHint','');
+  const hintEl=document.getElementById('checkinMsg'); if(hintEl&&!hintEl.textContent&&hint)hintEl.dataset.hint=hint;
 }
 function selectEmotion(id){
   state.selectedEmotion=id;
@@ -199,13 +210,14 @@ function toggleChip(type,val,el){
 document.getElementById('intensity').addEventListener('input', e=>document.getElementById('intensityVal').textContent=e.target.value);
 ['iFeel','iWhen','iBecause','iNeed','iAsk'].forEach(id=>document.getElementById(id).addEventListener('input', updateIPreview));
 function updateIPreview(){
-  const f=document.getElementById('iFeel').value, w=document.getElementById('iWhen').value, b=document.getElementById('iBecause').value, n=document.getElementById('iNeed').value, a=document.getElementById('iAsk').value;
-  const emo = EMOTIONS.find(e=>e.id===state.selectedEmotion);
-  const feel = f || (emo? emo.name.toLowerCase() : '...');
-  document.getElementById('iPreview').textContent = `Czuję ${feel}${w?` gdy ${w}`:''}${b?`, bo ${b}`:''}${n?`. Potrzebuję ${n}`:''}${a?`. Proszę o ${a}`:''}.`;
+  const f=document.getElementById('iFeel').value,w=document.getElementById('iWhen').value,b=document.getElementById('iBecause').value,n=document.getElementById('iNeed').value,a=document.getElementById('iAsk').value;
+  const emo=EMOTIONS.find(e=>e.id===state.selectedEmotion),names=window.EmloveLocale?.content('checkin','emotions')||{};
+  const feel=f||(emo?String(names[emo.id]||emo.name).toLowerCase():'...');
+  const tr=key=>window.EmloveLocale?.t('checkin.'+key)||({feel:'Czuję',when:'gdy',because:'bo',need:'Potrzebuję',ask:'Proszę o'}[key]);
+  document.getElementById('iPreview').textContent=`${tr('feel')} ${feel}${w?` ${tr('when')} ${w}`:''}${b?`, ${tr('because')} ${b}`:''}${n?`. ${tr('need')} ${n}`:''}${a?`. ${tr('ask')} ${a}`:''}.`;
 }
 function saveCheckin(){
-  if(!state.selectedEmotion){ alert('Wybierz najpierw emocję główną 🙂'); return; }
+  if(!state.selectedEmotion){ alert(window.EmloveLocale?.t('checkin.noEmotion')||'Wybierz najpierw emocję główną 🙂'); return; }
   const emo = EMOTIONS.find(e=>e.id===state.selectedEmotion);
   const entry = {
     id: newEntryId(), updatedAt: new Date().toISOString(),
@@ -219,7 +231,8 @@ function saveCheckin(){
   state.entries.unshift(entry);
   if(window.EmloveSync) EmloveSync.markDirty(entry.id);
   addPoints(10);
-  document.getElementById('checkinMsg').textContent = `✓ Zapisano! ${emo.emoji} ${emo.name} · siła ${entry.intensity}/10 · +10 pkt. Milo: „Dziękuję, że to nazwałeś/nazwałaś. Co chcesz z tym zrobić?”`;
+  const shownEmotion=(window.EmloveLocale?.content('checkin','emotions')||{})[emo.id]||emo.name;
+  document.getElementById('checkinMsg').textContent = `${window.EmloveLocale?.t('checkin.saved')||'✓ Zapisano!'} ${emo.emoji} ${shownEmotion} · ${window.EmloveLocale?.t('checkin.strength')||'siła'} ${entry.intensity}/10 · +10 pkt. Milo: „${window.EmloveLocale?.t('checkin.miloThanks')||'Dziękuję, że to nazywasz. Co chcesz z tym zrobić?'}”`;
   resetCheckin(false);
   setTimeout(()=>goTo('journal'), 1200);
 }
@@ -230,15 +243,19 @@ function resetCheckin(clearMsg=true){
   document.getElementById('intensity').value=5; document.getElementById('intensityVal').textContent=5;
   updateIPreview(); if(clearMsg) document.getElementById('checkinMsg').textContent='';
 }
+const BODY_ALIASES={'klatka piersiowa':'chest','żołądek':'stomach','brzuch':'stomach','gardło':'throat','ramiona':'arms','dłonie':'hands','całe ciało':'whole','głowa':'head','miejsce intymne':'intimate'};
+const NEED_ALIASES={'spokoju':'calm','spokój':'calm','wsparcia':'support','zrozumienia':'understanding','odpoczynku':'rest','rozmowy':'connection','ciszy':'calm','przestrzeni':'boundaries','bezpieczeństwa':'safety','akceptacji':'understanding','pomocy':'support','radości':'expression'};
+function displayEmotion(e){const dict=window.EmloveLocale?.content('checkin','emotions')||{};return dict[e.emotionId]||e.emotion||''}
+function displayStored(values,section,group,aliases){const dict=window.EmloveLocale?.content(section,group)||{};return (values||[]).map(value=>dict[value]||dict[aliases[value]]||value)}
 function renderRecent(){
   const el=document.getElementById('homeRecent');
-  if(!state.entries.length){ el.innerHTML='<p class="muted">Brak check-inów. Twój pierwszy wpis pojawi się tutaj.</p>'; return; }
-  el.innerHTML = state.entries.slice(0,3).map(e=>`<div class="recent-item"><div><strong>${escapeHtml(e.emoji)} ${escapeHtml(e.emotion)}</strong> · siła ${escapeHtml(e.intensity)}/10<br><span class="muted">${escapeHtml(e.what||'—')}</span></div><span class="muted">${escapeHtml(e.date)} ${escapeHtml(e.time)}</span></div>`).join('');
+  if(!state.entries.length){el.innerHTML=`<p class="muted">${window.EmloveLocale?.t('home.recentEmpty')||'Brak check-inów. Twój pierwszy wpis pojawi się tutaj.'}</p>`;return;}
+  el.innerHTML=state.entries.slice(0,3).map(e=>`<div class="recent-item"><div><strong>${escapeHtml(e.emoji)} ${escapeHtml(displayEmotion(e))}</strong> · ${escapeHtml(window.EmloveLocale?.t('checkin.strength')||'siła')} ${escapeHtml(e.intensity)}/10<br><span class="muted">${escapeHtml(e.what||'—')}</span></div><span class="muted">${escapeHtml(e.date)} ${escapeHtml(e.time)}</span></div>`).join('');
 }
 function renderJournal(){
   const el=document.getElementById('journalList');
-  if(!state.entries.length){ el.innerHTML='<p class="muted">Jeszcze pusto. Zrób pierwszy check-in, a pojawi się tutaj.</p>'; return; }
-  el.innerHTML = state.entries.map((e,i)=>`<div class="journal-item"><div class="meta"><span class="pill">${escapeHtml(e.emoji)} ${escapeHtml(e.emotion)}</span><span>siła ${escapeHtml(e.intensity)}/10</span><span>${escapeHtml(e.date)} · ${escapeHtml(e.time)}</span>${e.body.map(b=>`<span>📍 ${escapeHtml(b)}</span>`).join('')}</div><p><strong>Co się stało:</strong> ${escapeHtml(e.what||'—')}</p>${e.needs.length?`<p><strong>Potrzeby:</strong> ${e.needs.map(escapeHtml).join(', ')}</p>`:''}${e.needText?`<p>${escapeHtml(e.needText)}</p>`:''}<p class="preview-box">${escapeHtml(e.iStatement)}</p><button class="btn btn-ghost btn-small" onclick="deleteEntry(${i})">Usuń wpis</button></div>`).join('');
+  if(!state.entries.length){el.innerHTML=`<p class="muted">${trContent('journal-ui','journalEmpty','Jeszcze pusto. Zrób pierwszy check-in, a pojawi się tutaj.')}</p>`;return;}
+  el.innerHTML=state.entries.map((e,i)=>`<div class="journal-item"><div class="meta"><span class="pill">${escapeHtml(e.emoji)} ${escapeHtml(displayEmotion(e))}</span><span>${escapeHtml(trContent('journal-ui','entryIntensity','intensity'))} ${escapeHtml(e.intensity)}/10</span><span>${escapeHtml(e.date)} · ${escapeHtml(e.time)}</span>${displayStored(e.body,'checkin','bodyParts',BODY_ALIASES).map(b=>`<span>📍 ${escapeHtml(b)}</span>`).join('')}</div><p><strong>${escapeHtml(trContent('checkin','storyQuestion','What happened?'))}</strong> ${escapeHtml(e.what||'—')}</p>${(e.needs||[]).length?`<p><strong>${escapeHtml(trContent('journal-ui','entryNeeds','Needs:'))}</strong> ${displayStored(e.needs,'checkin','needOptions',NEED_ALIASES).map(escapeHtml).join(', ')}</p>`:''}${e.needText?`<p>${escapeHtml(e.needText)}</p>`:''}<p class="preview-box">${escapeHtml(e.iStatement)}</p><button class="btn btn-ghost btn-small" onclick="deleteEntry(${i})">${escapeHtml(trContent('journal-ui','entryDelete','Delete entry'))}</button></div>`).join('');
 }
 function deleteEntry(i){
   const removed=state.entries[i];
@@ -340,7 +357,8 @@ function completeExpress(){
 // Simulations
 function renderSims(){
   applySimulationLocale();
-  document.getElementById('simGrid').innerHTML = SIMULATIONS.map((s,i)=>`<div class="sim-card" onclick="startSim(${i})"><h4>${escapeHtml(s.icon)} ${escapeHtml(s.title)}${s.advanced?' <span class="sim-badge">rozbudowana</span>':''}</h4><p>${escapeHtml(s.short)}</p><span class="muted">Wejdź w symulację →</span></div>`).join('');
+  const advanced=trContent('simulations-ui','advanced','extended'),open=trContent('exercises','open','Open');
+  document.getElementById('simGrid').innerHTML=SIMULATIONS.map((s,i)=>`<div class="sim-card" onclick="startSim(${i})"><h4>${escapeHtml(s.icon)} ${escapeHtml(s.title)}${s.advanced?` <span class="sim-badge">${escapeHtml(advanced)}</span>`:''}</h4><p>${escapeHtml(s.short)}</p><span class="muted">${escapeHtml(open)} →</span></div>`).join('');
 }
 function startSim(i){
   state.simIndex=i; state.simStep=0; state.simLog=[];
@@ -352,9 +370,9 @@ function closeSim(){ document.getElementById('simPlayer').style.display='none'; 
 function renderSimStep(){
   const sim=SIMULATIONS[state.simIndex];
   const step=sim.steps[state.simStep];
-  document.getElementById('simStepLabel').textContent=`Krok ${state.simStep+1} z ${sim.steps.length}`;
+  document.getElementById('simStepLabel').textContent=trContent('simulations-ui','step',`Step ${state.simStep+1} of ${sim.steps.length}`,{step:state.simStep+1,total:sim.steps.length});
   document.getElementById('simStory').innerHTML=`<strong>${escapeHtml(sim.icon)} ${escapeHtml(sim.title)}</strong><br>${escapeHtml(sim.story)}`;
-  document.getElementById('simQuestion').innerHTML=`<strong>Milo pyta:</strong> ${escapeHtml(step.q)}`;
+  document.getElementById('simQuestion').innerHTML=`<strong>${escapeHtml(trContent('simulations-ui','ask','Milo asks:'))}</strong> ${escapeHtml(step.q)}`;
   document.getElementById('simChoices').innerHTML=step.choices.map((c,i)=>`<button class="choice-btn" onclick="chooseSim(${i})">${escapeHtml(c.t)}</button>`).join('');
   document.getElementById('simReflect').style.display='none';
 }
@@ -363,10 +381,10 @@ function chooseSim(i){
   const step=sim.steps[state.simStep];
   const choice=step.choices[i];
   state.simLog.push({step:state.simStep, choice:choice.t, milo:choice.next});
-  document.getElementById('simQuestion').innerHTML=`<strong>Milo:</strong> ${escapeHtml(choice.next)}`;
+  document.getElementById('simQuestion').innerHTML=`<strong>${escapeHtml(trContent('simulations-ui','milo','Milo:'))}</strong> ${escapeHtml(choice.next)}`;
   document.getElementById('simChoices').innerHTML='';
   if(state.simStep < sim.steps.length-1){
-    document.getElementById('simChoices').innerHTML=`<button class="btn btn-primary" onclick="state.simStep++; renderSimStep()">Dalej →</button>`;
+    document.getElementById('simChoices').innerHTML=`<button class="btn btn-primary" onclick="state.simStep++; renderSimStep()">${escapeHtml(trContent('simulations-ui','next','Next →'))}</button>`;
   } else {
     document.getElementById('simReflect').style.display='block';
   }
@@ -379,26 +397,29 @@ function finishSim(){
   state.entries.unshift(_simEntry);
   if(window.EmloveSync) EmloveSync.markDirty(_simEntry.id);
   saveState();
-  alert('✓ Symulacja ukończona! +15 pkt. Pamiętaj: w prawdziwej sytuacji decyzja zawsze należy do Ciebie.');
+  alert(trContent('simulations-ui','doneTitle','Simulation complete')+'\n'+trContent('simulations-ui','doneBody','Saved on this device. +15 points. In a real situation, the decision is always yours.'));
   closeSim(); document.getElementById('simReflectText').value='';
 }
 
 // Library
 function renderLibrary(){
-  const q=(document.getElementById('libSearch').value||'').toLowerCase();
+  const q=(document.getElementById('libSearch')?.value||'').trim().toLocaleLowerCase();
   renderLibraryWheel(q);
-  const list=EMOTIONS.filter(e=>e.name.toLowerCase().includes(q)||e.words.join(' ').includes(q));
-  document.getElementById('libGrid').innerHTML=list.map(e=>`<div class="lib-card" onclick="this.classList.toggle('open')"><h4>${e.emoji} ${e.name}</h4><p class="muted">${e.words.slice(0,4).join(', ')}…</p><div class="body"><p>${e.desc}</p><p><strong>Ciało:</strong> ${e.body}</p><p><strong>Słowa:</strong> ${e.words.join(', ')}</p><ul>${e.questions.map(x=>`<li>${x}</li>`).join('')}</ul></div></div>`).join('')||'<p class="muted">Brak wyników.</p>';
+  const ui=(key,fb)=>trContent('library-ui',key,fb);
+  const catalog=window.EmloveLocale?.content('library-content')||{};
+  const list=EMOTIONS.map(source=>{const t=catalog[source.id]||{};return {...source,name:t.name||source.name,words:t.words||source.words,desc:t.desc||source.desc,body:t.body||source.body,questions:t.questions||source.questions}})
+    .filter(e=>!q||[e.name,...e.words,e.desc,e.body].join(' ').toLocaleLowerCase().includes(q));
+  document.getElementById('libGrid').innerHTML=list.map(e=>`<div class="lib-card" onclick="this.classList.toggle('open')"><h4>${escapeHtml(e.emoji)} ${escapeHtml(e.name)}</h4><p class="muted">${e.words.slice(0,4).map(escapeHtml).join(', ')}…</p><div class="body"><p>${escapeHtml(e.desc)}</p><p><strong>${escapeHtml(ui('body','Possible body sensations:'))}</strong> ${escapeHtml(e.body)}</p><p><strong>${escapeHtml(ui('words','Words:'))}</strong> ${e.words.map(escapeHtml).join(', ')}</p><p><strong>${escapeHtml(ui('questions','Questions for reflection:'))}</strong></p><ul>${e.questions.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div></div>`).join('')||`<p class="muted">${escapeHtml(ui('noCards','No matching cards.'))}</p>`;
 }
 
 // Breath
 let breathTimer=null;
 function toggleBreath(){
-  const c=document.getElementById('breathCircle'), b=document.getElementById('breathBtn');
-  if(breathTimer){ clearInterval(breathTimer); breathTimer=null; c.classList.remove('in'); c.textContent='oddychaj'; b.textContent='Rozpocznij oddech'; return; }
-  b.textContent='Zatrzymaj'; let phase=true;
-  const tick=()=>{ phase=!phase; c.classList.toggle('in',phase); c.textContent=phase?'wdech…':'wydech…'; };
-  tick(); breathTimer=setInterval(tick,4000);
+  const c=document.getElementById('breathCircle'),b=document.getElementById('breathBtn'),tr=k=>window.EmloveLocale?.t('home.'+k)||k;
+  if(breathTimer){clearInterval(breathTimer);breathTimer=null;c.classList.remove('in');c.textContent=tr('breathe');b.textContent=tr('startBreath');return;}
+  b.textContent=tr('stopBreath');let phase=true;
+  const tick=()=>{phase=!phase;c.classList.toggle('in',phase);c.textContent=phase?tr('inhale'):tr('exhale');};
+  tick();breathTimer=setInterval(tick,4000);
 }
 
 // Chat Milo
@@ -541,13 +562,14 @@ function updateAIStatus(){
   if(window.EmloveProviders && window.EmloveProviders.activeProvider()!=='admin'){ updateMiloGate(); return; }
   const t=document.getElementById('aiStatusTitle'), x=document.getElementById('aiStatusText'), c=document.getElementById('chatModeLabel');
   if(aiSettings.enabled){
-    t.textContent='🌙 Pełny Milo';
-    x.textContent='Milo układa odpowiedzi sam, z tymi samymi zasadami: nie ocenia i nie decyduje za Ciebie.';
-    if(c) c.textContent=`Pełny Milo (${aiSettings.model}) · pyta, nie ocenia · nie decyduje za Ciebie`;
+    const title=trContent('milo-ui','fullTitle','Milo online');
+    t.textContent='🌙 '+title;
+    x.textContent=trContent('milo-ui','fullText','Milo writes its own replies and asks questions without judging or deciding for you.');
+    if(c) c.textContent=title+' ('+aiSettings.model+')';
   } else {
-    t.textContent='🌙 Milo — tryb lokalny';
-    x.textContent='Milo działa lokalnie, bez internetu — z gotowych zwrotów. Pełną rozmowność ustala administrator aplikacji.';
-    if(c) c.textContent='Online · tryb lokalny · pyta, nie ocenia · nie decyduje za Ciebie';
+    t.textContent='🌙 '+trContent('milo-ui','localMode','Local mode');
+    x.textContent=trContent('milo-ui','localText','Milo is available locally.');
+    if(c) c.textContent=trContent('milo-ui','status','local mode · offline');
   }
   document.getElementById('muteBtn').textContent = aiSettings.soundEnabled ? '🔊' : '🔇';
   const amb=document.getElementById('ambientSelect'); if(amb) amb.value=aiSettings.ambient;
@@ -928,7 +950,7 @@ renderChat = function(){
     clone.querySelectorAll('.who,.speak-btn').forEach(n=>n.remove());
     const txt=clone.textContent.replace(/\s+/g,' ').trim();
     const btn=document.createElement('button');
-    btn.className='speak-btn'; btn.textContent='🔊 Odsłuchaj';
+    btn.className='speak-btn'; btn.textContent=trContent('milo-ui','listen','🔊 Listen');
     btn.onclick=()=>TTS.speak(txt);
     node.appendChild(btn);
   });
@@ -945,7 +967,7 @@ function looksLikeServerError(text){
 function showTyping(){
   const el=document.getElementById('chatMessages');
   const d=document.createElement('div'); d.className='msg milo'; d.id='typingMsg';
-  d.innerHTML='<span class="who">Milo</span><span class="typing"><span></span><span></span><span></span></span> Milo myśli...';
+  d.innerHTML='<span class="who">Milo</span><span class="typing"><span></span><span></span><span></span></span> '+escapeHtml(trContent('milo-ui','typing','Milo is typing…'));
   el.appendChild(d); el.scrollTop=el.scrollHeight;
 }
 function hideTyping(){ document.getElementById('typingMsg')?.remove(); }
@@ -1025,14 +1047,14 @@ async function installPWA(){
 
 // Biblioteka: precyzyjne słowa z koła 3-poziomowego
 function renderLibraryWheel(q){
-  const box = document.getElementById('wheelWordList');
-  if(!box || typeof WHEEL_WORDS === 'undefined') return;
-  const list = q ? WHEEL_WORDS.filter(w =>
-      w.word.includes(q) || w.familyName.toLowerCase().includes(q) || w.cluster.toLowerCase().includes(q)) : WHEEL_WORDS;
-  if(!list.length){ box.innerHTML = '<p class="muted">Brak słów pasujących do „' + escapeHtml(q) + '”.</p>'; return; }
-  const shown = list.slice(0, 60);
-  box.innerHTML = shown.map(w => `<div class="wheel-word"><b>${escapeHtml(w.word)}</b><span>${escapeHtml(w.cluster)}</span><i>${escapeHtml(w.familyName)}</i></div>`).join('') +
-    (list.length > shown.length ? `<p class="muted small">Pokazano ${shown.length} z ${list.length} słów — doprecyzuj wyszukiwanie.</p>` : '');
+  const box=document.getElementById('wheelWordList');if(!box||typeof WHEEL_WORDS==='undefined')return;
+  const lang=window.EmloveLocale?.language()||'pl',terms=window.EmloveLocale?.content('wheel-reference-locales','locales.'+lang)||{};
+  const ui=(key,fb)=>trContent('library-ui',key,fb),localized=WHEEL_WORDS.map(w=>({...w,word:terms[w.word]||w.word,familyName:terms[w.familyName]||w.familyName,cluster:terms[w.cluster]||w.cluster}));
+  const query=(q||'').toLocaleLowerCase(),list=query?localized.filter(w=>`${w.word} ${w.familyName} ${w.cluster}`.toLocaleLowerCase().includes(query)):localized;
+  if(!list.length){box.innerHTML=`<p class="muted">${escapeHtml(ui('noWords','No matching words.'))}</p>`;return;}
+  const shown=list.slice(0,60);
+  box.innerHTML=shown.map(w=>`<div class="wheel-word"><b>${escapeHtml(w.word)}</b><span>${escapeHtml(w.cluster)}</span><i>${escapeHtml(w.familyName)}</i></div>`).join('')+
+    (list.length>shown.length?`<p class="muted small">${escapeHtml(ui('shownCount','Showing {shown} of {total} words — refine your search.').replace('{shown}',shown.length).replace('{total}',list.length))}</p>`:'');
 }
 
 // ══════════════════════════════════════════════════════════════
@@ -1253,38 +1275,19 @@ async function deleteAccount(){
 
 // ── Milo online wymaga teraz zalogowania ────────────────────
 function updateMiloGate(){
-  const auth = window.EmloveAuth;
-  const status = document.getElementById('aiStatusTitle');
-  const text = document.getElementById('aiStatusText');
-  if(!status || !text) return;
-
-  const P = window.EmloveProviders;
-  const byokProvider = P ? P.activeProvider() : 'admin';
-  const byok = byokProvider !== 'admin' && !!P.getApiKey(byokProvider);
-  const adminAvailable = !!window.EmloveOnline; // funkcja private26 jest dostępna
-  const loggedIn = !!(auth && auth.currentUser());
-  const anyOnline = byok || adminAvailable;
-
-  if(loggedIn && byok){
-    status.textContent = '🌙 Milo — online';
-    text.textContent = 'Milo odpowiada z modelu ' + P.providerById(byokProvider).label +
-      ' na Twoim własnym kluczu. Rozmowy nie są zapisywane u dostawcy.';
-    return;
+  const status=document.getElementById('aiStatusTitle'),text=document.getElementById('aiStatusText');
+  if(!status||!text)return;
+  const auth=window.EmloveAuth,P=window.EmloveProviders,provider=P?P.activeProvider():'admin';
+  const byok=provider!=='admin'&&!!P.getApiKey(provider),adminAvailable=!!window.EmloveOnline;
+  const loggedIn=!!(auth&&auth.currentUser()),anyOnline=byok||adminAvailable;
+  const online=trContent('milo-ui','onlineMode','Milo online'),local=trContent('milo-ui','localMode','Local mode');
+  if(loggedIn&&(byok||adminAvailable)){
+    status.textContent='🌙 '+online;text.textContent=trContent('milo-ui','onlineText','Your message is sent to the model provider for a reply.');return;
   }
-  if(loggedIn && adminAvailable){
-    status.textContent = '🌙 Milo — online';
-    text.textContent = 'Milo odpowiada z modelu językowego. Rozmowy nie są zapisywane u dostawcy.';
-    return;
+  if(!loggedIn&&anyOnline){
+    status.textContent='🌙 '+online;text.textContent=trContent('milo-ui','loginJournal','Sign in through the Journal tab to enable Milo online.');return;
   }
-  if(!loggedIn && anyOnline){
-    status.textContent = '🌙 Milo — online';
-    text.textContent = byok
-      ? 'Wybrano własny klucz (' + P.providerById(byokProvider).label + '). Zaloguj się, żeby zacząć rozmowę.'
-      : 'Zaloguj się w panelu bocznym, aby rozmawiać z Milo online.';
-    return;
-  }
-  status.textContent = '🌙 Milo — tryb lokalny';
-  text.textContent = 'Milo działa lokalnie, z gotowych zwrotów.';
+  status.textContent='🌙 '+local;text.textContent=trContent('milo-ui','localText','Milo is available locally.');
 }
 
 ensureEntryIds();
@@ -1335,6 +1338,9 @@ function renderKeys(){
   selectedProvider = P.activeProvider();
   const list = document.getElementById('providerList');
   if(!list) return;
+  const names=window.EmloveLocale?.content('api-keys','providerNames')||{};
+  const help=window.EmloveLocale?.content('api-keys','providerHelp')||{};
+  const displayName=id=>names[id]||P.providerById(id)?.label||id;
 
   list.innerHTML = P.PROVIDERS.map(item => {
     const on = item.id === selectedProvider;
@@ -1343,8 +1349,8 @@ function renderKeys(){
       ' data-provider="' + item.id + '"' +
       ' onclick="chooseProvider(\'' + item.id + '\')">' +
       '<span class="provider-radio' + (on ? ' active' : '') + '"></span>' +
-      '<span class="provider-body"><span class="provider-label">' + escapeHtml(item.label) + '</span>' +
-      '<span class="provider-hint">' + escapeHtml(item.hint) + '</span></span>' +
+      '<span class="provider-body"><span class="provider-label">' + escapeHtml(displayName(item.id)) + '</span>' +
+      '<span class="provider-hint">' + escapeHtml(help[item.id]||item.hint) + '</span></span>' +
       '</button>';
   }).join('');
 
@@ -1369,7 +1375,7 @@ function renderKeys(){
       modelEl.value = P.getModel(selectedProvider);
       modelEl.placeholder = current.model;
     }
-    if(hintEl) hintEl.textContent = current.hint;
+    if(hintEl) hintEl.textContent = help[selectedProvider]||current.hint;
   }
   updateKeysStatus();
 }
@@ -1388,8 +1394,9 @@ function updateKeysStatus(){
   const P = window.EmloveProviders;
   if(!label || !P) return;
   const active = P.activeProvider();
-  if(active === 'admin') return; // ustawienia Milo sama nadpisze tekst
-  label.textContent = 'Milo · ' + P.providerById(active).label + ' · pyta, nie ocenia · nie decyduje za Ciebie';
+  if(active === 'admin') return;
+  const names=window.EmloveLocale?.content('api-keys','providerNames')||{};
+  label.textContent=trContent('milo-ui','onlineMode','Milo online')+' · '+(names[active]||P.providerById(active).label);
 }
 
 async function saveProviderKey(){
