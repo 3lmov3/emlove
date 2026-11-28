@@ -47,6 +47,12 @@ assert.ok(events.some(e => e.type === 'emlove:theme-change'));
 assert.equal(resolveLocale('en-GB'), 'en');
 assert.equal(resolveLocale('xx'), null);
 
+const css = fs.readFileSync(new URL('../style.css', here), 'utf8');
+assert.match(css, /html\[data-theme="night"\] \.topbar h1\{color:#EEF2FA!important\}/);
+assert.match(css, /html\[data-theme="night"\] \.btn-ghost\{color:#F1F4FA!important/);
+assert.match(css, /html\[data-theme="night"\] \.btn-secondary\{color:#FFD7E7!important/);
+assert.match(css, /html\[data-theme="night"\] #authModal \.settings-actions \.btn-ghost\{color:#F1F4FA!important/);
+
 const launcherManifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', here), 'utf8'));
 assert.deepEqual(launcherManifest.icons.map(icon => icon.src), ['icon-192.png', 'icon-512.png', 'icon-512.png']);
 for (const [name, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['apple-touch-icon.png', 180]]) {
