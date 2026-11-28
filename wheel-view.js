@@ -136,7 +136,7 @@
     out += `<text x="${D_CENTER}" y="${D_CENTER - 4}" text-anchor="middle" font-size="19" pointer-events="none">${ICONS[area.sourceName||area.name] || ''}</text>`;
     out += `<text x="${D_CENTER}" y="${D_CENTER + 14}" text-anchor="middle" font-size="10" font-weight="700" fill="${INK}" pointer-events="none">${esc(area.name)}</text>`;
 
-    return `<svg viewBox="0 0 480 480" width="${zoom ? '155%' : '100%'}" role="img" aria-label="${esc(wheelUi('chooseArea','Area: {name}').replace('{name}',area.name))}">${out}</svg>`;
+    return `<svg viewBox="0 0 480 480" width="100%" role="img" aria-label="${esc(wheelUi('chooseArea','Area: {name}').replace('{name}',area.name))}">${out}</svg>`;
   }
 
   // ── render ──────────────────────────────────────────────────
@@ -253,12 +253,10 @@
     if (!canvas || !svg || !button) { render(); return; }
 
     canvas.classList.toggle('zoomed', zoom);
-    // Set the rendered width directly so the control responds immediately,
-    // even when the SVG also has a presentation width attribute.
-    const mobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
-    svg.style.width = zoom ? (mobile ? 'min(180%, 720px)' : 'min(155%, 720px)') : 'min(100%, 580px)';
-    svg.style.maxWidth = zoom ? 'none' : '580px';
-    svg.style.maxHeight = zoom ? 'none' : '68vh';
+    // Toggling a class lets CSS animate the bounded SVG width smoothly.
+    svg.style.removeProperty('width');
+    svg.style.removeProperty('max-width');
+    svg.style.removeProperty('max-height');
     button.setAttribute('aria-pressed', zoom ? 'true' : 'false');
     button.textContent = wheelUi(zoom ? 'zoomOut' : 'zoomIn', zoom ? 'Reduce wheel' : 'Enlarge wheel');
   }

@@ -1,0 +1,3 @@
+Emlove wheel smooth zoom update
+
+Overlay these files into the PWA repository root and publish. Normal size is capped at 580px, zoom size at 650px (112% of the base width); CSS transitions the width over 280ms. The zoom control toggles the class and accessible pressed state without changing inline width, so the transition can run. Previous night-theme fixes remain included. Cache: emlove-v78; stylesheet URL: style.css?v=wheel-size-3. No build required.
