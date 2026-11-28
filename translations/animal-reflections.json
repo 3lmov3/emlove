@@ -1,0 +1,419 @@
+{
+  "status": "draft-needs-native-review",
+  "sourceQuestions": {
+    "wyspa": "Co przychodzi Ci na myśl, kiedy myślisz o zabawie lub bliskości?",
+    "sowa": "Jakie skojarzenia budzą w Tobie cisza i uważność?",
+    "lis": "Jakie znaczenie ma dla Ciebie ciekawość?",
+    "wilk": "Co przychodzi Ci na myśl, gdy myślisz o zaufaniu i więzi?",
+    "kot": "Jak rozumiesz przestrzeń dla siebie?",
+    "jelen": "Co kojarzy Ci się z delikatnością?",
+    "jez": "Jakie znaczenie mają dla Ciebie granice?",
+    "delfin": "Co przychodzi Ci na myśl, gdy myślisz o kontakcie z innymi?",
+    "zolw": "Jakie skojarzenia budzi w Tobie własne tempo?",
+    "motyl": "Co przychodzi Ci na myśl, gdy myślisz o zmianie?",
+    "pszczola": "Jak rozumiesz współpracę?",
+    "paw": "Co dla Ciebie oznacza pokazywanie siebie innym?",
+    "niedzwiedz": "Jakie skojarzenia budzi w Tobie odpoczynek?",
+    "pingwin": "Co dla Ciebie oznacza bycie częścią grupy?",
+    "krolik": "Jakie skojarzenia masz z uważnością na otoczenie?",
+    "aksolotl": "Co przychodzi Ci na myśl, kiedy słyszysz słowo «regeneracja»?",
+    "orzel": "Jakie znaczenie ma dla Ciebie patrzenie na coś z innej perspektywy?"
+  },
+  "locales": {
+    "en": {
+      "animals": {
+        "wyspa": {
+          "name": "Otter",
+          "question": "What comes to mind when you think of play or closeness?"
+        },
+        "sowa": {
+          "name": "Owl",
+          "question": "What associations do silence and attentiveness bring to mind for you?"
+        },
+        "lis": {
+          "name": "Fox",
+          "question": "What does curiosity mean to you?"
+        },
+        "wilk": {
+          "name": "Wolf",
+          "question": "What comes to mind when you think of trust and connection?"
+        },
+        "kot": {
+          "name": "Cat",
+          "question": "What does having space for yourself mean to you?"
+        },
+        "jelen": {
+          "name": "Deer",
+          "question": "What do you associate with gentleness?"
+        },
+        "jez": {
+          "name": "Hedgehog",
+          "question": "What do boundaries mean to you?"
+        },
+        "delfin": {
+          "name": "Dolphin",
+          "question": "What comes to mind when you think of contact with others?"
+        },
+        "zolw": {
+          "name": "Turtle",
+          "question": "What associations does going at your own pace bring to mind?"
+        },
+        "motyl": {
+          "name": "Butterfly",
+          "question": "What comes to mind when you think of change?"
+        },
+        "pszczola": {
+          "name": "Bee",
+          "question": "What does cooperation mean to you?"
+        },
+        "paw": {
+          "name": "Peacock",
+          "question": "What does showing yourself to others mean to you?"
+        },
+        "niedzwiedz": {
+          "name": "Bear",
+          "question": "What associations does rest bring to mind?"
+        },
+        "pingwin": {
+          "name": "Penguin",
+          "question": "What does being part of a group mean to you?"
+        },
+        "krolik": {
+          "name": "Rabbit",
+          "question": "What do you associate with being attentive to your surroundings?"
+        },
+        "aksolotl": {
+          "name": "Axolotl",
+          "question": "What comes to mind when you hear the word “regeneration”?"
+        },
+        "orzel": {
+          "name": "Eagle",
+          "question": "What does looking at something from a different perspective mean to you?"
+        }
+      },
+      "ui": {
+        "symbol": "Companion animal",
+        "intro": "A symbol selected from your answers: an invitation to reflect, not a description of who you are.",
+        "other": "Other symbols selected from your answers",
+        "ask": "Milo asks:",
+        "disclaimer": "This educational exercise is inspired by five dimensions of personality. It is not a diagnosis or a comparison with other people."
+      }
+    },
+    "de": {
+      "animals": {
+        "wyspa": {
+          "name": "Otter",
+          "question": "Was kommt dir in den Sinn, wenn du an Spiel oder Nähe denkst?"
+        },
+        "sowa": {
+          "name": "Eule",
+          "question": "Welche Gedanken verbindest du mit Stille und Achtsamkeit?"
+        },
+        "lis": {
+          "name": "Fuchs",
+          "question": "Was bedeutet Neugier für dich?"
+        },
+        "wilk": {
+          "name": "Wolf",
+          "question": "Was kommt dir in den Sinn, wenn du an Vertrauen und Verbundenheit denkst?"
+        },
+        "kot": {
+          "name": "Katze",
+          "question": "Was bedeutet es für dich, Raum für dich selbst zu haben?"
+        },
+        "jelen": {
+          "name": "Hirsch",
+          "question": "Was verbindest du mit Sanftheit?"
+        },
+        "jez": {
+          "name": "Igel",
+          "question": "Was bedeuten Grenzen für dich?"
+        },
+        "delfin": {
+          "name": "Delfin",
+          "question": "Was kommt dir in den Sinn, wenn du an Kontakt mit anderen denkst?"
+        },
+        "zolw": {
+          "name": "Schildkröte",
+          "question": "Welche Gedanken verbindest du mit deinem eigenen Tempo?"
+        },
+        "motyl": {
+          "name": "Schmetterling",
+          "question": "Was kommt dir in den Sinn, wenn du an Veränderung denkst?"
+        },
+        "pszczola": {
+          "name": "Biene",
+          "question": "Was bedeutet Zusammenarbeit für dich?"
+        },
+        "paw": {
+          "name": "Pfau",
+          "question": "Was bedeutet es für dich, dich anderen zu zeigen?"
+        },
+        "niedzwiedz": {
+          "name": "Bär",
+          "question": "Welche Gedanken verbindest du mit Erholung?"
+        },
+        "pingwin": {
+          "name": "Pinguin",
+          "question": "Was bedeutet es für dich, Teil einer Gruppe zu sein?"
+        },
+        "krolik": {
+          "name": "Kaninchen",
+          "question": "Was verbindest du damit, deine Umgebung aufmerksam wahrzunehmen?"
+        },
+        "aksolotl": {
+          "name": "Axolotl",
+          "question": "Was kommt dir in den Sinn, wenn du das Wort „Regeneration“ hörst?"
+        },
+        "orzel": {
+          "name": "Adler",
+          "question": "Was bedeutet es für dich, etwas aus einer anderen Perspektive zu betrachten?"
+        }
+      },
+      "ui": {
+        "symbol": "Begleittier",
+        "intro": "Ein Symbol, das anhand deiner Antworten ausgewählt wurde: eine Einladung zur Selbstreflexion, keine Beschreibung deiner Person.",
+        "other": "Weitere anhand deiner Antworten ausgewählte Symbole",
+        "ask": "Milo fragt:",
+        "disclaimer": "Diese Bildungsübung ist von fünf Persönlichkeitsdimensionen inspiriert. Sie ist weder eine Diagnose noch ein Vergleich mit anderen Menschen."
+      }
+    },
+    "fr": {
+      "animals": {
+        "wyspa": {
+          "name": "Loutre",
+          "question": "À quoi penses-tu quand tu évoques le jeu ou la proximité ?"
+        },
+        "sowa": {
+          "name": "Hibou",
+          "question": "Quelles idées te viennent à l’esprit avec le silence et l’attention ?"
+        },
+        "lis": {
+          "name": "Renard",
+          "question": "Que signifie la curiosité pour toi ?"
+        },
+        "wilk": {
+          "name": "Loup",
+          "question": "À quoi penses-tu quand tu évoques la confiance et le lien ?"
+        },
+        "kot": {
+          "name": "Chat",
+          "question": "Que signifie pour toi avoir un espace à toi ?"
+        },
+        "jelen": {
+          "name": "Cerf",
+          "question": "Qu’associes-tu à la douceur ?"
+        },
+        "jez": {
+          "name": "Hérisson",
+          "question": "Que signifient les limites pour toi ?"
+        },
+        "delfin": {
+          "name": "Dauphin",
+          "question": "À quoi penses-tu quand tu évoques le contact avec les autres ?"
+        },
+        "zolw": {
+          "name": "Tortue",
+          "question": "Qu’évoque pour toi le fait d’avancer à ton rythme ?"
+        },
+        "motyl": {
+          "name": "Papillon",
+          "question": "À quoi penses-tu quand tu évoques le changement ?"
+        },
+        "pszczola": {
+          "name": "Abeille",
+          "question": "Que signifie la coopération pour toi ?"
+        },
+        "paw": {
+          "name": "Paon",
+          "question": "Que signifie pour toi te montrer aux autres ?"
+        },
+        "niedzwiedz": {
+          "name": "Ours",
+          "question": "Quelles idées te viennent à l’esprit avec le repos ?"
+        },
+        "pingwin": {
+          "name": "Manchot",
+          "question": "Que signifie pour toi faire partie d’un groupe ?"
+        },
+        "krolik": {
+          "name": "Lapin",
+          "question": "À quoi associes-tu le fait de prêter attention à ton environnement ?"
+        },
+        "aksolotl": {
+          "name": "Axolotl",
+          "question": "À quoi penses-tu quand tu entends le mot « régénération » ?"
+        },
+        "orzel": {
+          "name": "Aigle",
+          "question": "Que signifie pour toi regarder quelque chose sous un autre angle ?"
+        }
+      },
+      "ui": {
+        "symbol": "Animal compagnon",
+        "intro": "Un symbole choisi à partir de tes réponses : une invitation à réfléchir, pas une description de ta personne.",
+        "other": "Autres symboles choisis à partir de tes réponses",
+        "ask": "Milo demande :",
+        "disclaimer": "Cet exercice éducatif s’inspire de cinq dimensions de la personnalité. Ce n’est ni un diagnostic ni une comparaison avec les autres."
+      }
+    },
+    "hu": {
+      "animals": {
+        "wyspa": {
+          "name": "Vidra",
+          "question": "Mi jut eszedbe, amikor a játékra vagy a közelségre gondolsz?"
+        },
+        "sowa": {
+          "name": "Bagoly",
+          "question": "Milyen gondolatokat ébreszt benned a csend és a figyelem?"
+        },
+        "lis": {
+          "name": "Róka",
+          "question": "Mit jelent számodra a kíváncsiság?"
+        },
+        "wilk": {
+          "name": "Farkas",
+          "question": "Mi jut eszedbe, amikor a bizalomra és a kötődésre gondolsz?"
+        },
+        "kot": {
+          "name": "Macska",
+          "question": "Mit jelent számodra a saját tér?"
+        },
+        "jelen": {
+          "name": "Szarvas",
+          "question": "Mi jut eszedbe a gyengédségről?"
+        },
+        "jez": {
+          "name": "Sün",
+          "question": "Mit jelentenek számodra a határok?"
+        },
+        "delfin": {
+          "name": "Delfin",
+          "question": "Mi jut eszedbe, amikor a másokkal való kapcsolatra gondolsz?"
+        },
+        "zolw": {
+          "name": "Teknős",
+          "question": "Milyen gondolatokat ébreszt benned a saját tempód?"
+        },
+        "motyl": {
+          "name": "Pillangó",
+          "question": "Mi jut eszedbe, amikor a változásra gondolsz?"
+        },
+        "pszczola": {
+          "name": "Méh",
+          "question": "Mit jelent számodra az együttműködés?"
+        },
+        "paw": {
+          "name": "Páva",
+          "question": "Mit jelent számodra megmutatni magad másoknak?"
+        },
+        "niedzwiedz": {
+          "name": "Medve",
+          "question": "Milyen gondolatokat ébreszt benned a pihenés?"
+        },
+        "pingwin": {
+          "name": "Pingvin",
+          "question": "Mit jelent számodra egy csoporthoz tartozni?"
+        },
+        "krolik": {
+          "name": "Nyúl",
+          "question": "Mi jut eszedbe a környezetedre való odafigyelésről?"
+        },
+        "aksolotl": {
+          "name": "Axolotl",
+          "question": "Mi jut eszedbe, amikor meghallod a „regenerálódás” szót?"
+        },
+        "orzel": {
+          "name": "Sas",
+          "question": "Mit jelent számodra más nézőpontból tekinteni valamire?"
+        }
+      },
+      "ui": {
+        "symbol": "Kísérőállat",
+        "intro": "A válaszaid alapján kiválasztott szimbólum: meghívás az önreflexióra, nem a személyed leírása.",
+        "other": "További szimbólumok a válaszaid alapján",
+        "ask": "Milo kérdezi:",
+        "disclaimer": "Ez az oktató gyakorlat a személyiség öt dimenziójából merít ihletet. Nem diagnózis és nem másokkal való összehasonlítás."
+      }
+    },
+    "uk": {
+      "animals": {
+        "wyspa": {
+          "name": "Видра",
+          "question": "Що спадає тобі на думку, коли ти думаєш про гру або близькість?"
+        },
+        "sowa": {
+          "name": "Сова",
+          "question": "Які асоціації в тебе викликають тиша й уважність?"
+        },
+        "lis": {
+          "name": "Лисиця",
+          "question": "Що для тебе означає допитливість?"
+        },
+        "wilk": {
+          "name": "Вовк",
+          "question": "Що спадає тобі на думку, коли ти думаєш про довіру та зв’язок?"
+        },
+        "kot": {
+          "name": "Кіт",
+          "question": "Що для тебе означає мати простір для себе?"
+        },
+        "jelen": {
+          "name": "Олень",
+          "question": "З чим у тебе асоціюється ніжність?"
+        },
+        "jez": {
+          "name": "Їжак",
+          "question": "Що для тебе означають межі?"
+        },
+        "delfin": {
+          "name": "Дельфін",
+          "question": "Що спадає тобі на думку, коли ти думаєш про контакт з іншими?"
+        },
+        "zolw": {
+          "name": "Черепаха",
+          "question": "Які асоціації в тебе викликає власний темп?"
+        },
+        "motyl": {
+          "name": "Метелик",
+          "question": "Що спадає тобі на думку, коли ти думаєш про зміни?"
+        },
+        "pszczola": {
+          "name": "Бджола",
+          "question": "Що для тебе означає співпраця?"
+        },
+        "paw": {
+          "name": "Павич",
+          "question": "Що для тебе означає показувати себе іншим?"
+        },
+        "niedzwiedz": {
+          "name": "Ведмідь",
+          "question": "Які асоціації в тебе викликає відпочинок?"
+        },
+        "pingwin": {
+          "name": "Пінгвін",
+          "question": "Що для тебе означає бути частиною групи?"
+        },
+        "krolik": {
+          "name": "Кролик",
+          "question": "З чим у тебе асоціюється уважність до оточення?"
+        },
+        "aksolotl": {
+          "name": "Аксолотль",
+          "question": "Що спадає тобі на думку, коли ти чуєш слово «відновлення»?"
+        },
+        "orzel": {
+          "name": "Орел",
+          "question": "Що для тебе означає подивитися на щось з іншого погляду?"
+        }
+      },
+      "ui": {
+        "symbol": "Тварина-компаньйон",
+        "intro": "Символ, вибраний на основі відповідей: запрошення до роздумів, а не опис твоєї особистості.",
+        "other": "Інші символи, вибрані на основі відповідей",
+        "ask": "Milo запитує:",
+        "disclaimer": "Ця освітня вправа натхненна п’ятьма вимірами особистості. Це не діагноз і не порівняння з іншими людьми."
+      }
+    }
+  }
+}

@@ -1,0 +1,634 @@
+{
+  "status": "draft-needs-native-and-content-review",
+  "source": "mobile/lib/personality.ts BF_ITEMS",
+  "source_sha256": "a56f7a0a3490c275c5203b211a4ca7b9b0f09b5972146268d51a5a692c380dd6",
+  "sourceItems": [
+    {
+      "dimension": "O",
+      "facet": "Wyobraźnia",
+      "text": "Mam żywą wyobraźnię i często tworzę obrazy w głowie."
+    },
+    {
+      "dimension": "O",
+      "facet": "Ciekawość intelektualna",
+      "text": "Lubię pytać „dlaczego” i rozkładać tematy na części."
+    },
+    {
+      "dimension": "O",
+      "facet": "Otwartość na nowość",
+      "text": "Nowe miejsca i nieznane sytuacje raczej mnie ciekawią niż odstraszają."
+    },
+    {
+      "dimension": "O",
+      "facet": "Wrażliwość estetyczna",
+      "text": "Muzyka, sztuka albo przyroda potrafią mnie wzruszyć."
+    },
+    {
+      "dimension": "O",
+      "facet": "Elastyczność myślenia",
+      "text": "Trzymam się swoich poglądów i rzadko je zmieniam."
+    },
+    {
+      "dimension": "O",
+      "facet": "Potrzeba stymulacji",
+      "text": "Nuda bywa dla mnie trudniejsza niż wyzwanie."
+    },
+    {
+      "dimension": "C",
+      "facet": "Sumienność",
+      "text": "Często odkładam rzeczy na później."
+    },
+    {
+      "dimension": "C",
+      "facet": "Porządek",
+      "text": "W mojej przestrzeni panuje porządek, który mi służy."
+    },
+    {
+      "dimension": "C",
+      "facet": "Samodyscyplina",
+      "text": "Potrafię robić coś regularnie, nawet gdy nie mam ochoty."
+    },
+    {
+      "dimension": "C",
+      "facet": "Rozwaga",
+      "text": "Zanim działam, sprawdzam konsekwencje."
+    },
+    {
+      "dimension": "C",
+      "facet": "Dążenie do osiągnięć",
+      "text": "Lubię stawiać sobie cele i je realizować."
+    },
+    {
+      "dimension": "C",
+      "facet": "Punktualność",
+      "text": "Trzymam się ustalonych godzin i zobowiązań."
+    },
+    {
+      "dimension": "E",
+      "facet": "Towarzyskość",
+      "text": "Kontakt z ludźmi dodaje mi energii."
+    },
+    {
+      "dimension": "E",
+      "facet": "Asertywność",
+      "text": "Bez trudu mówię, co myślę, w grupie."
+    },
+    {
+      "dimension": "E",
+      "facet": "Aktywność",
+      "text": "Lubię być w ruchu — mam dużo planów i pomysłów na dzień."
+    },
+    {
+      "dimension": "E",
+      "facet": "Poszukiwanie wrażeń",
+      "text": "Lubię sytuacje z dreszczem emocji."
+    },
+    {
+      "dimension": "E",
+      "facet": "Pozytywne emocje",
+      "text": "Śmieję się i cieszę z drobiazgów częściej niż inni."
+    },
+    {
+      "dimension": "E",
+      "facet": "Wyrazistość",
+      "text": "Moje emocje widać — nie umiem ich ukryć."
+    },
+    {
+      "dimension": "A",
+      "facet": "Zaufanie",
+      "text": "Trudno mi zaufać nowym osobom."
+    },
+    {
+      "dimension": "A",
+      "facet": "Moralność",
+      "text": "Trudno mi postąpić wbrew temu, co uważam za uczciwe."
+    },
+    {
+      "dimension": "A",
+      "facet": "Altruizm",
+      "text": "Pomaganie innym sprawia mi realną przyjemność."
+    },
+    {
+      "dimension": "A",
+      "facet": "Współpraca",
+      "text": "Wolę rozwiązywać konflikty niż wygrywać."
+    },
+    {
+      "dimension": "A",
+      "facet": "Skromność",
+      "text": "Nie lubię mówić o sobie zbyt wiele."
+    },
+    {
+      "dimension": "A",
+      "facet": "Współczucie",
+      "text": "Łatwo się wzruszam, gdy ktoś cierpi."
+    },
+    {
+      "dimension": "N",
+      "facet": "Lęk",
+      "text": "Często zamartwiam się rzeczami, które mogłyby się zdarzyć."
+    },
+    {
+      "dimension": "N",
+      "facet": "Złość",
+      "text": "Szybko robię się rozdrażniony/a, gdy coś nie idzie."
+    },
+    {
+      "dimension": "N",
+      "facet": "Przygnębienie",
+      "text": "Mam dni, w których trudno mi dostrzec cokolwiek dobrego."
+    },
+    {
+      "dimension": "N",
+      "facet": "Samoświadomość",
+      "text": "Często myślę, że inni oceniają mnie krytycznie."
+    },
+    {
+      "dimension": "N",
+      "facet": "Impulsywność",
+      "text": "Zdążę coś zrobić, zanim sprawdzę, czy to dobry pomysł."
+    },
+    {
+      "dimension": "N",
+      "facet": "Wrażliwość na stres",
+      "text": "Napięcie długo zostaje mi w ciele po trudnych sytuacjach."
+    }
+  ],
+  "locales": {
+    "en": {
+      "facets": [
+        "Imagination",
+        "Intellectual curiosity",
+        "Openness to novelty",
+        "Aesthetic sensitivity",
+        "Flexibility of thinking",
+        "Need for stimulation",
+        "Conscientiousness",
+        "Order",
+        "Self-discipline",
+        "Deliberation",
+        "Achievement striving",
+        "Punctuality",
+        "Sociability",
+        "Assertiveness",
+        "Activity",
+        "Excitement seeking",
+        "Positive emotions",
+        "Expressiveness",
+        "Trust",
+        "Morality",
+        "Altruism",
+        "Cooperation",
+        "Modesty",
+        "Compassion",
+        "Anxiety",
+        "Anger",
+        "Low mood",
+        "Self-consciousness",
+        "Impulsiveness",
+        "Sensitivity to stress"
+      ],
+      "items": [
+        "I have a vivid imagination and often form pictures in my mind.",
+        "I like asking “why” and breaking topics down into parts.",
+        "New places and unfamiliar situations tend to interest me rather than put me off.",
+        "Music, art or nature can move me emotionally.",
+        "I hold on to my views and rarely change them.",
+        "I sometimes find boredom harder than a challenge.",
+        "I often put things off.",
+        "My space has a sense of order that works for me.",
+        "I can do something regularly, even when I do not feel like it.",
+        "Before acting, I consider the consequences.",
+        "I like setting goals and achieving them.",
+        "I stick to agreed times and commitments.",
+        "Contact with people gives me energy.",
+        "I find it easy to say what I think in a group.",
+        "I like being on the move — I have many plans and ideas for the day.",
+        "I like situations that give me a thrill.",
+        "I laugh and enjoy little things more often than other people.",
+        "My emotions show — I cannot hide them.",
+        "I find it difficult to trust new people.",
+        "I find it difficult to act against what I consider honest.",
+        "Helping others gives me genuine pleasure.",
+        "I prefer resolving conflicts to winning them.",
+        "I do not like talking too much about myself.",
+        "I am easily moved when someone is suffering.",
+        "I often worry about things that might happen.",
+        "I quickly become irritable when things do not go well.",
+        "I have days when it is hard to see anything good.",
+        "I often think that others judge me critically.",
+        "I act before checking whether it is a good idea.",
+        "Tension stays in my body for a long time after difficult situations."
+      ],
+      "scale": [
+        "Not like me at all",
+        "Mostly unlike me",
+        "Somewhat like and unlike me",
+        "Mostly like me",
+        "Very much like me"
+      ],
+      "dimensions": {
+        "O": {
+          "name": "Openness",
+          "description": "Curiosity about the world, imagination and openness to new experiences."
+        },
+        "C": {
+          "name": "Conscientiousness",
+          "description": "Order, perseverance, planning and working towards goals."
+        },
+        "E": {
+          "name": "Extraversion",
+          "description": "Energy from social contact, sociability and expressiveness."
+        },
+        "A": {
+          "name": "Agreeableness",
+          "description": "Warmth, trust and care for others."
+        },
+        "N": {
+          "name": "Emotional sensitivity",
+          "description": "Intensity of experience and response to stress."
+        }
+      }
+    },
+    "de": {
+      "facets": [
+        "Fantasie",
+        "Intellektuelle Neugier",
+        "Offenheit für Neues",
+        "Ästhetische Empfindsamkeit",
+        "Flexibilität im Denken",
+        "Bedürfnis nach Anregung",
+        "Gewissenhaftigkeit",
+        "Ordnung",
+        "Selbstdisziplin",
+        "Besonnenheit",
+        "Leistungsstreben",
+        "Pünktlichkeit",
+        "Geselligkeit",
+        "Durchsetzungsfähigkeit",
+        "Aktivität",
+        "Suche nach Erlebnissen",
+        "Positive Gefühle",
+        "Ausdrucksstärke",
+        "Vertrauen",
+        "Moral",
+        "Altruismus",
+        "Zusammenarbeit",
+        "Bescheidenheit",
+        "Mitgefühl",
+        "Ängstlichkeit",
+        "Wut",
+        "Niedergeschlagenheit",
+        "Befangenheit",
+        "Impulsivität",
+        "Stressempfindlichkeit"
+      ],
+      "items": [
+        "Ich habe eine lebhafte Fantasie und stelle mir oft Bilder vor.",
+        "Ich frage gern „warum“ und zerlege Themen in einzelne Teile.",
+        "Neue Orte und unbekannte Situationen machen mich eher neugierig, als dass sie mich abschrecken.",
+        "Musik, Kunst oder die Natur können mich berühren.",
+        "Ich halte an meinen Ansichten fest und ändere sie selten.",
+        "Langeweile fällt mir manchmal schwerer als eine Herausforderung.",
+        "Ich schiebe Dinge oft auf.",
+        "In meinem Umfeld herrscht eine Ordnung, die für mich funktioniert.",
+        "Ich kann etwas regelmäßig tun, auch wenn ich keine Lust habe.",
+        "Bevor ich handle, prüfe ich die Folgen.",
+        "Ich setze mir gern Ziele und erreiche sie.",
+        "Ich halte mich an vereinbarte Zeiten und Verpflichtungen.",
+        "Kontakt mit Menschen gibt mir Energie.",
+        "In einer Gruppe fällt es mir leicht, meine Meinung zu sagen.",
+        "Ich bin gern in Bewegung und habe viele Pläne und Ideen für den Tag.",
+        "Ich mag Situationen, die für Nervenkitzel sorgen.",
+        "Ich lache und freue mich häufiger über Kleinigkeiten als andere.",
+        "Man sieht mir meine Gefühle an; ich kann sie nicht verbergen.",
+        "Es fällt mir schwer, neuen Menschen zu vertrauen.",
+        "Es fällt mir schwer, entgegen dem zu handeln, was ich für ehrlich halte.",
+        "Anderen zu helfen, bereitet mir echte Freude.",
+        "Ich löse Konflikte lieber, als sie zu gewinnen.",
+        "Ich rede nicht gern zu viel über mich selbst.",
+        "Es berührt mich schnell, wenn jemand leidet.",
+        "Ich mache mir oft Sorgen über Dinge, die passieren könnten.",
+        "Ich werde schnell gereizt, wenn etwas nicht klappt.",
+        "Es gibt Tage, an denen es mir schwerfällt, etwas Gutes zu sehen.",
+        "Ich denke oft, dass andere mich kritisch beurteilen.",
+        "Ich handle, bevor ich prüfe, ob es eine gute Idee ist.",
+        "Nach schwierigen Situationen bleibt die Anspannung lange in meinem Körper."
+      ],
+      "scale": [
+        "Trifft überhaupt nicht auf mich zu",
+        "Trifft eher nicht auf mich zu",
+        "Teils, teils",
+        "Trifft eher auf mich zu",
+        "Trifft sehr auf mich zu"
+      ],
+      "dimensions": {
+        "O": {
+          "name": "Offenheit",
+          "description": "Neugier auf die Welt, Fantasie und Offenheit für neue Erfahrungen."
+        },
+        "C": {
+          "name": "Gewissenhaftigkeit",
+          "description": "Ordnung, Ausdauer, Planung und das Streben nach Zielen."
+        },
+        "E": {
+          "name": "Extraversion",
+          "description": "Energie durch Kontakt, Geselligkeit und Ausdrucksstärke."
+        },
+        "A": {
+          "name": "Verträglichkeit",
+          "description": "Wärme, Vertrauen und Fürsorge für andere."
+        },
+        "N": {
+          "name": "Emotionale Sensibilität",
+          "description": "Intensität des Erlebens und Reaktion auf Stress."
+        }
+      }
+    },
+    "fr": {
+      "facets": [
+        "Imagination",
+        "Curiosité intellectuelle",
+        "Ouverture à la nouveauté",
+        "Sensibilité esthétique",
+        "Souplesse de pensée",
+        "Besoin de stimulation",
+        "Conscienciosité",
+        "Ordre",
+        "Autodiscipline",
+        "Réflexion",
+        "Recherche de réussite",
+        "Ponctualité",
+        "Sociabilité",
+        "Affirmation de soi",
+        "Activité",
+        "Recherche de sensations",
+        "Émotions positives",
+        "Expressivité",
+        "Confiance",
+        "Moralité",
+        "Altruisme",
+        "Coopération",
+        "Modestie",
+        "Compassion",
+        "Anxiété",
+        "Colère",
+        "Abattement",
+        "Conscience de soi",
+        "Impulsivité",
+        "Sensibilité au stress"
+      ],
+      "items": [
+        "J’ai une imagination vive et je crée souvent des images dans ma tête.",
+        "J’aime demander « pourquoi » et décomposer les sujets.",
+        "Les nouveaux lieux et les situations inconnues ont plutôt tendance à m’intéresser qu’à me repousser.",
+        "La musique, l’art ou la nature peuvent m’émouvoir.",
+        "Je m’en tiens à mes opinions et je les change rarement.",
+        "L’ennui est parfois plus difficile pour moi qu’un défi.",
+        "Je remets souvent les choses à plus tard.",
+        "Mon espace est organisé d’une façon qui me convient.",
+        "Je peux faire quelque chose régulièrement, même quand je n’en ai pas envie.",
+        "Avant d’agir, j’examine les conséquences.",
+        "J’aime me fixer des objectifs et les réaliser.",
+        "Je respecte les horaires et les engagements convenus.",
+        "Le contact avec les autres me donne de l’énergie.",
+        "Je dis facilement ce que je pense dans un groupe.",
+        "J’aime être en mouvement : j’ai beaucoup de projets et d’idées pour la journée.",
+        "J’aime les situations qui procurent des sensations fortes.",
+        "Je ris et me réjouis des petites choses plus souvent que les autres.",
+        "Mes émotions se voient : je ne sais pas les cacher.",
+        "J’ai du mal à faire confiance aux personnes que je viens de rencontrer.",
+        "J’ai du mal à agir contre ce que je considère comme honnête.",
+        "Aider les autres me fait vraiment plaisir.",
+        "Je préfère résoudre les conflits plutôt que les gagner.",
+        "Je n’aime pas trop parler de moi.",
+        "La souffrance de quelqu’un me touche facilement.",
+        "Je m’inquiète souvent de choses qui pourraient arriver.",
+        "Je deviens vite irritable quand les choses ne vont pas bien.",
+        "Il y a des jours où j’ai du mal à voir quoi que ce soit de positif.",
+        "Je pense souvent que les autres me jugent de manière critique.",
+        "J’agis avant de vérifier si c’est une bonne idée.",
+        "Après des situations difficiles, la tension reste longtemps dans mon corps."
+      ],
+      "scale": [
+        "Pas du tout moi",
+        "Plutôt pas moi",
+        "Autant l’un que l’autre",
+        "Plutôt moi",
+        "Tout à fait moi"
+      ],
+      "dimensions": {
+        "O": {
+          "name": "Ouverture",
+          "description": "Curiosité pour le monde, imagination et ouverture aux nouvelles expériences."
+        },
+        "C": {
+          "name": "Conscienciosité",
+          "description": "Ordre, persévérance, planification et poursuite des objectifs."
+        },
+        "E": {
+          "name": "Extraversion",
+          "description": "Énergie tirée du contact, sociabilité et expressivité."
+        },
+        "A": {
+          "name": "Agréabilité",
+          "description": "Chaleur, confiance et attention aux autres."
+        },
+        "N": {
+          "name": "Sensibilité émotionnelle",
+          "description": "Intensité du vécu et réaction au stress."
+        }
+      }
+    },
+    "hu": {
+      "facets": [
+        "Képzelőerő",
+        "Szellemi kíváncsiság",
+        "Nyitottság az újra",
+        "Esztétikai érzékenység",
+        "A gondolkodás rugalmassága",
+        "Az ingerek iránti igény",
+        "Lelkiismeretesség",
+        "Rendezettség",
+        "Önfegyelem",
+        "Megfontoltság",
+        "Teljesítményre törekvés",
+        "Pontosság",
+        "Társaságkedvelés",
+        "Önérvényesítés",
+        "Aktivitás",
+        "Élménykeresés",
+        "Pozitív érzelmek",
+        "Kifejezőkészség",
+        "Bizalom",
+        "Erkölcsösség",
+        "Önzetlenség",
+        "Együttműködés",
+        "Szerénység",
+        "Együttérzés",
+        "Szorongás",
+        "Harag",
+        "Lehangoltság",
+        "Öntudatosság",
+        "Impulzivitás",
+        "Stresszérzékenység"
+      ],
+      "items": [
+        "Élénk a képzelőerőm, és gyakran alkotok képeket a fejemben.",
+        "Szeretem megkérdezni, hogy „miért”, és részekre bontani a témákat.",
+        "Az új helyek és ismeretlen helyzetek inkább kíváncsivá tesznek, mint elriasztanak.",
+        "A zene, a művészet vagy a természet meg tud hatni.",
+        "Ragaszkodom a nézeteimhez, és ritkán változtatok rajtuk.",
+        "Az unalom néha nehezebb számomra, mint egy kihívás.",
+        "Gyakran halogatom a dolgokat.",
+        "A környezetemben olyan rend van, amely nekem megfelel.",
+        "Rendszeresen tudok csinálni valamit akkor is, ha nincs kedvem hozzá.",
+        "Mielőtt cselekszem, mérlegelem a következményeket.",
+        "Szeretek célokat kitűzni és megvalósítani őket.",
+        "Tartom magam a megbeszélt időpontokhoz és vállalásokhoz.",
+        "Az emberekkel való kapcsolat energiát ad.",
+        "Egy csoportban könnyen elmondom, amit gondolok.",
+        "Szeretek mozgásban lenni: sok tervem és ötletem van a napra.",
+        "Szeretem az izgalmas, borzongató helyzeteket.",
+        "Másoknál gyakrabban nevetek és örülök az apróságoknak.",
+        "Az érzelmeim láthatók; nem tudom elrejteni őket.",
+        "Nehezen bízom meg új emberekben.",
+        "Nehéz számomra azzal ellentétesen cselekedni, amit tisztességesnek tartok.",
+        "Mások segítése valódi örömet okoz.",
+        "Inkább megoldom a konfliktusokat, mint megnyerem őket.",
+        "Nem szeretek túl sokat beszélni magamról.",
+        "Könnyen meghatódom, ha valaki szenved.",
+        "Gyakran aggódom olyan dolgok miatt, amelyek megtörténhetnek.",
+        "Gyorsan ingerült leszek, ha valami nem sikerül.",
+        "Vannak napok, amikor nehezen látok meg bármi jót.",
+        "Gyakran gondolom, hogy mások kritikusan ítélnek meg.",
+        "Cselekszem, mielőtt átgondolnám, jó ötlet-e.",
+        "Nehéz helyzetek után sokáig megmarad a feszültség a testemben."
+      ],
+      "scale": [
+        "Egyáltalán nem jellemző rám",
+        "Inkább nem jellemző rám",
+        "Fele-fele arányban jellemző",
+        "Inkább jellemző rám",
+        "Nagyon jellemző rám"
+      ],
+      "dimensions": {
+        "O": {
+          "name": "Nyitottság",
+          "description": "Kíváncsiság a világ iránt, képzelőerő és nyitottság az új élményekre."
+        },
+        "C": {
+          "name": "Lelkiismeretesség",
+          "description": "Rendezettség, kitartás, tervezés és célokra törekvés."
+        },
+        "E": {
+          "name": "Extraverzió",
+          "description": "A kapcsolatokból nyert energia, társaságkedvelés és kifejezőkészség."
+        },
+        "A": {
+          "name": "Barátságosság",
+          "description": "Melegség, bizalom és másokról való gondoskodás."
+        },
+        "N": {
+          "name": "Érzelmi érzékenység",
+          "description": "Az érzelmi megélés intenzitása és a stresszre adott reakció."
+        }
+      }
+    },
+    "uk": {
+      "facets": [
+        "Уява",
+        "Інтелектуальна допитливість",
+        "Відкритість до нового",
+        "Естетична чутливість",
+        "Гнучкість мислення",
+        "Потреба в стимуляції",
+        "Сумлінність",
+        "Порядок",
+        "Самодисципліна",
+        "Обачність",
+        "Прагнення досягнень",
+        "Пунктуальність",
+        "Товариськість",
+        "Наполегливість",
+        "Активність",
+        "Пошук вражень",
+        "Позитивні емоції",
+        "Виразність",
+        "Довіра",
+        "Моральність",
+        "Альтруїзм",
+        "Співпраця",
+        "Скромність",
+        "Співчуття",
+        "Тривожність",
+        "Злість",
+        "Пригніченість",
+        "Самосвідомість",
+        "Імпульсивність",
+        "Чутливість до стресу"
+      ],
+      "items": [
+        "У мене жива уява, і я часто створюю образи у своїй голові.",
+        "Я люблю запитувати «чому» й розкладати теми на частини.",
+        "Нові місця та незнайомі ситуації радше цікавлять мене, ніж відштовхують.",
+        "Музика, мистецтво або природа можуть мене зворушити.",
+        "Я дотримуюся своїх поглядів і рідко їх змінюю.",
+        "Іноді мені важче впоратися з нудьгою, ніж із викликом.",
+        "Я часто відкладаю справи на потім.",
+        "У моєму просторі панує порядок, який мені підходить.",
+        "Я можу робити щось регулярно, навіть коли не маю бажання.",
+        "Перш ніж діяти, я зважую наслідки.",
+        "Я люблю ставити перед собою цілі й досягати їх.",
+        "Я дотримуюся домовленого часу та зобов’язань.",
+        "Спілкування з людьми додає мені енергії.",
+        "У групі мені легко сказати те, що я думаю.",
+        "Я люблю бути в русі: маю багато планів та ідей на день.",
+        "Мені подобаються ситуації, що дарують гострі відчуття.",
+        "Я сміюся й радію дрібницям частіше за інших.",
+        "Мої емоції помітні — я не вмію їх приховувати.",
+        "Мені важко довіряти новим людям.",
+        "Мені важко чинити всупереч тому, що я вважаю чесним.",
+        "Допомагати іншим приносить мені справжнє задоволення.",
+        "Я вважаю за краще розв’язувати конфлікти, ніж перемагати в них.",
+        "Я не люблю забагато говорити про себе.",
+        "Мене легко зворушує чиєсь страждання.",
+        "Я часто хвилююся через те, що може статися.",
+        "Я швидко дратуюся, коли щось не виходить.",
+        "Бувають дні, коли мені важко побачити хоч щось добре.",
+        "Я часто думаю, що інші критично мене оцінюють.",
+        "Я роблю щось, перш ніж перевірити, чи це добра ідея.",
+        "Після складних ситуацій напруження надовго залишається в моєму тілі."
+      ],
+      "scale": [
+        "Зовсім не про мене",
+        "Радше не про мене",
+        "Наполовину про мене",
+        "Радше про мене",
+        "Дуже про мене"
+      ],
+      "dimensions": {
+        "O": {
+          "name": "Відкритість",
+          "description": "Допитливість щодо світу, уява та відкритість до нового досвіду."
+        },
+        "C": {
+          "name": "Сумлінність",
+          "description": "Порядок, наполегливість, планування та прагнення до мети."
+        },
+        "E": {
+          "name": "Екстраверсія",
+          "description": "Енергія від спілкування, товариськість і виразність."
+        },
+        "A": {
+          "name": "Доброзичливість",
+          "description": "Теплота, довіра та турбота про інших."
+        },
+        "N": {
+          "name": "Емоційна чутливість",
+          "description": "Інтенсивність переживань і реакція на стрес."
+        }
+      }
+    }
+  }
+}
