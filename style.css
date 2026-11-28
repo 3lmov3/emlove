@@ -413,7 +413,7 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
 .wheel-intro{max-width:520px;margin:9px auto 16px;color:#617B76;text-align:center;font-size:13px;line-height:1.6}
 .wheel-canvas{display:flex;align-items:center;justify-content:center;overflow-x:auto;padding:6px 0}
 .wheel-canvas svg{max-width:min(100%,580px);max-height:68vh;height:auto}
-.wheel-canvas.zoomed svg{width:155%;max-width:none;max-height:none}
+.wheel-canvas.zoomed svg{width:min(155%,720px)!important;max-width:none!important;max-height:none}
 .wheel-hint{margin:12px 0;color:#718C86;text-align:center;font-size:11px}
 .wheel-zoom{display:block;margin:0 auto 8px}
 .wheel-areas{display:flex;justify-content:center;gap:7px;flex-wrap:wrap;margin-top:12px}
@@ -509,7 +509,7 @@ input[type="range"],.range{width:100%;accent-color:var(--primary)}
   .settings-actions,.form-actions,.keys-row{gap:7px}
   .settings-actions .btn,.form-actions .btn{flex:1 1 140px}
   .wheel-card{padding:16px 11px;border-radius:18px}
-  .wheel-canvas.zoomed svg{width:180%}
+  .wheel-canvas.zoomed svg{width:min(180%,720px)!important}
   .bf-q{font-size:16px}
 }
 @media (max-width:520px){

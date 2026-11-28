@@ -183,7 +183,7 @@
 
         <p class="wheel-hint">${area ? esc(wheelUi('wordPrompt','Tap a word on the wheel or choose one from the list below')) : esc(wheelUi('areaHint','Tap a colour or choose a name below'))}</p>
 
-        <button type="button" class="btn btn-ghost wheel-zoom" onclick="EmloveWheel.toggleZoom()">${esc(wheelUi(zoom?'zoomOut':'zoomIn',zoom?'Reduce wheel':'Enlarge wheel'))}</button>
+        <button type="button" class="btn btn-ghost wheel-zoom" aria-pressed="${zoom?'true':'false'}" onclick="EmloveWheel.toggleZoom()">${esc(wheelUi(zoom?'zoomOut':'zoomIn',zoom?'Reduce wheel':'Enlarge wheel'))}</button>
         ${zoom ? `<p class="wheel-hint">${esc(wheelUi('zoomHint','Swipe sideways to explore the whole wheel.'))}</p>` : ''}
 
         <div class="wheel-areas">
@@ -244,7 +244,24 @@
     word = {label: term, id: 'w-' + i + '-' + j};
     render();
   }
-  function toggleZoom() { zoom = !zoom; render(); }
+  function toggleZoom() {
+    zoom = !zoom;
+    const host = document.getElementById('wheelHost');
+    const canvas = host && host.querySelector('.wheel-canvas');
+    const svg = canvas && canvas.querySelector('svg');
+    const button = host && host.querySelector('.wheel-zoom');
+    if (!canvas || !svg || !button) { render(); return; }
+
+    canvas.classList.toggle('zoomed', zoom);
+    // Set the rendered width directly so the control responds immediately,
+    // even when the SVG also has a presentation width attribute.
+    const mobile = window.matchMedia && window.matchMedia('(max-width: 820px)').matches;
+    svg.style.width = zoom ? (mobile ? 'min(180%, 720px)' : 'min(155%, 720px)') : 'min(100%, 580px)';
+    svg.style.maxWidth = zoom ? 'none' : '580px';
+    svg.style.maxHeight = zoom ? 'none' : '68vh';
+    button.setAttribute('aria-pressed', zoom ? 'true' : 'false');
+    button.textContent = wheelUi(zoom ? 'zoomOut' : 'zoomIn', zoom ? 'Reduce wheel' : 'Enlarge wheel');
+  }
 
   async function mount() {
     try {
