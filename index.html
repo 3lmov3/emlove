@@ -302,51 +302,51 @@
         <div class="card chat-card">
           <div class="chat-head">
             <div class="milo-avatar">M</div>
-            <div><strong>Milo — towarzysz emocji</strong><p id="chatModeLabel">Online · tryb lokalny · pyta, nie ocenia · nie decyduje za Ciebie</p></div>
-            <button class="btn btn-ghost" onclick="clearChat()">Wyczyść czat</button>
+            <div><strong data-i18n-content="milo-ui|companionTitle">Milo — towarzysz emocji</strong><p id="chatModeLabel">Online · tryb lokalny · pyta, nie ocenia · nie decyduje za Ciebie</p></div>
+            <button class="btn btn-ghost" onclick="clearChat()" data-i18n-content="milo-ui|clearChat">Wyczyść czat</button>
           </div>
           <div class="chat-voice-bar">
-            <label><input type="checkbox" id="voiceToggle" checked> 🔊 Milo mówi na głos</label>
-            <label>Głos: <select id="voiceSelect"><option value="">Automatyczny (polski)</option></select></label>
-            <label>Tempo: <input type="range" id="voiceRate" min="0.7" max="1.3" step="0.05" value="0.95"></label>
-            <button class="btn btn-small btn-ghost" onclick="stopSpeaking()">⏹ Zatrzymaj głos</button>
+            <label><input type="checkbox" id="voiceToggle" checked> <span data-i18n-content="milo-ui|voiceToggle">Milo mówi na głos</span></label>
+            <label><span data-i18n-content="milo-ui|voiceLabel">Głos</span>: <select id="voiceSelect"><option value="" data-i18n-content="milo-ui|voiceAuto">Automatyczny (polski)</option></select></label>
+            <label><span data-i18n-content="milo-ui|voiceRate">Tempo</span>: <input type="range" id="voiceRate" min="0.7" max="1.3" step="0.05" value="0.95"></label>
+            <button class="btn btn-small btn-ghost" onclick="stopSpeaking()">⏹ <span data-i18n-content="milo-ui|stopVoice">Zatrzymaj głos</span></button>
           </div>
           <div class="chat-messages" id="chatMessages"></div>
           <div class="quick-prompts">
-            <button onclick="quickPrompt('Czuję się dziś smutno')">😢 Czuję smutek</button>
-            <button onclick="quickPrompt('Jestem zły')">😠 Jestem zły</button>
-            <button onclick="quickPrompt('Boję się jutro')">😟 Boję się</button>
-            <button onclick="quickPrompt('Daj mi ćwiczenie')">🧩 Daj ćwiczenie</button>
-            <button onclick="quickPrompt('Nie wiem, co czuję')">🤷 Nie wiem, co czuję</button>
+            <button onclick="quickPrompt(miloPrompt('sad'))" data-i18n-content="milo-ui|prompts.sad">😢 Czuję się dziś smutno</button>
+            <button onclick="quickPrompt(miloPrompt('anger'))" data-i18n-content="milo-ui|prompts.anger">😠 Jestem zły</button>
+            <button onclick="quickPrompt(miloPrompt('fear'))" data-i18n-content="milo-ui|prompts.fear">😟 Boję się jutra</button>
+            <button onclick="quickPrompt(miloPrompt('exercise'))" data-i18n-content="milo-ui|prompts.exercise">🧩 Daj mi ćwiczenie</button>
+            <button onclick="quickPrompt(miloPrompt('unsure'))" data-i18n-content="milo-ui|prompts.unsure">🤷 Nie wiem, co czuję</button>
           </div>
           <form class="chat-form" id="chatForm">
-            <input id="chatInput" placeholder="Napisz, co czujesz... Milo odpowie pytaniem 💬" autocomplete="off">
-            <button class="btn btn-primary" type="submit">Wyślij</button>
+            <input id="chatInput" data-i18n-content-placeholder="milo-ui|chatPlaceholder" placeholder="Napisz, co czujesz... Milo odpowie pytaniem 💬" autocomplete="off">
+            <button class="btn btn-primary" type="submit" data-i18n-content="milo-ui|send">Wyślij</button>
           </form>
           <p class="muted small">Milo nie jest terapeutą ani służbą kryzysową. Kontakty dla regionu urządzenia: <span data-crisis-summary></span>. Pełny Milo: Twoje wiadomości trafiają do modelu językowego — nie wysyłaj danych wrażliwych.</p>
         </div>
         <div class="card">
-          <h3>Kim jest Milo?</h3>
-          <p><b>Tożsamość:</b> stworzenie z Krainy Odczuwania, którego zadaniem jest towarzyszyć ludziom w odkrywaniu emocji.</p>
+          <h3 data-i18n-content="milo-ui|identityTitle">Kim jest Milo?</h3>
+          <p><b data-i18n-content="milo-ui|identityLabel">Tożsamość:</b> <span data-i18n-content="milo-ui|identity">Stworzenie z Krainy Odczuwania, które towarzyszy ludziom w odkrywaniu emocji.</span></p>
           <ul class="check-list">
-            <li>✓ Słucha i odzwierciedla Twoje słowa</li>
-            <li>✓ Zadaje pytania otwarte</li>
-            <li>✓ Tworzy sytuacje i ćwiczenia</li>
-            <li>✗ Nie przejmuje Twoich wypowiedzi</li>
-            <li>✗ Nie mówi „powinieneś/powinnaś”</li>
-            <li>✗ Nie stawia diagnoz</li>
-            <li>✗ Nie decyduje za Ciebie</li>
+            <li>✓ <span data-i18n-content="milo-ui|listens">Słucha i odzwierciedla Twoje słowa</span></li>
+            <li>✓ <span data-i18n-content="milo-ui|asks">Zadaje pytania otwarte</span></li>
+            <li>✓ <span data-i18n-content="milo-ui|creates">Tworzy sytuacje i ćwiczenia</span></li>
+            <li>✗ <span data-i18n-content="milo-ui|notTakeOver">Nie przejmuje Twoich wypowiedzi</span></li>
+            <li>✗ <span data-i18n-content="milo-ui|noShould">Nie mówi „powinieneś/powinnaś”</span></li>
+            <li>✗ <span data-i18n-content="milo-ui|noDiagnoses">Nie stawia diagnoz</span></li>
+            <li>✗ <span data-i18n-content="milo-ui|noDecisions">Nie decyduje za Ciebie</span></li>
           </ul>
-          <h4>Pełny Milo</h4>
-          <p class="muted">Domyślnie Milo odpowiada lokalnie, z gotowych zwrotów. Gdy włączysz pełną rozmowność w ⚙️, Milo układa odpowiedzi sam — z tymi samymi zasadami: nie ocenia, nie decyduje za Ciebie, pyta.</p>
-          <p class="muted small">Pełną rozmowność Milo ustala administrator aplikacji. Nie musisz nic konfigurować.</p>
+          <h4 data-i18n-content="milo-ui|fullTitle">Pełny Milo</h4>
+          <p class="muted" data-i18n-content="milo-ui|fullText">Domyślnie Milo odpowiada lokalnie, z gotowych zwrotów. Gdy włączysz pełną rozmowność, układa odpowiedzi sam — nie ocenia, nie decyduje za Ciebie, pyta.</p>
+          <p class="muted small" data-i18n-content="milo-ui|fullAdmin">Pełną rozmowność Milo ustala administrator aplikacji. Nie musisz nic konfigurować.</p>
         </div>
       </div>
     </section>
 
     <section class="view" id="view-journal">
       <div class="card">
-        <div class="card-head"><h2>📓 Dziennik emocji</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="summarizeWithAI()">✨ Podsumowanie od Milo</button><button class="btn btn-ghost" id="sendMailBtn" type="button" onclick="sendSummaryMail()" disabled>📧 Wyślij mailem</button><button class="btn btn-ghost" onclick="exportJournal()">Eksportuj (JSON)</button></div></div>
+        <div class="card-head"><h2 data-i18n-content="journal-entry|title">📓 Dziennik emocji</h2><div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn btn-secondary" onclick="summarizeWithAI()" data-i18n-content="journal-ui|summary">✨ Podsumowanie od Milo</button><button class="btn btn-ghost" id="sendMailBtn" type="button" onclick="sendSummaryMail()" disabled data-i18n-content="journal-ui|sendMail">📧 Wyślij mailem</button><button class="btn btn-ghost" onclick="exportJournal()" data-i18n-content="journal-ui|exportJson">Eksportuj (JSON)</button></div></div>
         <div id="aiSummary" class="preview-box" style="display:none"></div>
         <div id="journalList"></div>
       </div>
@@ -354,37 +354,36 @@
 
     <section class="view" id="view-library">
       <div class="card">
-        <h2>📚 Biblioteka emocji</h2>
-        <p class="muted">Karty z definicjami, sygnałami w ciele i pytaniami do refleksji. Kliknij kartę, aby rozwinąć.</p>
-        <div class="search-row"><input id="libSearch" placeholder="Szukaj emocji... np. złość, lęk, wstyd, zlekceważony" oninput="renderLibrary()"></div>
-        <div class="lib-section-title">Rodziny emocji</div>
+        <h2 data-i18n-content="library-ui|title">📚 Biblioteka emocji</h2>
+        <p class="muted" data-i18n-content="library-ui|intro">Explore words and questions that may help you describe your own experience.</p>
+        <div class="search-row"><input id="libSearch" data-i18n-content-placeholder="library-ui|searchPlaceholder" placeholder="Szukaj emocji... np. złość, lęk, wstyd, zlekceważony" oninput="renderLibrary()" aria-label="Szukaj w bibliotece"></div>
+        <div class="lib-section-title" data-i18n-content="library-ui|cards">Rodziny emocji</div>
         <div class="lib-grid" id="libGrid"></div>
-        <div class="lib-section-title">Precyzyjne słowa z koła emocji</div>
-        <p class="muted small">Słowa z przesłanego koła: grupy, podgrupy i bardziej szczegółowe określenia.</p>
+        <div class="lib-section-title" data-i18n-content="library-ui|wheelTerms">Precyzyjne słowa z koła emocji</div>
+        <p class="muted small" data-i18n-content="library-ui|wheelNote">Słowa z przesłanego koła: grupy, podgrupy i bardziej szczegółowe określenia.</p>
         <div class="wheel-word-grid" id="wheelWordList"></div>
       </div>
     </section>
 
     <section class="view" id="view-keys">
       <div class="card">
-        <h2>🔑 Klucze API</h2>
-        <p class="muted">Wybierz, którego klucza ma używać Milo. Klucz administratora obsługuje Supabase;
-          własny klucz jest przechowywany tylko na tym urządzeniu.</p>
+        <h2 data-i18n-content="api-keys|title">🔑 Klucze API</h2>
+        <p class="muted" data-i18n-content="api-keys|intro">Wybierz, którego klucza ma używać Milo. Klucz administratora obsługuje Supabase; własny klucz jest przechowywany tylko na tym urządzeniu.</p>
 
-        <div class="keys-section-title">Dostawca</div>
+        <div class="keys-section-title" data-i18n-content="api-keys|provider">Dostawca</div>
         <div id="providerList" class="provider-list" role="radiogroup" aria-label="Dostawca modelu"></div>
 
         <div id="keyFields" hidden>
-          <div class="keys-section-title">Klucz API</div>
+          <div class="keys-section-title" data-i18n-content="api-keys|key">Klucz API</div>
           <input id="providerKey" type="password" autocomplete="off" spellcheck="false" placeholder="sk-…">
           <p class="keys-hint" id="providerKeyHint"></p>
 
-          <div class="keys-section-title">Model</div>
+          <div class="keys-section-title" data-i18n-content="api-keys|model">Model</div>
           <input id="providerModel" type="text" autocomplete="off" spellcheck="false" placeholder="model">
 
           <div class="keys-row">
-            <button class="btn btn-primary" type="button" id="saveKeyBtn" onclick="saveProviderKey()">Zapisz</button>
-            <button class="btn btn-ghost" type="button" onclick="clearProviderKey()">Usuń klucz</button>
+            <button class="btn btn-primary" type="button" id="saveKeyBtn" onclick="saveProviderKey()" data-i18n-content="api-keys|save">Zapisz</button>
+            <button class="btn btn-ghost" type="button" onclick="clearProviderKey()" data-i18n-content="api-keys|remove">Usuń klucz</button>
           </div>
         </div>
 
@@ -396,8 +395,8 @@
       </div>
 
       <div class="card">
-        <h2>🔒 Prywatność i bezpieczeństwo</h2>
-        <p class="keys-text">Własny klucz jest zapisywany w przeglądarce na tym urządzeniu i przesyłany do funkcji
+        <h2 data-i18n-content="api-keys|privacyTitle">🔒 Prywatność i bezpieczeństwo</h2>
+        <p class="keys-text" data-i18n-content="api-keys|privacy1">Własny klucz jest zapisywany w przeglądarce na tym urządzeniu i przesyłany do funkcji
           Supabase tylko wtedy, gdy wysyłasz wiadomość. Funkcja nie zapisuje klucza i nie loguje go.
           Nie wpisuj klucza w rozmowie z Milo.</p>
         <p class="keys-text">W przeglądarce klucz trafia do localStorage tej domeny — inaczej niż w aplikacji mobilnej,
@@ -409,7 +408,7 @@
           Emlove nie dodaje marży.</p>
       </div>
 
-      <button class="btn btn-ghost" type="button" onclick="goTo('chat')">← Wróć do rozmowy</button>
+      <button class="btn btn-ghost" type="button" onclick="goTo('chat')" data-i18n-content="api-keys|back">← Wróć do rozmowy</button>
     </section>
 
     <section class="view" id="view-personality">
@@ -513,5 +512,5 @@
 <script src="personality.js"></script>
 <script>if("serviceWorker" in navigator){navigator.serviceWorker.register("sw.js",{updateViaCache:"none"}).then(reg=>reg.update()).catch(()=>{})}</script>
 <script>if(window.EmloveContent)window.EmloveContent.load();</script>
-<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5fd44cfb802357b',t:'MTc5NTU3NDIxOA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5fd44cfb802357b',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script><script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a616286cca5dd924',t:'MTc5NTgzNTE5OQ=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a616286cca5dd924',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+<script>(function(){function c(){var b=a.contentDocument||(a.contentWindow&&a.contentWindow.document);if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'a5fd44cfb802357b',t:'MTc5NTU3NDIxOA=='};var l=window.parent.location,o;try{o=new URL(l.origin).origin}catch(e){try{o=new URL(new URL(l.href).origin).origin}catch(e){o=''}}var u='/cdn-cgi/challenge-platform/scripts/jsd/main.js?ray=a5fd44cfb802357b',a=document.createElement('script');a.src=o?new URL(u,o).href:u;document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
 </html>
