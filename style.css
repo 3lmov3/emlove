@@ -660,6 +660,20 @@ html[data-theme="night"] .btn-secondary:hover{color:#FFFFFF!important;-webkit-te
 html[data-theme="night"] .bf-opt{color:#F2F5FB!important;-webkit-text-fill-color:#F2F5FB!important;background:#28374B!important;border-color:#526278!important}
 html[data-theme="night"] .bf-opt:hover{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#32445C!important;border-color:#8196B2!important}
 html[data-theme="night"] .bf-opt b{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#3C5377!important}
+/* Chat: avoid light hard-coded surfaces with night-theme white text; keep every bubble legible. */
+html[data-theme="night"] .chat-head{color:#F2F5FB!important;background:#222F40!important;border-bottom-color:#46566B!important}
+html[data-theme="night"] .chat-head .milo-avatar{color:#111925!important;-webkit-text-fill-color:#111925!important}
+html[data-theme="night"] .chat-messages{background:#141E2C!important}
+html[data-theme="night"] .msg.milo{color:#F2F5FB!important;background:#28374B!important;border-color:#526278!important}
+html[data-theme="night"] .msg.user{color:#111925!important;-webkit-text-fill-color:#111925!important;background:#B4C9FF!important;border-color:#D0DDFF!important}
+html[data-theme="night"] .msg .who{color:#D2DBE8!important;opacity:1!important}
+html[data-theme="night"] .msg .speak-btn{color:#E4EAFF!important;-webkit-text-fill-color:#E4EAFF!important;background:#3C5377!important;border-color:#7187A7!important}
+html[data-theme="night"] .quick-prompts{border-color:#46566B!important}
+html[data-theme="night"] .chat-form{background:#1B2635!important;border-color:#46566B!important}
+html[data-theme="night"] .chat-voice-bar{color:#F2F5FB!important;background:#222F40!important;border-color:#46566B!important}
+html[data-theme="night"] .express-msg{color:#F2F5FB!important;background:#28374B!important;border-color:#526278!important}
+html[data-theme="night"] .express-msg.milo{background:#26384A!important;border-color:#526A83!important}
+html[data-theme="night"] .express-msg.user{color:#111925!important;background:#B4C9FF!important;border-color:#D0DDFF!important}
 html[data-theme="night"] .icon-btn,html[data-theme="night"] .hamburger{color:#F1F4FA!important;-webkit-text-fill-color:#F1F4FA!important;background:#263549!important;border-color:#52647A!important}
 html[data-theme="night"] .quick-prompts{background:#1B2635!important}
 html[data-theme="night"] .quick-prompts button{color:#F2F5FB!important;-webkit-text-fill-color:#F2F5FB!important;background:#263549!important;border-color:#52647A!important}
