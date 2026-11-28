@@ -59,6 +59,10 @@ assert.match(css, /html\[data-theme="night"\] \.btn-ghost\{color:#F1F4FA!importa
 assert.match(css, /html\[data-theme="night"\] \.btn-secondary\{color:#FFE7F1!important/);
 assert.match(css, /html\[data-theme="night"\] \.bf-opt\{color:#F2F5FB!important;-webkit-text-fill-color:#F2F5FB!important;background:#28374B!important/);
 assert.match(css, /html\[data-theme="night"\] \.bf-opt b\{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#3C5377!important/);
+assert.match(css, /html\[data-theme="night"\] \.chat-messages\{background:#141E2C!important\}/);
+assert.match(css, /html\[data-theme="night"\] \.msg\.milo\{color:#F2F5FB!important;background:#28374B!important;border-color:#526278!important\}/);
+assert.match(css, /html\[data-theme="night"\] \.msg\.user\{color:#111925!important;-webkit-text-fill-color:#111925!important;background:#B4C9FF!important/);
+assert.match(css, /html\[data-theme="night"\] \.chat-voice-bar\{color:#F2F5FB!important;background:#222F40!important/);
 assert.match(css, /html\[data-theme="night"\] \.journal-item\{color:#F2F5FB!important;background:#1B2635!important;border-color:#3C4A5E!important\}/);
 assert.match(css, /html\[data-theme="night"\] \.lib-card\{color:#F2F5FB!important;background:#222F40!important;border-color:#46566B!important\}/);
 assert.match(css, /html\[data-theme="night"\] \.wheel-word\{color:#DCE6F2!important;background:#28374B!important;border-color:#526278!important\}/);
@@ -73,12 +77,12 @@ assert.match(wheelJs, /button\.setAttribute\('aria-pressed', zoom \?/);
 assert.match(css, /html\[data-theme="night"\] input:not\(\[type="range"\]\):not\(\[type="checkbox"\]\):not\(\[type="radio"\]\),html\[data-theme="night"\] textarea,html\[data-theme="night"\] select\{color:#F2F5FB!important;-webkit-text-fill-color:#F2F5FB!important;background:#182332!important/);
 assert.match(css, /html\[data-theme="night"\] #authModal \.settings-actions \.btn-ghost\{color:#F1F4FA!important/);
 const html = fs.readFileSync(new URL('../index.html', here), 'utf8');
-assert.match(html, /style\.css\?v=personality-night-contrast-1/);
+assert.match(html, /style\.css\?v=night-chat-contrast-2/);
 const sw = fs.readFileSync(new URL('../sw.js', here), 'utf8');
-assert.match(sw, /emlove-v79/);
+assert.match(sw, /emlove-v80/);
 assert.ok(fs.existsSync(new URL('../translation-catalog.js', here)), 'the translation catalogue must be present for deployment');
 assert.match(html, /translation-catalog\.js/);
-assert.match(sw, /style\.css\?v=personality-night-contrast-1/);
+assert.match(sw, /style\.css\?v=night-chat-contrast-2/);
 
 const launcherManifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', here), 'utf8'));
 assert.deepEqual(launcherManifest.icons.map(icon => icon.src), ['icon-192.png', 'icon-512.png', 'icon-512.png']);
