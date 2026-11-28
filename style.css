@@ -656,6 +656,10 @@ html[data-theme="night"] .btn-ghost{color:#F1F4FA!important;-webkit-text-fill-co
 html[data-theme="night"] .btn-ghost:hover{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#31435A!important;border-color:#8196B2!important}
 html[data-theme="night"] .btn-secondary{color:#FFE7F1!important;-webkit-text-fill-color:#FFE7F1!important;background:#493449!important;border-color:#805A77!important}
 html[data-theme="night"] .btn-secondary:hover{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#5A3D58!important;border-color:#A8789A!important}
+/* Big Five response buttons: the light default surface paired with night-theme ink made the labels disappear. */
+html[data-theme="night"] .bf-opt{color:#F2F5FB!important;-webkit-text-fill-color:#F2F5FB!important;background:#28374B!important;border-color:#526278!important}
+html[data-theme="night"] .bf-opt:hover{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#32445C!important;border-color:#8196B2!important}
+html[data-theme="night"] .bf-opt b{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#3C5377!important}
 html[data-theme="night"] .icon-btn,html[data-theme="night"] .hamburger{color:#F1F4FA!important;-webkit-text-fill-color:#F1F4FA!important;background:#263549!important;border-color:#52647A!important}
 html[data-theme="night"] .quick-prompts{background:#1B2635!important}
 html[data-theme="night"] .quick-prompts button{color:#F2F5FB!important;-webkit-text-fill-color:#F2F5FB!important;background:#263549!important;border-color:#52647A!important}
