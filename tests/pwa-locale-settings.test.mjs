@@ -47,6 +47,18 @@ assert.ok(events.some(e => e.type === 'emlove:theme-change'));
 assert.equal(resolveLocale('en-GB'), 'en');
 assert.equal(resolveLocale('xx'), null);
 
+const launcherManifest = JSON.parse(fs.readFileSync(new URL('../manifest.json', here), 'utf8'));
+assert.deepEqual(launcherManifest.icons.map(icon => icon.src), ['icon-192.png', 'icon-512.png', 'icon-512.png']);
+for (const [name, size] of [['icon-192.png', 192], ['icon-512.png', 512], ['apple-touch-icon.png', 180]]) {
+  const png = fs.readFileSync(new URL(`../${name}`, here));
+  assert.equal(png.readUInt32BE(16), size, `${name} width ${size}`);
+  assert.equal(png.readUInt32BE(20), size, `${name} height ${size}`);
+}
+for (const theme of ['mint', 'night', 'lilac']) {
+  const png = fs.readFileSync(new URL(`../icons/app-icon-${theme}-192.png`, here));
+  assert.equal(png.readUInt32BE(16), 192, `${theme} in-app icon width`);
+}
+
 const miloBundle = JSON.parse(fs.readFileSync(new URL('../translations/milo-local.json', here), 'utf8'));
 for (const code of ['pl', 'en', 'de', 'fr', 'hu', 'uk']) {
   assert.ok(miloBundle[code]?.crisisFallback && Array.isArray(miloBundle[code].generic), `${code} local Milo replies exist`);
