@@ -28,6 +28,7 @@
     unavailable: 'Serwer jest chwilowo niedostępny. Spróbuj ponownie.',
     too_large: 'Wiadomość jest za długa.',
     disabled: 'Milo online jest wyłączone.',
+    language_mismatch: 'Odpowiedź Milo nie zgadza się z wybranym językiem. Spróbuj ponownie.',
     method: 'Nieprawidłowa metoda żądania.',
   };
 
@@ -42,7 +43,7 @@
    * @param {AbortSignal} [signal]
    * @returns {Promise<string>}
    */
-  async function ask(text, history, signal) {
+  async function ask(text, history, signal, language) {
     const auth = window.EmloveAuth;
 
     if (!auth || !auth.currentUser()) {
@@ -66,6 +67,7 @@
         body: JSON.stringify({
           text: String(text).slice(0, MAX_TEXT),
           history: (history || []).slice(-4),
+          language: language || (window.EmloveLocale ? window.EmloveLocale.language() : 'pl'),
         }),
         signal,
       });
@@ -97,6 +99,8 @@
     if (!obj || typeof obj.text !== 'string' || !obj.text.trim()) {
       throw Object.assign(new Error('service'), {code: 'service'});
     }
+    const requested = language || (window.EmloveLocale ? window.EmloveLocale.language() : 'pl');
+    if (obj.language !== requested) throw Object.assign(new Error('language_mismatch'), {code: 'language_mismatch'});
     return obj.text.trim();
   }
 

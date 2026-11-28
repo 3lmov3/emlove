@@ -351,7 +351,7 @@ function bfRenderResult(record, justFinished = false) {
     </div>
 
     <div class="card" style="margin-top:14px">
-      <p class="muted small">Emlove jest narzędziem edukacyjnym dla dorosłych (18+), nie terapią. Pomoc w Polsce: 116 123 · 116 111 · 112.</p>
+      <p class="muted small">Emlove jest narzędziem edukacyjnym dla dorosłych (18+), nie terapią. Kontakty pomocy dla regionu urządzenia: <span data-crisis-summary></span>.</p>
     </div>`;
 }
 

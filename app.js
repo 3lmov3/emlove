@@ -60,6 +60,19 @@ const SIMULATIONS = [
   ]},
 ];
 
+// The reviewed translations are used to localize built-in simulations. Polish remains the source locale.
+const SIMULATIONS_PL = JSON.parse(JSON.stringify(SIMULATIONS));
+function applySimulationLocale(){
+  const locale=window.EmloveLocale?window.EmloveLocale.language():'pl';
+  const translated=window.EMLOVE_SIMULATION_LOCALES&&window.EMLOVE_SIMULATION_LOCALES[locale];
+  SIMULATIONS_PL.forEach((base,i)=>{
+    const target=SIMULATIONS[i];
+    const content=translated&&translated[base.id];
+    target.title=content?.title||base.title; target.short=content?.short||base.short;
+    target.story=content?.story||base.story; target.steps=content?.steps||base.steps;
+  });
+}
+
 // State
 let state = {
   entries: JSON.parse(localStorage.getItem('emocje_entries')||'[]'),
@@ -95,21 +108,23 @@ function renderProgress(){
   document.getElementById('statStreak').textContent = dates.length;
 }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
-function todayLabel(){ return new Date().toLocaleDateString('pl-PL',{weekday:'long', day:'numeric', month:'long'}); }
+function todayLabel(){ const lang=window.EmloveLocale?window.EmloveLocale.language():'pl'; return new Date().toLocaleDateString(lang,{weekday:'long', day:'numeric', month:'long'}); }
 document.getElementById('todayPill').textContent = todayLabel();
 
 // Navigation
 const TITLES = {
-  home:['Cześć, tu Milo 👋','Poznaj, nazwij i wyraź to, co czujesz — w swoim tempie.'],
-  checkin:['Codzienny check-in 💭','Zatrzymaj się i zauważ, co czujesz.'],
-  wheel:['Koło emocji 🎡','Odkryj rodziny emocji i precyzyjne słowa.'],
-  exercises:['Ćwiczenia 🧩','Trenuj rozpoznawanie, nazywanie i wyrażanie.'],
-  simulations:['Symulacje 🎭','Przeżyj sytuacje i wybierz, jak chcesz zareagować.'],
-  chat:['Rozmowa z Milo 💬','Milo pyta i słucha — nie decyduje za Ciebie.'],
-  journal:['Dziennik emocji 📓','Twoje wpisy, Twoja historia.'],
-  library:['Biblioteka emocji 📚','Słownik emocji z sygnałami i pytaniami.'],
-  keys:['Klucze API 🔑','Wybierz, którego klucza ma używać Milo.'],
+  home:['page.home.title','page.home.subtitle'],
+  checkin:['page.checkin.title','page.checkin.subtitle'],
+  wheel:['page.wheel.title','page.wheel.subtitle'],
+  exercises:['page.exercises.title','page.exercises.subtitle'],
+  simulations:['page.simulations.title','page.simulations.subtitle'],
+  chat:['page.chat.title','page.chat.subtitle'],
+  journal:['page.journal.title','page.journal.subtitle'],
+  personality:['page.personality.title','page.personality.subtitle'],
+  library:['page.library.title','page.library.subtitle'],
+  keys:['page.keys.title','page.keys.subtitle'],
 };
+let currentView='home';
 const navMenu=document.querySelector('.nav');
 function updateNavMenuEdges(){
   if(!navMenu)return;
@@ -137,18 +152,21 @@ function revealActiveNavItem(behavior='smooth'){
   requestAnimationFrame(updateNavMenuEdges);
 }
 function goTo(view){
+  currentView=view;
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
   document.getElementById('view-'+view).classList.add('active');
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.toggle('active', b.dataset.view===view));
   revealActiveNavItem();
   const meta = TITLES[view] || [view, ''];
-  document.getElementById('viewTitle').textContent = meta[0];
-  document.getElementById('viewSubtitle').textContent = meta[1];
+  const tr=window.EmloveLocale?window.EmloveLocale.t:(key=>key);
+  document.getElementById('viewTitle').textContent = tr(meta[0]);
+  document.getElementById('viewSubtitle').textContent = tr(meta[1]);
   closeSidebar();
   if(view==='keys'&&typeof renderKeys==='function') renderKeys();
   window.scrollTo({top:0,behavior:'smooth'});
 }
 document.querySelectorAll('.nav-btn').forEach(b=>b.addEventListener('click',()=>goTo(b.dataset.view)));
+window.addEventListener('emlove:language-change',()=>{if(window.EmloveLocale)window.EmloveLocale.apply();goTo(currentView);if(currentView==='checkin')renderCheckin();if(currentView==='journal')renderJournal();if(currentView==='home')renderRecent();if(currentView==='chat')renderChat();document.getElementById('todayPill').textContent=todayLabel();if(currentView==='simulations'){renderSims();if(state.simIndex!==null&&document.getElementById('simPlayer').style.display!=='none')renderSimStep();}if(typeof TTS!=='undefined')TTS.loadVoices();});
 if(navMenu){
   navMenu.addEventListener('scroll',updateNavMenuEdges,{passive:true});
   window.addEventListener('resize',updateNavMenuEdges);
@@ -321,6 +339,7 @@ function completeExpress(){
 
 // Simulations
 function renderSims(){
+  applySimulationLocale();
   document.getElementById('simGrid').innerHTML = SIMULATIONS.map((s,i)=>`<div class="sim-card" onclick="startSim(${i})"><h4>${escapeHtml(s.icon)} ${escapeHtml(s.title)}${s.advanced?' <span class="sim-badge">rozbudowana</span>':''}</h4><p>${escapeHtml(s.short)}</p><span class="muted">Wejdź w symulację →</span></div>`).join('');
 }
 function startSim(i){
@@ -387,13 +406,23 @@ function addMsg(who,text){
   state.chat.push({who,text,ts:Date.now()});
   renderChat(); saveState();
 }
+const CHAT_COPY={
+ pl:{you:'Ty',greeting:'Cześć! Jestem Milo, towarzysz z Krainy Odczuwania. Nie jestem terapeutą — jestem tu, aby słuchać i pytać. Nie przejmę Twoich słów i nie zdecyduję za Ciebie. Jak się dziś czujesz? Możesz napisać np. „czuję smutek” albo „nie wiem, co czuję”.'},
+ en:{you:'You',greeting:'Hello! I am Milo, your emotional companion. I am not a therapist; I am here to listen and ask questions. I will not take over your words or decide for you. How are you feeling today? You can say “I feel sad” or “I do not know what I feel”.'},
+ de:{you:'Du',greeting:'Hallo! Ich bin Milo, dein Begleiter für Gefühle. Ich bin kein Therapeut, sondern höre zu und stelle Fragen. Ich nehme dir deine Worte nicht ab und entscheide nicht für dich. Wie fühlst du dich heute? Du kannst sagen: „Ich bin traurig“ oder „Ich weiß nicht, was ich fühle“.'},
+ fr:{you:'Toi',greeting:'Bonjour ! Je suis Milo, ton compagnon des émotions. Je ne suis pas thérapeute : je suis là pour écouter et poser des questions. Je ne parlerai pas à ta place et ne déciderai pas pour toi. Comment te sens-tu aujourd’hui ? Tu peux dire « je me sens triste » ou « je ne sais pas ce que je ressens ».'},
+ hu:{you:'Te',greeting:'Szia! Milo vagyok, az érzelmi társad. Nem vagyok terapeuta; azért vagyok itt, hogy figyeljek és kérdezzek. Nem veszem át a szavaidat, és nem döntök helyetted. Hogy érzed magad ma? Mondhatod például: „szomorú vagyok” vagy „nem tudom, mit érzek”.'},
+ uk:{you:'Ти',greeting:'Привіт! Я Milo, твій емоційний помічник. Я не терапевт — я тут, щоб слухати й запитувати. Я не говоритиму замість тебе й не вирішуватиму за тебе. Як ти почуваєшся сьогодні? Можеш написати: «мені сумно» або «я не знаю, що відчуваю».'}
+};
 function renderChat(){
   const el=document.getElementById('chatMessages');
+  const locale=window.EmloveLocale?window.EmloveLocale.language():'pl';
+  const copy=CHAT_COPY[locale]||CHAT_COPY.pl;
   if(!state.chat.length){
-    el.innerHTML=`<div class="msg milo"><span class="who">Milo</span>Cześć! Jestem Milo, towarzysz z Krainy Odczuwania. Nie jestem terapeutą — jestem tu, aby słuchać i pytać. Nie przejmę Twoich słów i nie zdecyduję za Ciebie. Jak się dziś czujesz? Możesz napisać np. „czuję smutek” albo „nie wiem, co czuję”.</div>`;
+    el.innerHTML=`<div class="msg milo"><span class="who">Milo</span>${escapeHtml(copy.greeting)}</div>`;
     return;
   }
-  el.innerHTML=state.chat.map(m=>`<div class="msg ${m.who==='milo'?'milo':'user'}"><span class="who">${m.who==='milo'?'Milo':'Ty'}</span>${escapeHtml(m.text)}</div>`).join('');
+  el.innerHTML=state.chat.map(m=>`<div class="msg ${m.who==='milo'?'milo':'user'}"><span class="who">${m.who==='milo'?'Milo':copy.you}</span>${escapeHtml(m.text)}</div>`).join('');
   el.scrollTop=el.scrollHeight;
 }
 function escapeHtml(s){ return String(s??'').replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
@@ -403,8 +432,19 @@ function quickPrompt(text){ document.getElementById('chatInput').value=text; doc
 const CRISIS_WORDS=['samobój','samookalecz','krzywdz','nie chcę żyć','nie chce mi się żyć','zniknąć na zawsze','zranić się'];
 function miloReply(userText){
   const t=userText.toLowerCase();
+  const locale=window.EmloveLocale?window.EmloveLocale.language():'pl';
+  const localPack=window.EMLOVE_MILO_LOCAL&&window.EMLOVE_MILO_LOCAL[locale];
+  if(locale!=='pl'&&localPack){
+    if(localPack.crisisTerms.some(w=>t.includes(w)))return window.EmloveLocale.crisisReply();
+    if(/don't want to talk|stop asking|leave me alone|nicht reden|hör auf zu fragen|ne veux pas parler|arrête de demander|nem akarok beszélni|ne kérdezz|не хочу говорити|припини питати/i.test(t)){
+      return ({en:'I understand, and I respect that. You do not have to say anything now. You can come back whenever you want. Would you prefer a quiet breathing minute or an exercise without talking?',de:'Ich verstehe das und respektiere es. Du musst jetzt nichts sagen. Du kannst zurückkommen, wann immer du möchtest. Möchtest du lieber eine stille Atemminute oder eine Übung ohne Gespräch?',fr:'Je comprends et je respecte cela. Tu n’as rien à dire maintenant. Tu peux revenir quand tu le souhaites. Préfères-tu une minute de respiration en silence ou un exercice sans parler ?',hu:'Megértem, és tiszteletben tartom. Most nem kell semmit mondanod. Bármikor visszatérhetsz. Inkább egy csendes légzőgyakorlatot vagy beszéd nélküli feladatot szeretnél?',uk:'Я розумію і поважаю це. Тобі не потрібно нічого говорити зараз. Повертайся, коли захочеш. Тобі підійде тиха хвилина дихання чи вправа без розмови?'})[locale];
+    }
+    for(const group of Object.values(localPack.groups||{}))if(group.terms?.some(w=>t.includes(w)))return group.reply;
+    const generic=localPack.generic||[];
+    return generic[Math.floor(Math.random()*generic.length)]||localPack.crisisFallback;
+  }
   if(CRISIS_WORDS.some(w=>t.includes(w))){
-    return 'Słyszę, że jest Ci teraz bardzo trudno i że pojawiają się myśli o krzywdzeniu siebie. Dziękuję, że mi o tym mówisz. Nie jestem w stanie pomóc Ci w kryzysie — proszę, skontaktuj się teraz z zaufaną osobą lub zadzwoń: 116 111 (dla dzieci i młodzieży), 116 123 (kryzysowy telefon zaufania), 112 (numer alarmowy). Jeśli możesz, zostań z kimś, komu ufasz. Czy jest ktoś, do kogo możesz teraz zadzwonić?';
+    return window.EmloveLocale?window.EmloveLocale.crisisReply():'Skontaktuj się z zaufaną osobą lub lokalnymi służbami ratunkowymi.';
   }
   if(t.includes('nie chcę teraz')||t.includes('nie chce mi się mówić')||t.includes('przestań pytać')){
     return 'Rozumiem i szanuję to. Nie musisz teraz nic mówić. Możesz wrócić, kiedy będziesz chciał/chciała. Czy chcesz, żebym zaproponował/a cichą minutę oddechu albo ćwiczenie bez rozmowy?';
@@ -618,9 +658,14 @@ const TTS = {
     this.voices=all;
     const sel=document.getElementById('voiceSelect');
     if(!sel) return;
-    const pl=all.filter(v=>v.lang && v.lang.toLowerCase().startsWith('pl'));
-    const list = pl.length?pl:all;
-    sel.innerHTML='<option value="">Automatyczny (polski)</option>'+list.map((v,i)=>`<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)} (${escapeHtml(v.lang)})</option>`).join('');
+    const lang=window.EmloveLocale?window.EmloveLocale.language():'pl';
+    const prefix={pl:'pl',en:'en',de:'de',fr:'fr',hu:'hu',uk:'uk'}[lang]||'pl';
+    const matching=all.filter(v=>v.lang && v.lang.toLowerCase().startsWith(prefix));
+    const list=matching.length?matching:all;
+    const autoLabel={pl:'Automatyczny (polski)',en:'Automatic (English)',de:'Automatisch (Deutsch)',fr:'Automatique (français)',hu:'Automatikus (magyar)',uk:'Автоматично (українська)'}[lang]||'Automatic';
+    const selected=sel.value;
+    sel.innerHTML='<option value="">'+autoLabel+'</option>'+list.map(v=>`<option value="${escapeHtml(v.name)}">${escapeHtml(v.name)} (${escapeHtml(v.lang)})</option>`).join('');
+    if(selected&&list.some(v=>v.name===selected))sel.value=selected;
   },
   speak(text){
     if(!aiSettings.voiceEnabled) return;
@@ -637,7 +682,8 @@ const TTS = {
       .slice(0,600)
       .trim();
     const u=new SpeechSynthesisUtterance(clean);
-    u.lang='pl-PL';
+    const speechLocale={pl:'pl-PL',en:'en-GB',de:'de-DE',fr:'fr-FR',hu:'hu-HU',uk:'uk-UA'};
+    u.lang=speechLocale[window.EmloveLocale?window.EmloveLocale.language():'pl']||'pl-PL';
     const sel=document.getElementById('voiceSelect');
     const chosen=sel && sel.value ? this.voices.find(v=>v.name===sel.value) : (this.voices.find(v=>v.lang && v.lang.toLowerCase().startsWith('pl')) || this.voices[0]);
     if(chosen) u.voice=chosen;
@@ -649,7 +695,18 @@ const TTS = {
 };
 if('speechSynthesis' in window){ TTS.loadVoices(); speechSynthesis.onvoiceschanged=()=>TTS.loadVoices(); }
 function stopSpeaking(){ TTS.stop(); }
-function testVoice(){ TTS.speak('Cześć! Jestem Milo, Twój towarzysz emocji. Nie oceniam i nie decyduję za Ciebie. Tylko pytam i słucham. Jak się dziś czujesz?'); SoundEngine.pop(); }
+function testVoice(){
+  const lang=window.EmloveLocale?window.EmloveLocale.language():'pl';
+  const intros={
+    pl:'Cześć! Jestem Milo, Twój towarzysz emocji. Nie oceniam i nie decyduję za Ciebie. Tylko pytam i słucham. Jak się dziś czujesz?',
+    en:'Hello! I am Milo, your emotional companion. I do not judge or decide for you. I listen and ask questions. How are you feeling today?',
+    de:'Hallo! Ich bin Milo, dein Begleiter für Gefühle. Ich bewerte dich nicht und entscheide nicht für dich. Ich höre zu und frage. Wie fühlst du dich heute?',
+    fr:'Bonjour ! Je suis Milo, ton compagnon des émotions. Je ne juge pas et ne décide pas à ta place. J’écoute et je pose des questions. Comment te sens-tu aujourd’hui ?',
+    hu:'Szia! Milo vagyok, az érzelmi társad. Nem ítélkezem, és nem döntök helyetted. Figyelek és kérdezek. Hogy érzed magad ma?',
+    uk:'Привіт! Я Milo, твій емоційний помічник. Я не засуджую й не вирішую за тебе. Я слухаю та запитую. Як ти почуваєшся сьогодні?'
+  };
+  TTS.speak(intros[lang]||intros.pl); SoundEngine.pop();
+}
 function playMiloIntro(){ testVoice(); }
 function speakText(t){ TTS.speak(t); }
 
@@ -662,11 +719,15 @@ const MILO_SYSTEM_PROMPT = `Jesteś Milo — wirtualnym towarzyszem emocji z Kra
 - Odpowiadasz po polsku, ciepło i krótko (2-4 zdania), zadajesz jedno pytanie otwarte na raz.
 - Pomagasz rozpoznawać sygnały w ciele, nazywać emocje precyzyjnie i wyrażać je komunikatem "Ja" (Czuję... gdy... bo... Potrzebuję... Proszę o...).
 - Tworzysz sytuacje i ćwiczenia, gdy użytkownik o to prosi.
-- Jeśli użytkownik pisze o myślach samobójczych, samookaleczeniu lub krzywdzeniu siebie: odpowiedz ze współczuciem, zachęć do kontaktu z zaufaną osobą i podaj numery: 116 111 (dzieci i młodzież), 116 123 (kryzysowy telefon zaufania), 112 (alarmowy). Nie udzielaj terapii.
+- Jeśli użytkownik pisze o myślach samobójczych, samookaleczeniu lub krzywdzeniu siebie: odpowiedz ze współczuciem, zachęć do kontaktu z zaufaną osobą i podaj wyłącznie kontakty z regionu urządzenia. Nie zgaduj kraju na podstawie języka. Nie udzielaj terapii.
+- Lokalne kontakty pomocy: ${window.EmloveLocale?window.EmloveLocale.crisisSummary():"skontaktuj się z lokalnymi służbami ratunkowymi"}.
 - Szanujesz "nie chcę teraz mówić" — nie naciskasz.
 - Nie używasz formatowania markdown poza prostym tekstem.`;
 
+const MILO_LANGUAGE_DIRECTIVES={pl:'Odpowiadaj wyłącznie po polsku.',en:'Reply only in English.',de:'Antworte ausschließlich auf Deutsch.',fr:'Réponds uniquement en français.',hu:'Kizárólag magyarul válaszolj.',uk:'Відповідай лише українською.'};
 async function callAI(messages, opts={}){
+  const activeLocale=window.EmloveLocale?window.EmloveLocale.language():'pl';
+  const localizedMessages=messages.map(m=>m.role==='system'?{...m,content:m.content+'\n\n'+(MILO_LANGUAGE_DIRECTIVES[activeLocale]||MILO_LANGUAGE_DIRECTIVES.pl)}:m);
   // Własny klucz użytkownika (BYOK) ma pierwszeństwo przed kluczem administratora.
   const _active = window.EmloveProviders ? window.EmloveProviders.activeProvider() : 'admin';
   if(_active !== 'admin'){
@@ -679,6 +740,7 @@ async function callAI(messages, opts={}){
       model:'',
       text:_last.content,
       history:_history,
+      language:activeLocale,
     });
   }
   // 2) Własny endpoint z config.js — jeśli administrator go ustawił.
@@ -687,7 +749,7 @@ async function callAI(messages, opts={}){
     const url=base+'/chat/completions';
     const headers={'Content-Type':'application/json'};
     if(aiSettings.key) headers['Authorization']='Bearer '+aiSettings.key;
-    const body={model:aiSettings.model, messages, temperature: aiSettings.temp ?? 0.7, ...opts};
+    const body={model:aiSettings.model, messages:localizedMessages, temperature: aiSettings.temp ?? 0.7, ...opts};
     const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
     if(!res.ok){
       const txt=await res.text().catch(()=> '');
@@ -703,7 +765,7 @@ async function callAI(messages, opts={}){
     const _hist=messages.slice(0,-1)
       .filter(m=>m.role!=='system')
       .map(m=>({role:m.role, content:m.content}));
-    return await window.EmloveOnline.ask(_last.content, _hist);
+    return await window.EmloveOnline.ask(_last.content, _hist, undefined, activeLocale);
   }
 
   if(window.EmloveOnline) throw new Error('login_required');
@@ -712,7 +774,7 @@ async function callAI(messages, opts={}){
   const url=base+'/chat/completions';
   const headers={'Content-Type':'application/json'};
   if(aiSettings.key) headers['Authorization']='Bearer '+aiSettings.key;
-  const body={model:aiSettings.model, messages, temperature: aiSettings.temp ?? 0.7, ...opts};
+  const body={model:aiSettings.model, messages:localizedMessages, temperature: aiSettings.temp ?? 0.7, ...opts};
   const res=await fetch(url,{method:'POST',headers,body:JSON.stringify(body)});
   if(!res.ok){
     const txt=await res.text().catch(()=> '');

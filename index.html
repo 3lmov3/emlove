@@ -51,16 +51,16 @@
       <div><strong>Emlove</strong><span>pokochaj swoje emocje · v3.1</span></div>
     </div>
     <nav class="nav">
-      <button class="nav-btn active" data-view="home"><span>🏠</span> Start</button>
-      <button class="nav-btn" data-view="checkin"><span>💭</span> Check-in</button>
-      <button class="nav-btn" data-view="wheel"><span>🎡</span> Koło emocji</button>
-      <button class="nav-btn" data-view="exercises"><span>🧩</span> Ćwiczenia</button>
-      <button class="nav-btn" data-view="simulations"><span>🎭</span> Symulacje</button>
-      <button class="nav-btn" data-view="chat"><span>💬</span> Rozmowa z Milo</button>
-      <button class="nav-btn" data-view="journal"><span>📓</span> Dziennik</button>
-      <button class="nav-btn" data-view="personality"><span>🐾</span> Twoja osobowość</button>
-      <button class="nav-btn" data-view="keys"><span>🔑</span> Klucze API</button>
-      <button class="nav-btn" data-view="library"><span>📚</span> Biblioteka emocji</button>
+      <button class="nav-btn active" data-view="home"><span>🏠</span><span data-i18n="nav.home">Start</span></button>
+      <button class="nav-btn" data-view="checkin"><span>💭</span><span data-i18n="nav.checkin">Check-in</span></button>
+      <button class="nav-btn" data-view="wheel"><span>🎡</span><span data-i18n="nav.wheel">Koło emocji</span></button>
+      <button class="nav-btn" data-view="exercises"><span>🧩</span><span data-i18n="nav.exercises">Ćwiczenia</span></button>
+      <button class="nav-btn" data-view="simulations"><span>🎭</span><span data-i18n="nav.simulations">Symulacje</span></button>
+      <button class="nav-btn" data-view="chat"><span>💬</span><span data-i18n="nav.chat">Rozmowa z Milo</span></button>
+      <button class="nav-btn" data-view="journal"><span>📓</span><span data-i18n="nav.journal">Dziennik</span></button>
+      <button class="nav-btn" data-view="personality"><span>🐾</span><span data-i18n="nav.personality">Twoja osobowość</span></button>
+      <button class="nav-btn" data-view="keys"><span>🔑</span><span data-i18n="nav.keys">Klucze API</span></button>
+      <button class="nav-btn" data-view="library"><span>📚</span><span data-i18n="nav.library">Biblioteka emocji</span></button>
     </nav>
 
     <div class="account-box" id="accountBox">
@@ -95,7 +95,7 @@
         <div><strong id="statHearts">0</strong><span>serduszek</span></div>
       </div>
     </div>
-    <p class="disclaimer">Emlove to narzędzie edukacyjne dla dorosłych, nie terapia. Jeśli czujesz się zagrożony, skontaktuj się z zaufaną osobą lub zadzwoń <b>116 111</b> / <b>112</b>.</p>
+    <p class="disclaimer">Emlove to narzędzie edukacyjne dla dorosłych, nie terapia. W bezpośrednim zagrożeniu skontaktuj się z zaufaną osobą lub lokalnymi służbami ratunkowymi. <span data-crisis-summary></span></p>
   </aside>
   <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeSidebar()"></div>
 
@@ -103,8 +103,8 @@
     <header class="topbar">
       <button class="hamburger" id="hamburger">☰</button>
       <div>
-        <h1 id="viewTitle">Cześć, tu Milo ♥</h1>
-        <p id="viewSubtitle">Poznaj, nazwij i wyraź to, co czujesz — w swoim tempie.</p>
+        <h1 id="viewTitle" data-i18n="page.home.title">Cześć, tu Milo ♥</h1>
+        <p id="viewSubtitle" data-i18n="page.home.subtitle">Poznaj, nazwij i wyraź to, co czujesz — w swoim tempie.</p>
       </div>
       <div class="top-actions sound-bar">
         <div class="bar-sound">
@@ -323,7 +323,7 @@
             <input id="chatInput" placeholder="Napisz, co czujesz... Milo odpowie pytaniem 💬" autocomplete="off">
             <button class="btn btn-primary" type="submit">Wyślij</button>
           </form>
-          <p class="muted small">Milo nie jest terapeutą. W kryzysie: <b>116 111</b>, <b>116 123</b>, <b>112</b>. Pełny Milo: Twoje wiadomości trafiają do modelu językowego — nie wysyłaj danych wrażliwych.</p>
+          <p class="muted small">Milo nie jest terapeutą ani służbą kryzysową. Kontakty dla regionu urządzenia: <span data-crisis-summary></span>. Pełny Milo: Twoje wiadomości trafiają do modelu językowego — nie wysyłaj danych wrażliwych.</p>
         </div>
         <div class="card">
           <h3>Kim jest Milo?</h3>
@@ -445,7 +445,13 @@
 
 <div class="modal-overlay" id="settingsModal" style="display:none">
   <div class="modal">
-    <div class="modal-head"><h2>⚙️ Ustawienia: Milo i dźwięk</h2><button class="icon-btn" onclick="closeSettings()">✕</button></div>
+    <div class="modal-head"><h2 data-i18n="settings.title">⚙️ Ustawienia: Milo i dźwięk</h2><button class="icon-btn" onclick="closeSettings()" data-i18n-aria="locale.close">✕</button></div>
+
+    <section class="locale-settings"><h3 data-i18n="locale.section">Język i region</h3><p class="muted small" data-i18n="locale.helper">Język i kraj pomocy są wybierane niezależnie.</p>
+      <label data-i18n="locale.language">Język aplikacji</label><select id="localeLanguage" aria-label="Język aplikacji" onchange="window.EmloveLocale.setLanguage(this.value)"><option value="auto">Auto</option><option value="pl">Polski</option><option value="en">English</option><option value="de">Deutsch</option><option value="fr">Français</option><option value="hu">Magyar</option><option value="uk">Українська</option></select>
+      <label data-i18n="locale.country">Kraj pomocy kryzysowej</label><select id="supportCountry" aria-label="Kraj pomocy kryzysowej" onchange="window.EmloveLocale.setSupportCountry(this.value)"><option value="auto">Auto</option><option value="PL">PL</option><option value="GB">GB</option><option value="DE">DE</option><option value="FR">FR</option><option value="HU">HU</option><option value="UA">UA</option></select>
+      <div id="crisisContacts" aria-live="polite"></div><p class="muted small" id="localeStatus"></p><p class="muted small" data-i18n="locale.saveNote">Wybór języka i kraju zapisuje się oddzielnie.</p>
+      <label data-i18n="theme.section">Wygląd aplikacji</label><select id="themeSelect" aria-label="Wygląd aplikacji" onchange="window.EmloveLocale.setTheme(this.value)"><option value="classic" data-i18n="theme.classic">Miętowy</option><option value="night" data-i18n="theme.night">Nocny</option><option value="lilac" data-i18n="theme.lilac">Lawendowy</option></select></section>
 
     <h3>🔊 Dźwięk</h3><p class="muted small">Po powrocie do aplikacji naciśnij głośnik, aby wznowić tło. <a href="audio/LICENCJE.html" target="_blank" rel="noopener">Autorzy i licencje nagrań</a>.</p>
     <label class="check-row"><input type="checkbox" id="setSoundEnabled" checked> Efekty dźwiękowe (kliknięcia, sukcesy, oddech)</label>
@@ -477,7 +483,7 @@
     </div>
     <p id="settingsMsg" class="success-msg"></p>
 
-    <p class="muted small" style="margin-top:10px">Emlove 3.1 · narzędzie edukacyjne dla dorosłych, nie terapia. W kryzysie: <b>116 123</b> · <b>112</b>.</p>
+    <p class="muted small" style="margin-top:10px">Emlove 3.1 · narzędzie edukacyjne dla dorosłych, nie terapia. Kontakty dla regionu urządzenia: <span data-crisis-summary></span>.</p>
     <p class="project-credit muted small">Emlove jest częścią projektu <a href="https://3lmov3.github.io/elmove.cloud/" target="_blank" rel="noopener noreferrer">elmove.cloud</a>.</p>
   </div>
 </div>
@@ -490,6 +496,9 @@
 <script src="milo-online.js"></script>
 <script src="summary-mail.js"></script>
 <script src="wheel-view.js"></script>
+<script src="locales.js"></script>
+<script src="simulations-locales.js"></script>
+<script src="milo-locales.js"></script>
 <script src="app.js"></script>
 <script src="ambient.js"></script>
 <script src="wheel.js"></script>

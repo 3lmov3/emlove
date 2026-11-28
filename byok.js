@@ -22,6 +22,7 @@
    */
   async function ask(params) {
     const {provider, model, text, history, signal} = params;
+    const language = params.language || (window.EmloveLocale ? window.EmloveLocale.language() : 'pl');
     const auth = window.EmloveAuth;
 
     if (!auth || !auth.currentUser()) {
@@ -53,6 +54,7 @@
           model: model || window.EmloveProviders.getModel(provider),
           text: String(text).slice(0, MAX_TEXT),
           history: (history || []).slice(-4),
+          language,
         }),
         signal,
       });
@@ -82,6 +84,7 @@
     if (!obj || typeof obj.text !== 'string' || !obj.text.trim()) {
       throw Object.assign(new Error('service'), {code: 'service'});
     }
+    if (obj.language !== language) throw Object.assign(new Error('language_mismatch'), {code: 'language_mismatch'});
     return obj.text.trim();
   }
 
@@ -93,6 +96,7 @@
     limit: 'Osiągnięto limit żądań. Odczekaj chwilę.',
     provider_error: 'Dostawca odrzucił żądanie. Sprawdź klucz i nazwę modelu.',
     service: 'Milo nie mógł teraz odpowiedzieć. Spróbuj ponownie.',
+    language_mismatch: 'Odpowiedź Milo nie zgadza się z wybranym językiem. Spróbuj ponownie.',
   };
 
   function messageOf(error, fallback) {
