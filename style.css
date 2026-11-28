@@ -626,6 +626,25 @@ html[data-theme="night"] .card,html[data-theme="night"] .modal,html[data-theme="
 html[data-theme="night"] .btn-ghost{color:var(--ink)}
 html[data-theme="night"] .nav-btn{color:#D1D9E6}
 html[data-theme="night"] .nav-btn.active{color:#fff}
+/* Night theme contrast: override legacy fixed light-theme text/background colors. */
+html[data-theme="night"] .topbar h1{color:#EEF2FA!important}
+html[data-theme="night"] .btn-ghost{color:#F1F4FA!important;-webkit-text-fill-color:#F1F4FA!important;background:#263549!important;border-color:#52647A!important}
+html[data-theme="night"] .btn-ghost:hover{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#31435A!important;border-color:#7187A2!important}
+html[data-theme="night"] .btn-secondary{color:#FFD7E7!important;-webkit-text-fill-color:#FFD7E7!important;background:#493449!important;border-color:#805A77!important}
+html[data-theme="night"] .btn-secondary:hover{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#5A3D58!important;border-color:#A8789A!important}
+html[data-theme="night"] .account-actions .btn-ghost{background:#263549!important}
+html[data-theme="night"] .icon-btn,html[data-theme="night"] .hamburger{color:#F1F4FA!important;-webkit-text-fill-color:#F1F4FA!important;background:#263549!important;border-color:#52647A!important}
+html[data-theme="night"] .emotion-btn,html[data-theme="night"] .chip,html[data-theme="night"] .tab,html[data-theme="night"] .sim-card,html[data-theme="night"] .choice-btn,html[data-theme="night"] .provider-item{color:#EEF2FA!important;-webkit-text-fill-color:#EEF2FA!important;background:#222F40!important;border-color:#46576C!important}
+html[data-theme="night"] .emotion-btn.selected,html[data-theme="night"] .provider-item.active{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#273957!important;border-color:#82A9FF!important}
+html[data-theme="night"] .chip.selected,html[data-theme="night"] .tab.active{color:#101824!important;-webkit-text-fill-color:#101824!important;background:#A8C3FF!important;border-color:#C1D3FF!important}
+html[data-theme="night"] .quick-prompts{background:#1B2635!important}
+html[data-theme="night"] .quick-prompts button{color:#EEF2FA!important;-webkit-text-fill-color:#EEF2FA!important;background:#263549!important;border-color:#52647A!important}
+html[data-theme="night"] .date-pill{color:#EEF2FA;background:#222F40;border-color:#46576C}
+html[data-theme="night"] #authModal .modal{color:#EEF2FA!important;background:#1B2635!important;border-color:#39485B!important}
+html[data-theme="night"] #authModal .auth-tab{color:#E4EAF4!important;-webkit-text-fill-color:#E4EAF4!important;background:#273449!important;border-color:#52647A!important}
+html[data-theme="night"] #authModal .auth-tab.active{color:#FFFFFF!important;-webkit-text-fill-color:#FFFFFF!important;background:#354B68!important;border-color:#82A9FF!important}
+html[data-theme="night"] #authModal .settings-actions .btn-ghost{color:#F1F4FA!important;-webkit-text-fill-color:#F1F4FA!important;background:#263549!important;border-color:#52647A!important}
+html[data-theme="night"] #authModal label,html[data-theme="night"] #authModal p,html[data-theme="night"] #authModal h2,html[data-theme="night"] #authModal h3{color:#EEF2FA}
 html[data-theme="lilac"]{
   color-scheme:light;
   --bg:#F6F2FB;--surface:#FFFFFF;--surface-soft:#FBF8FF;--ink:#28243A;--muted:#716A83;
